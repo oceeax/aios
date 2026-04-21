@@ -15,26 +15,339 @@ input{padding:12px;margin:8px;width:80%;max-width:300px;border-radius:8px;border
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>批量重命名 + 打包 ZIP</title>
-<style>
-body{background:#ffeef5;margin:0;padding:20px;font-family:Arial;text-align:center;}
-h1{color:#e05688;}
-.btn{padding:12px 20px;margin:8px;border:none;border-radius:10px;background:#e05688;color:white;font-size:16px;cursor:pointer;width:80%;max-width:320px;}
-input{padding:12px;margin:8px;width:80%;max-width:300px;border-radius:8px;border:1px solid #ddd;}
-#list{background:white;border-radius:10px;padding:15px;margin-top:15px;text-align:left;max-height:200px;overflow:auto;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>批量重命名与压缩</title>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: #fff5f7;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header .back {
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .header .title {
+            flex: 1;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .header .share, .header .menu {
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .app-title {
+            text-align: center;
+            margin: 30px 0;
+            color: #e91e63;
+            font-size: 28px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .folder-icon {
+            display: inline-block;
+            margin-right: 10px;
+            font-size: 32px;
+            vertical-align: middle;
+        }
+
+        .select-button {
+            background-color: #e91e63;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 24px;
+            font-size: 18px;
+            width: 100%;
+            margin-bottom: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .select-button:hover {
+            background-color: #c2185b;
+        }
+
+        .rename-input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .start-button {
+            background-color: #e91e63;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 24px;
+            font-size: 18px;
+            width: 100%;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .start-button:hover {
+            background-color: #c2185b;
+        }
+
+        .file-list {
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .back-button {
+            background-color: #e91e63;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 24px;
+            font-size: 18px;
+            width: 100%;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: #e91e63;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .status-message {
+            text-align: center;
+            margin: 10px 0;
+            color: #e91e63;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-<h1>✏️ 批量重命名 + 打包 ZIP</h1>
+    <div class="header">
+        <div class="back">←</div>
+        <div class="title">批量重命名（支...</div>
+        <div class="share">⟲</div>
+        <div class="menu">⋮</div>
+    </div>
 
-<input type="file" id="fileInput" multiple webkitdirectory directory class="btn">
-<input type="text" id="prefix" placeholder="输入前缀（例如：照片_）" value="文件_">
-<button class="btn" onclick="startBatch()">开始批量重命名并打包</button>
+    <div class="content">
+        <h1 class="app-title">
+            <span class="folder-icon">📁</span>
+            批量重命名（支持文件夹）
+        </h1>
 
-<div id="list">选择文件/文件夹后显示列表...</div>
+        <input type="file" id="fileInput" class="hidden" webkitdirectory multiple>
+        
+        <button class="select-button" id="selectButton">
+            选择文件
+            <span id="fileCount">572 个文件</span>
+        </button>
 
+        <input type="text" class="rename-input" id="renameInput" placeholder="文件_2" value="文件_2">
+
+        <button class="start-button" id="startButton">开始重命名并打包 ZIP</button>
+
+        <div class="progress-container" id="progressContainer" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            <div class="status-message" id="statusMessage">准备处理文件...</div>
+        </div>
+
+        <div class="file-list" id="fileList">
+            <!-- 文件列表将在这里动态显示 -->
+        </div>
+
+        <button class="back-button" id="backButton">返回上一页</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('fileInput');
+            const selectButton = document.getElementById('selectButton');
+            const fileCount = document.getElementById('fileCount');
+            const renameInput = document.getElementById('renameInput');
+            const startButton = document.getElementById('startButton');
+            const fileList = document.getElementById('fileList');
+            const backButton = document.getElementById('backButton');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            let selectedFiles = [];
+
+            // 选择文件按钮点击事件
+            selectButton.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            // 文件选择变化事件
+            fileInput.addEventListener('change', function(e) {
+                selectedFiles = Array.from(e.target.files);
+                fileCount.textContent = `${selectedFiles.length} 个文件`;
+                
+                // 显示文件列表
+                displayFileList();
+            });
+
+            // 显示文件列表
+            function displayFileList() {
+                fileList.innerHTML = '';
+                selectedFiles.forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.textContent = `${index + 1}. ${file.name}`;
+                    fileList.appendChild(fileItem);
+                });
+            }
+
+            // 开始重命名并打包ZIP
+            startButton.addEventListener('click', async function() {
+                if (selectedFiles.length === 0) {
+                    alert('请先选择文件');
+                    return;
+                }
+
+                const newFileName = renameInput.value || '文件';
+                
+                // 显示进度条
+                progressContainer.style.display = 'block';
+                progressBar.style.width = '0%';
+                statusMessage.textContent = '准备处理文件...';
+                
+                try {
+                    // 创建ZIP文件
+                    const zip = new JSZip();
+                    
+                    // 添加文件到ZIP
+                    for (let i = 0; i < selectedFiles.length; i++) {
+                        const file = selectedFiles[i];
+                        const content = await file.arrayBuffer();
+                        zip.file(`${newFileName}_${i + 1}${getFileExtension(file.name)}`, content);
+                        
+                        // 更新进度
+                        const progress = Math.round(((i + 1) / selectedFiles.length) * 100);
+                        progressBar.style.width = `${progress}%`;
+                        statusMessage.textContent = `正在处理文件... 已处理 ${i + 1}/${selectedFiles.length} 个文件`;
+                        
+                        // 让UI更新
+                        await new Promise(resolve => setTimeout(resolve, 10));
+                    }
+                    
+                    // 生成ZIP文件
+                    statusMessage.textContent = '正在生成ZIP文件...';
+                    const content = await zip.generateAsync({type: 'blob'});
+                    
+                    // 下载ZIP文件
+                    saveAs(content, `${newFileName}_batch.zip`);
+                    
+                    // 显示成功消息
+                    statusMessage.textContent = '文件已成功压缩并下载！';
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                    }, 2000);
+                } catch (error) {
+                    console.error('压缩文件时出错:', error);
+                    statusMessage.textContent = '压缩文件时出错，请重试';
+                    alert('压缩文件时出错，请重试');
+                }
+            });
+
+            // 获取文件扩展名
+            function getFileExtension(filename) {
+                const lastDot = filename.lastIndexOf('.');
+                if (lastDot === -1) return '';
+                return filename.substring(lastDot);
+            }
+
+            // 返回上一页按钮点击事件
+            backButton.addEventListener('click', function() {
+                // 这里可以添加返回上一页的逻辑
+                window.history.back();
+            });
+        });
+    </script>
+</body>
+</html>
 <br>
 <button class="btn" onclick="history.back()">返回上一页</button>
 <button class="btn" onclick="location.href='../d.html'">返回文件管理</button>
