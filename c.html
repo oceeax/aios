@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>音乐中心</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#e3f2fd;padding:30px 15px}
+.title{text-align:center;font-size:26px;margin-bottom:25px}
+.back{background:#1e88e5;color:#fff;border:none;border-radius:8px;padding:10px 20px;margin-bottom:20px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.item{background:#fff;border-radius:12px;padding:25px 10px;text-align:center;box-shadow:0 2px 8px #00000013;cursor:pointer}
+</style>
+</head>
+<body>
+<button class="back" onclick="location.href='index.html'">← 返回主页</button>
+<div class="title">🎵 音乐中心</div>
+<div class="grid">
+  <div class="item" onclick="alert('本地音乐')">本地音乐</div>
+  <div class="item" onclick="alert('流行歌曲')">流行歌曲</div>
+  <div class="item" onclick="alert('DJ舞曲')">DJ舞曲</div>
+  <div class="item" onclick="alert('纯音乐')">纯音乐</div>
+  <div class="item" onclick="alert('经典老歌')">经典老歌</div>
+</div>
+</body>
+</html>

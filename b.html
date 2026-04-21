@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图片中心</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#e8f5e9;padding:30px 15px}
+.title{text-align:center;font-size:26px;margin-bottom:25px}
+.back{background:#43a047;color:#fff;border:none;border-radius:8px;padding:10px 20px;margin-bottom:20px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.item{background:#fff;border-radius:12px;padding:25px 10px;text-align:center;box-shadow:0 2px 8px #00000013;cursor:pointer}
+</style>
+</head>
+<body>
+<button class="back" onclick="location.href='index.html'">← 返回主页</button>
+<div class="title">🖼️ 图片中心</div>
+<div class="grid">
+  <div class="item" onclick="alert('手机相册')">手机相册</div>
+  <div class="item" onclick="alert('壁纸大全')">壁纸大全</div>
+  <div class="item" onclick="alert('头像库')">头像库</div>
+  <div class="item" onclick="alert('表情包')">表情包</div>
+  <div class="item" onclick="alert('风景图')">风景图</div>
+</div>
+</body>
+</html>

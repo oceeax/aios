@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>设置中心</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#fafafa;padding:30px 15px}
+.title{text-align:center;font-size:26px;margin-bottom:25px}
+.back{background:#616161;color:#fff;border:none;border-radius:8px;padding:10px 20px;margin-bottom:20px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.item{background:#fff;border-radius:12px;padding:25px 10px;text-align:center;box-shadow:0 2px 8px #00000013;cursor:pointer}
+</style>
+</head>
+<body>
+<button class="back" onclick="location.href='index.html'">← 返回主页</button>
+<div class="title">⚙️ 设置中心</div>
+<div class="grid">
+  <div class="item" onclick="alert('主题切换')">主题切换</div>
+  <div class="item" onclick="alert('音量调节')">音量调节</div>
+  <div class="item" onclick="alert('亮度调节')">亮度调节</div>
+  <div class="item" onclick="alert('清除缓存')">清除缓存</div>
+  <div class="item" onclick="alert('关于软件')">关于软件</div>
+</div>
+</body>
+</html>
