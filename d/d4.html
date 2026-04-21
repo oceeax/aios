@@ -79,15 +79,20 @@
             vertical-align: middle;
         }
 
+        .select-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
         .select-button {
+            flex: 1;
             background-color: #e91e63;
             color: white;
             border: none;
             border-radius: 12px;
             padding: 16px 24px;
             font-size: 18px;
-            width: 100%;
-            margin-bottom: 20px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -153,6 +158,18 @@
             font-size: 18px;
             width: 100%;
             cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .home-button {
+            background-color: #e91e63;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 24px;
+            font-size: 18px;
+            width: 100%;
+            cursor: pointer;
             margin-bottom: 20px;
         }
 
@@ -185,6 +202,21 @@
             color: #e91e63;
             font-weight: bold;
         }
+
+        .browser-warning {
+            background-color: #fff3e0;
+            border: 1px solid #ffe0b2;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            color: #e65100;
+            font-size: 14px;
+        }
+
+        .browser-warning-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -201,13 +233,23 @@
             批量重命名（支持文件夹）
         </h1>
 
-        <input type="file" id="fileInput" class="hidden" webkitdirectory multiple>
-        
-        <button class="select-button" id="selectButton">
-            选择文件
-            <span id="fileCount">572 个文件</span>
-        </button>
+        <div class="browser-warning" id="browserWarning">
+            <div class="browser-warning-title">注意：</div>
+            <div>部分国产浏览器可能不支持直接选择文件夹，如遇问题请尝试使用其他浏览器或手动选择文件。</div>
+        </div>
 
+        <div class="select-buttons">
+            <button class="select-button" id="selectFolderButton">
+                选择文件夹
+            </button>
+            <button class="select-button" id="selectFileButton">
+                选择文件
+            </button>
+        </div>
+        
+        <input type="file" id="folderInput" class="hidden" webkitdirectory directory multiple>
+        <input type="file" id="fileInput" class="hidden" multiple>
+        
         <input type="text" class="rename-input" id="renameInput" placeholder="文件_2" value="文件_2">
 
         <button class="start-button" id="startButton">开始重命名并打包 ZIP</button>
@@ -224,36 +266,64 @@
         </div>
 
         <button class="back-button" id="backButton">返回上一页</button>
+        <button class="home-button" id="homeButton">返回主页</button>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const folderInput = document.getElementById('folderInput');
             const fileInput = document.getElementById('fileInput');
-            const selectButton = document.getElementById('selectButton');
-            const fileCount = document.getElementById('fileCount');
+            const selectFolderButton = document.getElementById('selectFolderButton');
+            const selectFileButton = document.getElementById('selectFileButton');
             const renameInput = document.getElementById('renameInput');
             const startButton = document.getElementById('startButton');
             const fileList = document.getElementById('fileList');
             const backButton = document.getElementById('backButton');
+            const homeButton = document.getElementById('homeButton');
             const progressContainer = document.getElementById('progressContainer');
             const progressBar = document.getElementById('progressBar');
             const statusMessage = document.getElementById('statusMessage');
+            const browserWarning = document.getElementById('browserWarning');
             
             let selectedFiles = [];
 
+            // 检查浏览器是否支持webkitdirectory
+            if (!folderInput.webkitdirectory) {
+                browserWarning.style.display = 'block';
+            }
+
+            // 选择文件夹按钮点击事件
+            selectFolderButton.addEventListener('click', function() {
+                folderInput.click();
+            });
+
             // 选择文件按钮点击事件
-            selectButton.addEventListener('click', function() {
+            selectFileButton.addEventListener('click', function() {
                 fileInput.click();
+            });
+
+            // 文件夹选择变化事件
+            folderInput.addEventListener('change', function(e) {
+                selectedFiles = Array.from(e.target.files);
+                updateFileCount();
+                displayFileList();
             });
 
             // 文件选择变化事件
             fileInput.addEventListener('change', function(e) {
                 selectedFiles = Array.from(e.target.files);
-                fileCount.textContent = `${selectedFiles.length} 个文件`;
-                
-                // 显示文件列表
+                updateFileCount();
                 displayFileList();
             });
+
+            // 更新文件数量显示
+            function updateFileCount() {
+                const countElement = document.querySelector('.select-buttons .select-button:first-child span') || 
+                                  document.querySelector('.select-buttons .select-button:last-child span');
+                if (countElement) {
+                    countElement.textContent = `${selectedFiles.length} 个文件`;
+                }
+            }
 
             // 显示文件列表
             function displayFileList() {
@@ -281,6 +351,9 @@
                 statusMessage.textContent = '准备处理文件...';
                 
                 try {
+                    // 记录开始时间
+                    const startTime = Date.now();
+                    
                     // 创建ZIP文件
                     const zip = new JSZip();
                     
@@ -293,7 +366,15 @@
                         // 更新进度
                         const progress = Math.round(((i + 1) / selectedFiles.length) * 100);
                         progressBar.style.width = `${progress}%`;
-                        statusMessage.textContent = `正在处理文件... 已处理 ${i + 1}/${selectedFiles.length} 个文件`;
+                        
+                        // 计算预计剩余时间
+                        const elapsedTime = Date.now() - startTime;
+                        const estimatedTotalTime = (elapsedTime / (i + 1)) * selectedFiles.length;
+                        const remainingTime = Math.max(0, estimatedTotalTime - elapsedTime);
+                        const remainingMinutes = Math.floor(remainingTime / 60000);
+                        const remainingSeconds = Math.floor((remainingTime % 60000) / 1000);
+                        
+                        statusMessage.textContent = `正在压缩文件... 已处理 ${i + 1}/${selectedFiles.length} 个文件 (${progress}%)`;
                         
                         // 让UI更新
                         await new Promise(resolve => setTimeout(resolve, 10));
@@ -327,8 +408,12 @@
 
             // 返回上一页按钮点击事件
             backButton.addEventListener('click', function() {
-                // 这里可以添加返回上一页的逻辑
                 window.history.back();
+            });
+
+            // 返回主页按钮点击事件
+            homeButton.addEventListener('click', function() {
+                window.location.href = 'index.html';
             });
         });
     </script>
