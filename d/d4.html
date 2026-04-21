@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>重命名文件</title>
+<style>
+body{background:#ffeef5;margin:0;padding:20px;font-family:Arial;text-align:center;}
+h1{color:#e05688;}
+.btn{padding:12px 20px;margin:8px;border:none;border-radius:10px;background:#e05688;color:white;font-size:16px;cursor:pointer;width:80%;max-width:320px;}
+input{padding:12px;margin:8px;width:80%;max-width:300px;border-radius:8px;border:1px solid #ddd;}
+</style>
+</head>
+<body>
+<h1>✏️ 重命名文件</h1>
+<input type="file" id="fileInput" class="btn">
+<input type="text" id="newName" placeholder="输入新文件名（含后缀）">
+<button class="btn" onclick="rename()">确认重命名</button>
+<br>
+<button class="btn" onclick="history.back()">返回上一页</button>
+<button class="btn" onclick="location.href='../d.html'">返回文件管理</button>
+
+<script>
+function rename(){
+const f=document.getElementById('fileInput').files[0];
+const n=document.getElementById('newName').value.trim();
+if(!f||!n){alert('请选择文件并输入新名称');return;}
+alert('模拟重命名：'+f.name+' → '+n+'\n（本地浏览器仅模拟，实际需服务器支持）');
+}
+</script>
+</body>
+</html>

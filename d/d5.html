@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>删除文件</title>
+<style>
+body{background:#ffeef5;margin:0;padding:20px;font-family:Arial;text-align:center;}
+h1{color:#e05688;}
+.btn{padding:12px 20px;margin:8px;border:none;border-radius:10px;background:#e05688;color:white;font-size:16px;cursor:pointer;width:80%;max-width:320px;}
+.danger{background:#ff4444;}
+</style>
+</head>
+<body>
+<h1>🗑️ 删除文件</h1>
+<input type="file" id="fileInput" class="btn">
+<button class="btn danger" onclick="del()">确认删除</button>
+<br>
+<button class="btn" onclick="history.back()">返回上一页</button>
+<button class="btn" onclick="location.href='../d.html'">返回文件管理</button>
+
+<script>
+function del(){
+const f=document.getElementById('fileInput').files[0];
+if(!f){alert('请选择文件');return;}
+if(!confirm('确定删除 '+f.name+'？此操作不可恢复！'))return;
+alert('模拟删除：'+f.name+'\n（本地浏览器仅模拟，实际需服务器支持）');
+}
+</script>
+</body>
+</html>

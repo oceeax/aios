@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>压缩文件</title>
+<style>
+body{background:#ffeef5;margin:0;padding:20px;font-family:Arial;text-align:center;}
+h1{color:#e05688;}
+.btn{padding:12px 20px;margin:8px;border:none;border-radius:10px;background:#e05688;color:white;font-size:16px;cursor:pointer;width:80%;max-width:320px;}
+</style>
+</head>
+<body>
+<h1>📦 压缩文件</h1>
+<input type="file" id="fileInput" multiple class="btn">
+<button class="btn" onclick="compress()">开始压缩（生成zip）</button>
+<br>
+<button class="btn" onclick="history.back()">返回上一页</button>
+<button class="btn" onclick="location.href='../d.html'">返回文件管理</button>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+let files=[];
+document.getElementById('fileInput').onchange=e=>files=[...e.target.files];
+async function compress(){
+if(files.length===0){alert('请选择文件');return;}
+const zip=new JSZip();
+files.forEach(f=>zip.file(f.name,f));
+const b=await zip.generateAsync({type:'blob'});
+const a=document.createElement('a');
+a.href=URL.createObjectURL(b);
+a.download='打包.zip';
+a.click();
+}
+</script>
+</body>
+</html>

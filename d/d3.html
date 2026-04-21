@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>解压文件</title>
+<style>
+body{background:#ffeef5;margin:0;padding:20px;font-family:Arial;text-align:center;}
+h1{color:#e05688;}
+.btn{padding:12px 20px;margin:8px;border:none;border-radius:10px;background:#e05688;color:white;font-size:16px;cursor:pointer;width:80%;max-width:320px;}
+#list{background:white;border-radius:10px;padding:15px;margin-top:15px;text-align:left;}
+</style>
+</head>
+<body>
+<h1>📂 解压文件</h1>
+<input type="file" id="zipInput" accept=".zip" class="btn">
+<div id="list">选择zip文件后显示内容</div>
+<br>
+<button class="btn" onclick="history.back()">返回上一页</button>
+<button class="btn" onclick="location.href='../d.html'">返回文件管理</button>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+document.getElementById('zipInput').onchange=async e=>{
+const f=e.target.files[0];
+if(!f)return;
+const zip=await JSZip.loadAsync(f);
+const list=document.getElementById('list');
+list.innerHTML='';
+Object.keys(zip.files).forEach(n=>{
+const div=document.createElement('div');
+div.textContent=n;
+list.appendChild(div);
+});
+};
+</script>
+</body>
+</html>
