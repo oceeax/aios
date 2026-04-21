@@ -1,27 +1,92 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>音乐中心</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#e3f2fd;padding:30px 15px}
-.title{text-align:center;font-size:26px;margin-bottom:25px}
-.back{background:#1e88e5;color:#fff;border:none;border-radius:8px;padding:10px 20px;margin-bottom:20px;cursor:pointer}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.item{background:#fff;border-radius:12px;padding:25px 10px;text-align:center;box-shadow:0 2px 8px #00000013;cursor:pointer}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐中心</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial; }
+        body { background: #e0f7ff; padding: 30px 15px; }
+        .header { display: flex; align-items: center; justify-content: center; margin-bottom: 25px; }
+        .back { position: absolute; left: 15px; top: 15px; }
+        button { background: #3b82f6; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        .title { font-size: 28px; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 600px; margin: 0 auto; }
+        .item { background: #ffffff; border-radius: 16px; padding: 25px 10px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); font-size: 18px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100px; }
+        .item:active { transform: scale(0.98); }
+        /* 隐藏原生文件上传框 */
+        input[type="file"] { display: none; }
+        /* 简易播放器样式 */
+        .player { margin-top: 20px; padding: 15px; background: #fff; border-radius: 10px; display: none; }
+        .player audio { width: 100%; margin-top: 10px; }
+    </style>
 </head>
 <body>
-<button class="back" onclick="location.href='index.html'">← 返回主页</button>
-<div class="title">🎵 音乐中心</div>
-<div class="grid">
-  <div class="item" onclick="alert('本地音乐')">本地音乐</div>
-  <div class="item" onclick="alert('流行歌曲')">流行歌曲</div>
-  <div class="item" onclick="alert('DJ舞曲')">DJ舞曲</div>
-  <div class="item" onclick="alert('纯音乐')">纯音乐</div>
-  <div class="item" onclick="alert('经典老歌')">经典老歌</div>
-</div>
+    <div class="back">
+        <button onclick="location.href='/aios/'">← 返回主页</button>
+    </div>
+    <div class="header">
+        <span class="title">🎵 音乐中心</span>
+    </div>
+
+    <div class="grid">
+        <!-- 1. 本地音乐 - 真实选择并播放 -->
+        <div class="item" onclick="document.getElementById('musicInput').click();">
+            <label for="musicInput">本地音乐</label>
+            <input id="musicInput" type="file" accept="audio/*">
+        </div>
+
+        <!-- 2. 流行歌曲 - 在线播放 -->
+        <div class="item" onclick="playMusic('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', '流行歌曲 - 示例')">流行歌曲</div>
+
+        <!-- 3. DJ舞曲 - 在线播放 -->
+        <div class="item" onclick="playMusic('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', 'DJ舞曲 - 示例')">DJ舞曲</div>
+
+        <!-- 4. 纯音乐 - 在线播放 -->
+        <div class="item" onclick="playMusic('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', '纯音乐 - 示例')">纯音乐</div>
+
+        <!-- 5. 经典老歌 - 在线播放 -->
+        <div class="item" onclick="playMusic('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', '经典老歌 - 示例')">经典老歌</div>
+    </div>
+
+    <!-- 音乐播放器区域 -->
+    <div class="player" id="player">
+        <h3 id="nowPlaying">正在播放：</h3>
+        <audio id="audioPlayer" controls autoplay>
+    </div>
+
+    <script>
+        // 播放在线音乐函数
+        function playMusic(url, title) {
+            const player = document.getElementById('player');
+            const audio = document.getElementById('audioPlayer');
+            const nowPlaying = document.getElementById('nowPlaying');
+            
+            audio.src = url;
+            nowPlaying.textContent = "正在播放：" + title;
+            player.style.display = "block";
+            
+            // 自动播放
+            audio.play().catch(err => console.log("自动播放被阻止，请点击播放"));
+        }
+
+        // 播放本地音乐
+        document.getElementById('musicInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const player = document.getElementById('player');
+                const audio = document.getElementById('audioPlayer');
+                const nowPlaying = document.getElementById('nowPlaying');
+                
+                const fileURL = URL.createObjectURL(file);
+                audio.src = fileURL;
+                nowPlaying.textContent = "正在播放：" + file.name;
+                player.style.display = "block";
+                
+                // 自动播放
+                audio.play();
+            }
+        });
+    </script>
 </body>
 </html>
