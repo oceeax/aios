@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>五子棋</title>
+<style>
+body{text-align:center;background:#fff8e7;margin:0;padding:20px;}
+h1{color:#d4a068;}
+canvas{border:3px solid #d4a068;background:#fff;}
+.btns{margin-top:15px;}
+button{padding:10px 18px;margin:5px;border:none;border-radius:8px;background:#d4a068;color:white;font-size:16px;cursor:pointer;}
+</style>
+</head>
+<body>
+<h1>⚫ 五子棋</h1>
+<canvas id="game" width="400" height="400"></canvas>
+<div class="btns">
+<button onclick="history.back()">返回上一页</button>
+<button onclick="location.href='../index.html'">返回主页</button>
+</div>
+
+<script>
+const canvas=document.getElementById('game');
+const ctx=canvas.getContext('2d');
+const size=15,cell=26;
+let board=Array(size).fill().map(()=>Array(size).fill(0));
+let turn=1;
+function draw(){
+ctx.fillStyle='#fff8e7';ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.strokeStyle='#d4a068';
+for(let i=0;i<=size;i++){
+ctx.beginPath();ctx.moveTo(i*cell,0);ctx.lineTo(i*cell,size*cell);ctx.stroke();
+ctx.beginPath();ctx.moveTo(0,i*cell);ctx.lineTo(size*cell,i*cell);ctx.stroke();
+}
+for(let i=0;i<size;i++)for(let j=0;j<size;j++){
+if(board[i][j]){
+ctx.beginPath();
+ctx.arc(i*cell+cell/2,j*cell+cell/2,10,0,Math.PI*2);
+ctx.fillStyle=board[i][j]===1?'black':'white';
+ctx.fill();ctx.strokeStyle='#333';ctx.stroke();
+}
+}
+}
+canvas.addEventListener('click',e=>{
+const x=Math.round((e.offsetX-cell/2)/cell);
+const y=Math.round((e.offsetY-cell/2)/cell);
+if(x>=0&&x<size&&y>=0&&y<size&&!board[x][y]){
+board[x][y]=turn;turn=3-turn;draw();
+}
+});
+draw();
+</script>
+</body>
+</html>
