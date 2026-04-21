@@ -12,10 +12,79 @@ input{padding:12px;margin:8px;width:80%;max-width:300px;border-radius:8px;border
 </style>
 </head>
 <body>
-<h1>✏️ 重命名文件</h1>
-<input type="file" id="fileInput" class="btn">
-<input type="text" id="newName" placeholder="输入新文件名（含后缀）">
-<button class="btn" onclick="rename()">确认重命名</button>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>批量重命名 + 打包 ZIP</title>
+<style>
+body{background:#ffeef5;margin:0;padding:20px;font-family:Arial;text-align:center;}
+h1{color:#e05688;}
+.btn{padding:12px 20px;margin:8px;border:none;border-radius:10px;background:#e05688;color:white;font-size:16px;cursor:pointer;width:80%;max-width:320px;}
+input{padding:12px;margin:8px;width:80%;max-width:300px;border-radius:8px;border:1px solid #ddd;}
+#list{background:white;border-radius:10px;padding:15px;margin-top:15px;text-align:left;max-height:200px;overflow:auto;}
+</style>
+</head>
+<body>
+<h1>✏️ 批量重命名 + 打包 ZIP</h1>
+
+<input type="file" id="fileInput" multiple webkitdirectory directory class="btn">
+<input type="text" id="prefix" placeholder="输入前缀（例如：照片_）" value="文件_">
+<button class="btn" onclick="startBatch()">开始批量重命名并打包</button>
+
+<div id="list">选择文件/文件夹后显示列表...</div>
+
+<br>
+<button class="btn" onclick="history.back()">返回上一页</button>
+<button class="btn" onclick="location.href='../d.html'">返回文件管理</button>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+let files = [];
+const fileInput = document.getElementById('fileInput');
+const list = document.getElementById('list');
+
+fileInput.onchange = e => {
+  files = [...e.target.files];
+  showList();
+};
+
+function showList() {
+  list.innerHTML = '';
+  files.forEach((f, i) => {
+    const div = document.createElement('div');
+    div.textContent = `${i+1}. ${f.name}`;
+    list.appendChild(div);
+  });
+}
+
+async function startBatch() {
+  if (files.length === 0) {
+    alert('请先选择文件或文件夹！');
+    return;
+  }
+
+  const prefix = document.getElementById('prefix').value || '文件_';
+  const zip = new JSZip();
+
+  files.forEach((f, i) => {
+    const ext = f.name.split('.').pop();
+    const newName = `${prefix}${i+1}.${ext}`;
+    zip.file(newName, f);
+  });
+
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '批量重命名打包.zip';
+  a.click();
+
+  alert(`✅ 批量重命名完成！\n共处理 ${files.length} 个文件\n已打包为 ZIP 下载`);
+}
+</script>
+</body>
+</html>
 <br>
 <button class="btn" onclick="history.back()">返回上一页</button>
 <button class="btn" onclick="location.href='../d.html'">返回文件管理</button>
