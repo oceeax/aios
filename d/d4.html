@@ -1,20 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>重命名文件</title>
-<style>
-body{background:#ffeef5;margin:0;padding:20px;font-family:Arial;text-align:center;}
-h1{color:#e05688;}
-.btn{padding:12px 20px;margin:8px;border:none;border-radius:10px;background:#e05688;color:white;font-size:16px;cursor:pointer;width:80%;max-width:320px;}
-input{padding:12px;margin:8px;width:80%;max-width:300px;border-radius:8px;border:1px solid #ddd;}
-</style>
-</head>
-<body>
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>批量重命名与压缩</title>
@@ -346,69 +332,5 @@ input{padding:12px;margin:8px;width:80%;max-width:300px;border-radius:8px;border
             });
         });
     </script>
-</body>
-</html>
-<br>
-<button class="btn" onclick="history.back()">返回上一页</button>
-<button class="btn" onclick="location.href='../d.html'">返回文件管理</button>
-
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script>
-let files = [];
-const fileInput = document.getElementById('fileInput');
-const list = document.getElementById('list');
-
-fileInput.onchange = e => {
-  files = [...e.target.files];
-  showList();
-};
-
-function showList() {
-  list.innerHTML = '';
-  files.forEach((f, i) => {
-    const div = document.createElement('div');
-    div.textContent = `${i+1}. ${f.name}`;
-    list.appendChild(div);
-  });
-}
-
-async function startBatch() {
-  if (files.length === 0) {
-    alert('请先选择文件或文件夹！');
-    return;
-  }
-
-  const prefix = document.getElementById('prefix').value || '文件_';
-  const zip = new JSZip();
-
-  files.forEach((f, i) => {
-    const ext = f.name.split('.').pop();
-    const newName = `${prefix}${i+1}.${ext}`;
-    zip.file(newName, f);
-  });
-
-  const blob = await zip.generateAsync({ type: 'blob' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = '批量重命名打包.zip';
-  a.click();
-
-  alert(`✅ 批量重命名完成！\n共处理 ${files.length} 个文件\n已打包为 ZIP 下载`);
-}
-</script>
-</body>
-</html>
-<br>
-<button class="btn" onclick="history.back()">返回上一页</button>
-<button class="btn" onclick="location.href='../d.html'">返回文件管理</button>
-
-<script>
-function rename(){
-const f=document.getElementById('fileInput').files[0];
-const n=document.getElementById('newName').value.trim();
-if(!f||!n){alert('请选择文件并输入新名称');return;}
-alert('模拟重命名：'+f.name+' → '+n+'\n（本地浏览器仅模拟，实际需服务器支持）');
-}
-</script>
 </body>
 </html>
