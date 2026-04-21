@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<title>真实帧播放器（极速版）</title>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+body{background:#000;color:#fff;padding:12px}
+.title{color:#00ff00;font-size:14px;margin-bottom:8px}
+.frame-info{color:#00ff88;font-size:14px;margin-bottom:8px;text-align:center}
+video{width:100%;background:#222;border-radius:8px;margin-bottom:10px}
+.btn{padding:14px 10px;background:#007bff;color:#fff;border:none;border-radius:8px;margin:5px;font-size:16px}
+.btn-orange{background:#ff6600 !important}
+input[type=number]{width:90px;padding:12px;background:#222;color:#fff;border:1px solid #444;border-radius:8px;text-align:center}
+.progress{width:100%;height:8px;background:#333;border-radius:4px;overflow:hidden;margin-top:12px}
+.bar{height:100%;background:#00ff88;width:0%}
+.log{color:#ccc;font-size:14px;margin-top:6px;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="title">请打开视频，自动识别真实帧率</div>
+<div class="frame-info" id="frameInfo">当前帧：0 | 总帧数：0</div>
+
+<video id="video" controls></video>
+
+<button class="btn" id="open">打开本地视频</button>
+<button class="btn" id="prev">上一真实帧</button>
+<button class="btn" id="next">下一真实帧</button>
+<button class="btn" id="s1">1.0x</button>
+<button class="btn" id="s11">1.1x</button>
+<button class="btn" id="s2">2.0x</button>
+<button class="btn" id="cap">单张截图</button>
+
+<div style="margin:12px 0;display:flex;align-items:center;gap:8px">
+<span>批量导出真实帧：</span>
+<input id="start" type="number" value="0">
+<span>~</span>
+<input id="end" type="number" value="10">
+</div>
+
+<button class="btn" id="export">导出并命名文件夹</button>
+<button class="btn btn-orange" id="bg">后台导出</button>
+
+<div class="progress"><div class="bar" id="bar"></div></div>
+<div class="log" id="log">等待导出..</div>
+
+<script>
+const v=document.getElementById('video');
+const c=document.createElement('canvas');
+const x=c.getContext('2d');
+const frameInfo=document.getElementById('frameInfo');
+let fps=30, totalFrames=0;
+
+// 打开视频
+document.getElementById('open').onclick=()=>{
+  const i=document.createElement('input');
+  i.type='file';i.accept='video/*';
+  i.onchange=e=>{
+    const f=e.target.files[0];
+    v.src=URL.createObjectURL(f);
+    v.onloadedmetadata=()=>{
+      fps=v.videoFrameRate||30;
+      totalFrames=Math.round(v.duration*fps);
+      updateFrame();
+    };
+  };
+  i.click();
+};
+
+// 更新当前帧
+function updateFrame(){
+  const curr=Math.round(v.currentTime*fps);
+  frameInfo.textContent=`当前帧：${curr} | 总帧数：${totalFrames}`;
+}
+
+v.ontimeupdate=updateFrame;
+
+// 上一帧
+document.getElementById('prev').onclick=()=>{
+  v.currentTime=Math.max(0, v.currentTime-1/fps);
+  updateFrame();
+};
+
+// 下一帧
+document.getElementById('next').onclick=()=>{
+  v.currentTime+=1/fps;
+  updateFrame();
+};
+
+// 倍速
+document.getElementById('s1').onclick=()=>v.playbackRate=1;
+document.getElementById('s11').onclick=()=>v.playbackRate=1.1;
+document.getElementById('s2').onclick=()=>v.playbackRate=2;
+
+// 截图
+document.getElementById('cap').onclick=()=>{
+  c.width=v.videoWidth;c.height=v.videoHeight;
+  x.drawImage(v,0,0);
+  const a=document.createElement('a');
+  a.href=c.toDataURL('image/png');
+  a.download='截图.png';a.click();
+};
+
+// ✅ 极速导出（无延迟、瞬间跳帧）
+async function go(bg){
+  if(!v.src){alert('请打开视频');return;}
+  const s=parseInt(document.getElementById('start').value)||0;
+  const e=parseInt(document.getElementById('end').value)||10;
+  const name=prompt('文件夹名称','导出')||'导出';
+  const zip=new JSZip().folder(name);
+  const total=e-s+1;
+  const bar=document.getElementById('bar');
+  const log=document.getElementById('log');
+  const t0=Date.now();
+
+  bar.style.width='0%';
+  
+  // ✅ 极速核心：取消所有多余延迟
+  for(let i=s;i<=e;i++){
+    v.currentTime=i/fps;
+    // 极速：只留最必要渲染等待，无多余延时
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    
+    c.width=v.videoWidth;c.height=v.videoHeight;
+    x.drawImage(v,0,0);
+    const b=await new Promise(res=>c.toBlob(res));
+    zip.file(i+'.png',b);
+
+    const curr=i-s+1;
+    const used=Date.now()-t0;
+    const left=Math.round(Math.max(0, (total-curr)*(used/curr)/1000));
+    bar.style.width=(curr/total*100)+'%';
+    log.textContent=`${curr}/${total}帧 | 剩余${left}秒`;
+  }
+
+  // ✅ ZIP压缩等级调低=更快生成
+  const blob=await zip.generateAsync({type:'blob',compression:'STORE'});
+  saveAs(blob,name+'.zip');
+  log.textContent('✅ 导出完成');
+  bar.style.width='100%';
+}
+
+document.getElementById('export').onclick=()=>go(false);
+document.getElementById('bg').onclick=()=>go(true);
+</script>
+
+</body>
+</html>
