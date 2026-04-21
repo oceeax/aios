@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>扫雷</title>
+<style>
+body{text-align:center;background:#f5f5f5;margin:0;padding:20px;}
+h1{color:#555;}
+#mine{display:grid;grid-template-columns:repeat(8,35px);gap:2px;margin:0 auto;width:296px;}
+.cell{width:35px;height:35px;background:#bbb;border:none;border-radius:4px;font-size:14px;cursor:pointer;}
+.btns{margin-top:15px;}
+button{padding:10px 18px;margin:5px;border:none;border-radius:8px;background:#555;color:white;font-size:16px;cursor:pointer;}
+</style>
+</head>
+<body>
+<h1>💣 扫雷</h1>
+<div id="mine"></div>
+<div class="btns">
+<button onclick="history.back()">返回上一页</button>
+<button onclick="location.href='../index.html'">返回主页</button>
+</div>
+
+<script>
+const w=8,h=8,mineCount=10;
+let board=Array(h).fill().map(()=>Array(w).fill(0));
+for(let i=0;i<mineCount;i++){
+let x=Math.floor(Math.random()*w),y=Math.floor(Math.random()*h);
+board[y][x]=-1;
+}
+function render(){
+const div=document.getElementById('mine');div.innerHTML='';
+for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+const btn=document.createElement('button');btn.className='cell';
+btn.textContent=board[y][x]===-1?'💣':board[y][x]||'';
+div.appendChild(btn);
+}
+}
+render();
+</script>
+</body>
+</html>
