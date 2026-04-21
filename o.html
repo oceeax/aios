@@ -2,193 +2,82 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>生活&工作常识测试（100题·隐藏分数）</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>学习工具</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Microsoft YaHei, sans-serif;}
-body{background:#f5f7fa;padding:20px;}
-.main{max-width:720px;margin:0 auto;background:white;border-radius:16px;padding:24px;box-shadow:0 6px 18px rgba(0,0,0,0.08);}
-h1{text-align:center;color:#222;margin-bottom:8px;font-size:22px;}
-.sub{text-align:center;color:#777;margin-bottom:24px;font-size:14px;}
-.ques{margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #eee;}
-.qtitle{font-size:16px;color:#222;margin-bottom:10px;font-weight:500;}
-.opt{display:block;padding:10px 12px;background:#f7f8fa;border-radius:10px;margin:6px 0;font-size:14px;color:#444;cursor:pointer;}
-.opt input{margin-right:8px;}
-#btn{width:100%;padding:14px;background:#2563eb;color:white;border:none;border-radius:12px;font-size:17px;font-weight:bold;margin-top:10px;}
-#res{display:none;text-align:center;margin-top:26px;padding:20px;border-radius:14px;background:#f9fafb;}
-#res img{max-width:190px;border-radius:12px;margin-bottom:12px;}
-#rt{font-size:22px;font-weight:bold;margin-bottom:8px;}
-#rd{font-size:14px;color:#555;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;background:#f5f5f7;min-height:100vh}
+.header{background:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;border-bottom:1px solid #eee}
+.header a{color:#333;text-decoration:none;font-size:22px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#f5f5f7}
+.header h1{flex:1;font-size:17px;font-weight:600}
+.main{max-width:560px;margin:0 auto;padding:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:#fff;border-radius:16px;padding:32px 16px;text-align:center;text-decoration:none;color:#333;box-shadow:0 1px 4px rgba(0,0,0,.04);transition:transform .15s,box-shadow .15s;display:flex;flex-direction:column;align-items:center;gap:14px}
+.card:active{transform:scale(.97);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.card .icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px}
+.card .name{font-size:15px;font-weight:600}
+.c1 .icon{background:#fff3e0;color:#ef6c00}
+.c2 .icon{background:#e3f2fd;color:#1565c0}
+.c3 .icon{background:#fce4ec;color:#c62828}
+.c4 .icon{background:#e8f5e9;color:#2e7d32}
+.c5 .icon{background:#f3e5f5;color:#7b1fa2}
+.c6 .icon{background:#e0f7fa;color:#00838f}
+.c7 .icon{background:#fff8e1;color:#f57f17}
+.c8 .icon{background:#ede7f6;color:#4527a0}
+.foot{max-width:560px;margin:20px auto;padding:0 16px;display:flex;gap:10px}
+.foot a{flex:1;display:block;text-align:center;padding:14px;border-radius:12px;text-decoration:none;font-size:15px;font-weight:600}
+.back-a{background:#fff;color:#333;border:1px solid #ddd}
+.home-a{background:#333;color:#fff}
 </style>
 </head>
 <body>
+
+<div class="header">
+    <a href="javascript:history.back()">←</a>
+    <h1>学习工具</h1>
+</div>
+
 <div class="main">
-<h1>🧩 生活 & 工作 常识测试（100题）</h1>
-<p class="sub">选项无分数 · 提交出结果 · 测真实段位</p>
-<div id="qlist"></div>
-<button id="btn">提交 → 查看等级</button>
-<div id="res">
-<img id="rimage" src="">
-<div id="rt"></div>
-<div id="rd"></div>
+    <div class="grid">
+        <a class="card c1" href="o1.html">
+            <div class="icon">🤖</div>
+            <div class="name">AI工具</div>
+        </a>
+        <a class="card c2" href="o2.html">
+            <div class="icon">🎬</div>
+            <div class="name">视频剪辑</div>
+        </a>
+        <a class="card c3" href="o3.html">
+            <div class="icon">🎵</div>
+            <div class="name">音乐鉴赏</div>
+        </a>
+        <a class="card c4" href="o4.html">
+            <div class="icon">✨</div>
+            <div class="name">动画制作</div>
+        </a>
+        <a class="card c5" href="o5.html">
+            <div class="icon">💻</div>
+            <div class="name">编程开发</div>
+        </a>
+        <a class="card c6" href="o6.html">
+            <div class="icon">🎨</div>
+            <div class="name">绘画设计</div>
+        </a>
+        <a class="card c7" href="o7.html">
+            <div class="icon">✍️</div>
+            <div class="name">写作辅助</div>
+        </a>
+        <a class="card c8" href="o8.html">
+            <div class="icon">🧩</div>
+            <div class="name">趣味测试</div>
+        </a>
+    </div>
 </div>
+
+<div class="foot">
+    <a class="back-a" href="javascript:history.back()">返回上一页</a>
+    <a class="home-a" href="index.html">返回主页</a>
 </div>
 
-<script>
-// 100题：纯生活 + 纯工作场景，选项无分数显示，提交后算分
-const raw = [
-["炒鸡蛋什么时候放盐？",["出锅前放","打蛋液时放","炒一半放","先放盐再炒蛋"],[5,3,2,0]],
-["煮面条水开后要？",["转中小火","一直大火","关火","加冷水"],[5,2,0,3]],
-["衣服沾酱油怎么洗？",["冷水+洗洁精","热水洗","直接丢洗衣机","用漂白剂"],[5,0,2,3]],
-["隔夜菜能不能吃？",["密封冷藏可吃","绝对不能吃","常温隔夜也能吃","热透就能吃"],[5,1,0,3]],
-["切完大蒜手臭怎么办？",["搓不锈钢","用香皂洗","用香水遮","不管"],[5,3,1,0]],
-["煮粥糊底了怎么办？",["别刮底，只盛上面","全倒掉","加水继续煮","刮底一起吃"],[5,1,0,2]],
-["冬天静电多怎么办？",["摸墙放电","穿纯棉衣服","穿化纤","摸金属"],[5,4,0,2]],
-["煮饺子怎么判断熟了？",["全部浮起","水沸腾","变大变白","闻香味"],[5,3,4,2]],
-["擦玻璃最干净用？",["旧报纸","干抹布","湿纸巾","清水"],[5,3,2,1]],
-["米饭煮硬了怎么办？",["加少量水再焖","加水煮粥","直接吃","倒掉重做"],[5,4,2,1]],
-["炒菜油温太高会？",["产生致癌物","更香","更健康","没关系"],[5,2,0,1]],
-["衣服沾油渍用？",["洗洁精","洗衣粉","清水","漂白水"],[5,3,1,2]],
-["煮鸡蛋几分钟熟？",["水开8分钟","3分钟","15分钟","随便煮"],[5,3,2,1]],
-["拖地后地面滑是因为？",["清洁剂太多","水太多","地太干净","正常现象"],[5,4,2,1]],
-["冰箱除霜最好用？",["温水+刮板","吹风机","热水直接倒","不管"],[5,4,2,0]],
-["炒青菜要？",["大火快炒","小火慢炒","加水煮","久炒"],[5,2,3,0]],
-["洗头发水温最好？",["38度左右","冷水","开水","随便"],[5,2,0,1]],
-["切洋葱不流泪？",["水里切","戴眼镜","闭气","随便切"],[5,3,2,1]],
-["煮玉米更甜要？",["加少许盐","加糖","加油","清水煮"],[5,3,2,4]],
-["铁锅生锈怎么处理？",["土豆+盐擦","钢丝球猛刷","洗洁精洗","不管"],[5,3,2,0]],
-["洗衣服深色浅色要？",["分开洗","一起洗","只洗深色","随便洗"],[5,2,0,1]],
-["烧水有水垢说明？",["水质硬","水脏","有毒","正常"],[5,2,0,3]],
-["冬天手裂用？",["凡士林","热水泡","酒精","不管"],[5,2,0,0]],
-["煮肉去腥用？",["姜+料酒","只放盐","酱油","辣椒"],[5,2,3,1]],
-["衣服缩水怎么办？",["厚纸板拉伸","再洗一次","硬拉","扔掉"],[5,2,1,0]],
-["煮粥防溢锅？",["放根筷子","不停搅拌","大火煮","加水"],[5,3,0,2]],
-["煮泡面更健康？",["少放料包","多煮一会","加鸡蛋","全放料包"],[5,4,3,2]],
-["衣服发霉用？",["白醋+暴晒","漂白剂","清水洗","不管"],[5,4,1,0]],
-["铁锅保养要？",["擦干抹油","水洗放着","泡水里","随便"],[5,2,0,1]],
-["洗草莓不能用？",["洗洁精","淡盐水","清水","面粉水"],[0,5,3,4]],
-["公交车晚点你会？",["耐心等或换车","骂司机","砸站牌","抱怨但等"],[5,0,0,3]],
-["下雨没带伞你会？",["等雨小或拼车","淋雨跑","站着发呆","抱怨天气"],[5,2,1,0]],
-["电梯坏了你会？",["走楼梯或等维修","扒门","跳电梯","猛按按钮"],[5,0,0,2]],
-["超市结账排队你会？",["耐心排队","插队","换短队","抱怨"],[5,0,4,2]],
-["手机没电借充电器？",["先问能不能借","直接拿","偷偷用","不用"],[5,1,0,3]],
-["外卖送错了？",["联系商家沟通","直接差评","骂骑手","将就吃"],[5,2,0,3]],
-["买东西被坑了？",["找商家维权","自认倒霉","骂人发泄","再也不买"],[5,2,0,1]],
-["wifi连不上你会？",["重启路由器","骂运营商","换手机","不管"],[5,1,2,0]],
-["灯泡坏了你会？",["断电后更换","带电换","不管","砸灯"],[5,0,2,0]],
-["水管漏水你会？",["关总阀报修","不管","用手堵","泼水"],[5,2,1,0]],
-["领导突然发怒你会？",["冷静询问原因","立刻顶嘴","低头沉默","偷偷抱怨"],[5,0,3,2]],
-["机器突然冒烟你会？",["立刻断电","继续使用","浇水灭火","买新的"],[5,0,2,3]],
-["上班迟到你会？",["主动说明+道歉","撒谎找借口","偷偷溜进去","干脆不来"],[5,2,1,0]],
-["同事推卸责任你会？",["摆事实讲道理","当场吵架","忍气吞声","背后告状"],[5,0,3,2]],
-["客户无理取闹你会？",["耐心安抚解释","直接怼回去","不理不睬","找领导"],[5,0,2,3]],
-["文件丢失你会？",["立刻查找+备份","隐瞒不报","推卸责任","重做一份"],[5,0,2,3]],
-["开会迟到你会？",["悄悄进入不打扰","大声道歉","直接走掉","中途加入"],[5,2,0,3]],
-["打印机卡纸你会？",["断电取纸","硬拉纸张","不管","砸机器"],[5,0,2,0]],
-["电脑蓝屏你会？",["重启+查原因","重装系统","砸电脑","不管"],[5,3,0,2]],
-["快递丢件你会？",["联系快递索赔","自认倒霉","骂快递员","投诉到底"],[5,2,0,3]],
-["外卖超时很久你会？",["理解+催单","差评+投诉","骂骑手","拒收"],[5,2,0,3]],
-["买到过期食品你会？",["退货+索赔","扔掉算了","吃了再说","骂商家"],[5,2,0,3]],
-["邻居噪音大你会？",["友好提醒","吵架","报警","忍"],[5,0,3,2]],
-["小区停水你会？",["提前储水","抱怨物业","不管","出去住"],[5,2,0,3]],
-["停电了你会？",["点蜡烛/手电","玩手机到关机","睡觉","骂电力公司"],[5,2,3,0]],
-["手机掉进水里你会？",["立刻捞出关机","继续用","吹风机猛吹","放太阳下晒"],[5,0,2,3]],
-["钥匙丢了你会？",["回忆+寻找+换锁","撬锁","不管","配新的"],[5,2,0,3]],
-["煤气泄漏你会？",["开窗+关阀+撤离","开灯检查","打电话","点火"],[5,0,0,0]],
-["烫伤了你会？",["冷水冲15分钟","涂牙膏","挑破水泡","不管"],[5,2,0,1]],
-["切到手流血你会？",["按压止血+消毒","不管","用嘴吸","贴创可贴"],[5,2,1,3]],
-["鱼刺卡喉你会？",["喝醋或就医","吞饭","咳嗽","不管"],[5,0,3,2]],
-["中暑了你会？",["阴凉处降温补水","继续晒","喝冰水","睡觉"],[5,0,2,3]],
-["迷路了你会？",["导航+问路","乱走","原地等","哭"],[5,2,3,0]],
-["身份证丢了你会？",["挂失+补办","不管","借别人的","找关系"],[5,2,0,3]],
-["银行卡吞卡你会？",["联系银行取回","砸机器","不管","挂失"],[5,0,2,3]],
-["买到假货你会？",["退货+举报","自认倒霉","继续用","骂商家"],[5,2,0,3]],
-["朋友借钱不还你会？",["友好提醒+协商","绝交","暴力催收","算了"],[5,2,0,3]],
-["别人借你东西不还你会？",["提醒+沟通","抢回来","绝交","不要了"],[5,0,2,3]],
-["聚会有人劝酒你会？",["适量拒绝","硬喝","翻脸","偷偷倒掉"],[5,2,0,3]],
-["有人插队你会？",["温和提醒","吵架","忍","也插队"],[5,0,3,0]],
-["有人问路你会？",["耐心指路","不理","乱指","简单说"],[5,2,0,3]],
-["有人求助你帮不了你会？",["抱歉说明","直接拒绝","假装没看见","硬着头皮帮"],[5,2,0,3]],
-["别人夸你你会？",["谦虚感谢","骄傲","不信","嘲讽"],[5,2,3,0]],
-["别人批评你你会？",["冷静反思","立刻反驳","记仇","自卑"],[5,2,0,3]],
-["别人误会你你会？",["冷静解释","生气辩解","默默忍受","记恨"],[5,2,3,0]],
-["你说错话你会？",["道歉改正","狡辩","装傻","转移话题"],[5,2,0,3]],
-["你做错事你会？",["承认+补救","推卸","隐瞒","怪别人"],[5,2,0,3]],
-["你情绪不好你会？",["自我调节","乱发脾气","暴饮暴食","找人发泄"],[5,0,2,3]],
-["你压力大你会？",["分解压力+放松","崩溃","逃避","硬扛"],[5,2,0,3]],
-["你失败了你会？",["总结经验","放弃","抱怨","怪命运"],[5,2,0,3]],
-["你成功了你会？",["保持低调","骄傲炫耀","看不起别人","继续努力"],[5,2,0,3]],
-["你遇到小人你会？",["远离+提防","硬碰硬","讨好","报复"],[5,0,2,0]],
-["你遇到贵人你会？",["感恩珍惜","理所当然","索取更多","转身就忘"],[5,2,0,3]],
-["你时间不够你会？",["优先重要事","拖延","熬夜","随便做"],[5,2,0,3]],
-["你钱不够你会？",["努力赚钱+节省","网贷","啃老","偷抢"],[5,0,2,0]],
-["你想学习你会？",["坚持到底","三分钟热度","买资料放着","放弃"],[5,2,3,0]],
-["你想减肥你会？",["合理饮食+运动","节食","吃药","放弃"],[5,2,0,3]],
-["你想存钱你会？",["记账+强制储蓄","月光","抠门","借钱花"],[5,2,3,0]],
-["你想提升自己你会？",["持续学习","躺平","抱怨","跟风"],[5,2,0,3]],
-["你想赚钱你会？",["提升价值","投机","坑人","打工"],[5,0,0,3]],
-["你想交朋友你会？",["真诚相待","功利交友","讨好","独来独往"],[5,2,0,3]],
-["你想处好关系你会？",["尊重边界","干涉","黏人","疏远"],[5,0,2,3]],
-["你想做好工作你会？",["认真负责","摸鱼","敷衍","抱怨"],[5,2,0,3]],
-["你想做好管理你会？",["公平公正","偏心","独裁","讨好"],[5,2,0,3]],
-["你想做好服务你会？",["耐心周到","敷衍","不耐烦","收费高"],[5,0,2,3]],
-["你想做好产品你会？",["注重质量","高价","跟风","偷工减料"],[5,3,2,0]],
-["你想做好生意你会？",["诚信经营","暴利","短斤少两","坑蒙拐骗"],[5,3,2,0]]
-];
-
-// 随机打乱选项顺序
-function shuffle(a) {
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-}
-
-const questions = raw.map(q => {
-    const opts = q[1].map((text, idx) => ({ text, score: q[2][idx] }));
-    const shuffled = shuffle(opts);
-    return [q[0], shuffled.map(o => o.text), shuffled.map(o => o.score)];
-});
-
-// 渲染题目（无分数）
-const list = document.getElementById("qlist");
-questions.forEach((q, i) => {
-    const d = document.createElement("div");
-    d.className = "ques";
-    let opts = "";
-    q[1].forEach((o, j) => {
-        opts += `<label class="opt"><input type="radio" name="q${i}" value="${j}"> ${o}</label>`;
-    });
-    d.innerHTML = `<div class="qtitle">${i + 1}. ${q[0]}</div>${opts}`;
-    list.appendChild(d);
-});
-
-// 等级配置（带图片）
-const levels = [
-    { min: 0, max: 99, title: "🔴 文盲级", desc: "常识严重不足，生活自理困难。", img: "https://p3.itc.cn/q_70/images03/20230617/22222222222222222222222222222222.jpeg" },
-    { min: 100, max: 199, title: "🟤 小学级", desc: "懂基本常识，能简单自理。", img: "https://p3.itc.cn/q_70/images03/20230617/33333333333333333333333333333333.jpeg" },
-    { min: 200, max: 299, title: "🟡 初中级", desc: "常识够用，能处理日常问题。", img: "https://p3.itc.cn/q_70/images03/20230617/44444444444444444444444444444444.jpeg" },
-    { min: 300, max: 379, title: "🔵 高中级", desc: "生活高手，做事靠谱，逻辑清晰。", img: "https://p3.itc.cn/q_70/images03/20230617/55555555555555555555555555555555.jpeg" },
-    { min: 380, max: 439, title: "🟣 大专级", desc: "成熟稳重，职场生存能力强。", img: "https://p3.itc.cn/q_70/images03/20230617/66666666666666666666666666666666.jpeg" },
-    { min: 440, max: 479, title: "⚪ 本科级", desc: "认知全面，人情练达，生活大师。", img: "https://p3.itc.cn/q_70/images03/20230617/77777777777777777777777777777777.jpeg" },
-    { min: 480, max: 499, title: "📚 硕士级", desc: "人间清醒，智慧通透，顶级认知。", img: "https://p3.itc.cn/q_70/images03/20230617/88888888888888888888888888888888.jpeg" },
-    { min: 500, max: 500, title: "🎓 研究生级（满级）", desc: "全能满级，生活+工作双巅峰！", img: "https://p3.itc.cn/q_70/images03/20230617/99999999999999999999999999999999.jpeg" }
-];
-
-// 提交判分
-document.getElementById("btn").onclick = () => {
-    let score = 0;
-    questions.forEach((q, i) => {
-        const ans = document.querySelector(`input[name="q${i}"]:checked`);
-        if (ans) score += q[2][ans.value];
-    });
-    const level = levels.find(l => score >= l.min && score <= l.max);
-    document.getElementById("rimage").src = level.img;
-    document.getElementById("rt").textContent = level.title;
-    document.getElementById("rd").textContent = `总分：${score}/500 | ${level.desc}`;
-    document.getElementById("res").style.display = "block";
-};
-</script>
 </body>
 </html>
