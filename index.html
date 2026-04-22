@@ -1,259 +1,156 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>超级工具箱</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>超级工具箱</title>
 
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4ecf7 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-            margin: 0;
-        }
+<style>
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+    background: #f5f6f8;
+}
 
-        .header {
-            width: 100%;
-            max-width: 600px;
-            text-align: center;
-            margin-bottom: 15px;
-            padding-top: 15px;
-        }
+/* 标题 */
+.header {
+    text-align: center;
+    padding: 20px 10px 10px;
+    font-size: 24px;
+    font-weight: 600;
+}
 
-        .title {
-            font-size: 30px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
+/* 网格布局 */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 12px;
+}
 
-        .title-icon {
-            font-size: 34px;
-            color: #3498db;
-        }
+/* 卡片 */
+.card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 5px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: 0.2s;
+    text-decoration: none;
+    color: #333;
+}
 
-        .subtitle {
-            font-size: 13px;
-            color: #7f8c8d;
-            margin-top: 4px;
-        }
+.card:active {
+    transform: scale(0.95);
+}
 
-        .container {
-            width: 100%;
-            max-width: 600px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(5, 1fr);
-            gap: 3px;
-            padding: 0 10px;
-            height: calc(100vh - 90px);
-            max-height: 900px;
-        }
+/* 图标 */
+.icon {
+    font-size: 26px;
+    margin-bottom: 6px;
+}
 
-        .tool-card {
-            background: white;
-            border-radius: 10px;
-            padding: 18px;
-            text-align: center;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
-            transition: all 0.2s ease;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            aspect-ratio: 1/1;
-            position: relative;
-            overflow: hidden;
-        }
+/* 文字 */
+.text {
+    font-size: 14px;
+}
 
-        .tool-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, #3498db, #2ecc71);
-            transform: scaleX(0);
-            transition: transform 0.2s ease;
-        }
-
-        .tool-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .tool-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .tool-icon {
-            font-size: 26px;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .tool-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: #2c3e50;
-            line-height: 0.5; /* 行距改为0.5 */
-        }
-
-        /* 工具图标颜色 */
-        .video-icon { color: #e74c3c; }
-        .image-icon { color: #f39c12; }
-        .music-icon { color: #9b59b6; }
-        .file-icon { color: #f1c40f; }
-        .browser-icon { color: #3498db; }
-        .download-icon { color: #1abc9c; }
-        .photo-icon { color: #2ecc71; }
-        .record-icon { color: #e67e22; }
-        .map-icon { color: #e67e22; }
-        .lightning-icon { color: #f39c12; }
-        .game-icon { color: #9b59b6; }
-        .settings-icon { color: #34495e; }
-        .speed-icon { color: #95a5a6; }
-        .compiler-icon { color: #e74c3c; }
-        .study-icon { color: #3498db; }
-
-        .footer {
-            margin-top: 10px;
-            text-align: center;
-            color: #7f8c8d;
-            font-size: 11px;
-            width: 100%;
-            max-width: 600px;
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 3px;
-                height: calc(100vh - 80px);
-            }
-            
-            .title {
-                font-size: 26px;
-            }
-            
-            .tool-card {
-                padding: 18px;
-            }
-            
-            .tool-name {
-                font-size: 14px;
-                line-height: 0.5; /* 行距改为0.5 */
-            }
-        }
-    </style>
+/* 限制高度不超一屏 */
+.container {
+    max-width: 500px;
+    margin: auto;
+}
+</style>
 </head>
+
 <body>
-    <div class="header">
-        <h1 class="title">
-            <span class="title-icon">🔧</span>
-            超级工具箱
-        </h1>
-        <p class="subtitle">一站式多功能工具平台</p>
+
+<div class="container">
+
+<div class="header">🔧 超级工具箱</div>
+
+<div class="grid">
+
+<a class="card" href="a.html">
+<div class="icon">🎬</div>
+<div class="text">视频</div>
+</a>
+
+<a class="card" href="b.html">
+<div class="icon">🖼️</div>
+<div class="text">图片</div>
+</a>
+
+<a class="card" href="c.html">
+<div class="icon">🎵</div>
+<div class="text">音乐</div>
+</a>
+
+<a class="card" href="d.html">
+<div class="icon">📁</div>
+<div class="text">文件</div>
+</a>
+
+<a class="card" href="a.html">
+<div class="icon">🌐</div>
+<div class="text">浏览器</div>
+</a>
+
+<a class="card" href="b.html">
+<div class="icon">⬇️</div>
+<div class="text">下载</div>
+</a>
+
+<a class="card" href="c.html">
+<div class="icon">📷</div>
+<div class="text">相册</div>
+</a>
+
+<a class="card" href="d.html">
+<div class="icon">🚀</div>
+<div class="text">计算</div>
+</a>
+
+<a class="card" href="a.html">
+<div class="icon">🧭</div>
+<div class="text">地图</div>
+</a>
+
+<a class="card" href="b.html">
+<div class="icon">🛰️</div>
+<div class="text">雷达</div>
+</a>
+
+<a class="card" href="c.html">
+<div class="icon">🎮</div>
+<div class="text">游戏</div>
+</a>
+
+<a class="card" href="d.html">
+<div class="icon">⚙️</div>
+<div class="text">设置</div>
+</a>
+
+<a class="card" href="a.html">
+<div class="icon">👽</div>
+<div class="text">播放器</div>
+</a>
+
+<a class="card" href="b.html">
+<div class="icon">🐯</div>
+<div class="text">编译器</div>
+</a>
+
+<a class="card" href="c.html">
+<div class="icon">📚</div>
+<div class="text">学习工具</div>
+</a>
+
+</div>
+<div class="footer">
+        <p>© 2026ʕ◦`꒳◦ʔ 超级工具箱 | 看起来更简单‎ദ്ദിᵔ.ᵔ₎✧</p>
     </div>
+</div>
 
-    <div class="container">
-        <a href="a.html" class="tool-card">
-            <div class="tool-icon video-icon">🎬</div>
-            <div class="tool-name">视频</div>
-        </a>
-
-        <a href="b.html" class="tool-card">
-            <div class="tool-icon image-icon">🖼️</div>
-            <div class="tool-name">图片</div>
-        </a>
-
-        <a href="c.html" class="tool-card">
-            <div class="tool-icon music-icon">🎵</div>
-            <div class="tool-name">音乐</div>
-        </a>
-
-        <a href="d.html" class="tool-card">
-            <div class="tool-icon file-icon">📁</div>
-            <div class="tool-name">文件</div>
-        </a>
-
-        <a href="e.html" class="tool-card">
-            <div class="tool-icon browser-icon">🌐</div>
-            <div class="tool-name">浏览器</div>
-        </a>
-
-        <a href="f.html" class="tool-card">
-            <div class="tool-icon download-icon">⬇️</div>
-            <div class="tool-name">下载</div>
-        </a>
-
-        <a href="g.html" class="tool-card">
-            <div class="tool-icon photo-icon">📷</div>
-            <div class="tool-name">相册</div>
-        </a>
-
-        <a href="h.html" class="tool-card">
-            <div class="tool-icon record-icon">🎤</div>
-            <div class="tool-name">录音</div>
-        </a>
-
-        <a href="i.html" class="tool-card">
-            <div class="tool-icon map-icon">🗺️</div>
-            <div class="tool-name">地图</div>
-        </a>
-
-        <a href="j.html" class="tool-card">
-            <div class="tool-icon lightning-icon">⚡</div>
-            <div class="tool-name">雷电</div>
-        </a>
-
-        <a href="k.html" class="tool-card">
-            <div class="tool-icon game-icon">🎮</div>
-            <div class="tool-name">游戏</div>
-        </a>
-
-        <a href="l.html" class="tool-card">
-            <div class="tool-icon settings-icon">⚙️</div>
-            <div class="tool-name">设置</div>
-        </a>
-
-        <a href="m.html" class="tool-card">
-            <div class="tool-icon speed-icon">👽</div>
-            <div class="tool-name">速帧播放</div>
-        </a>
-
-        <a href="n.html" class="tool-card">
-            <div class="tool-icon compiler-icon">🐯</div>
-            <div class="tool-name">编译器</div>
-        </a>
-
-        <a href="o.html" class="tool-card">
-            <div class="tool-icon study-icon">📚</div>
-            <div class="tool-name">学习工具</div>
-        </a>
-    </div>
-
-    <div class="footer">
-        <p>© 2026ʕ ◦`꒳´◦ʔ 超级工具箱 | 看起来更简单‎ദ്ദിᵔ.˛.ᵔ₎✧</p>
-    </div>
 </body>
 </html>
