@@ -6,59 +6,67 @@
 <title>超级工具箱</title>
 
 <style>
-body {
+* {
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
-    background: #f5f6f8;
+    background: linear-gradient(135deg, #eef2f7, #e3e8ef);
+}
+
+/* 容器 */
+.container {
+    max-width: 520px;
+    margin: auto;
+    padding: 10px;
 }
 
 /* 标题 */
 .header {
     text-align: center;
-    padding: 20px 10px 10px;
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 600;
+    padding: 15px 0 10px;
 }
 
-/* 网格布局 */
+/* 网格 */
 .grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    padding: 12px;
+    gap: 14px;
 }
 
 /* 卡片 */
 .card {
-    background: #fff;
-    border-radius: 16px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 18px;
     padding: 18px 5px;
     text-align: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    transition: 0.2s;
     text-decoration: none;
     color: #333;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    transition: all 0.2s ease;
 }
 
+/* 点击效果 */
 .card:active {
-    transform: scale(0.95);
+    transform: scale(0.92);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 /* 图标 */
 .icon {
-    font-size: 26px;
+    font-size: 28px;
     margin-bottom: 6px;
 }
 
 /* 文字 */
 .text {
     font-size: 14px;
-}
-
-/* 限制高度不超一屏 */
-.container {
-    max-width: 500px;
-    margin: auto;
 }
 </style>
 </head>
@@ -72,83 +80,68 @@ body {
 <div class="grid">
 
 <a class="card" href="a.html">
-<div class="icon">🎬</div>
-<div class="text">视频</div>
+<div class="icon">🎬</div><div class="text">视频</div>
 </a>
 
 <a class="card" href="b.html">
-<div class="icon">🖼️</div>
-<div class="text">图片</div>
+<div class="icon">🖼️</div><div class="text">图片</div>
 </a>
 
 <a class="card" href="c.html">
-<div class="icon">🎵</div>
-<div class="text">音乐</div>
+<div class="icon">🎵</div><div class="text">音乐</div>
 </a>
 
 <a class="card" href="d.html">
-<div class="icon">📁</div>
-<div class="text">文件</div>
+<div class="icon">📁</div><div class="text">文件</div>
 </a>
 
-<a class="card" href="a.html">
-<div class="icon">🌐</div>
-<div class="text">浏览器</div>
+<a class="card" href="e.html">
+<div class="icon">🌐</div><div class="text">浏览器</div>
 </a>
 
-<a class="card" href="b.html">
-<div class="icon">⬇️</div>
-<div class="text">下载</div>
+<a class="card" href="f.html">
+<div class="icon">⬇️</div><div class="text">下载</div>
 </a>
 
-<a class="card" href="c.html">
-<div class="icon">📷</div>
-<div class="text">相册</div>
+<a class="card" href="g.html">
+<div class="icon">📷</div><div class="text">计算</div>
 </a>
 
-<a class="card" href="d.html">
-<div class="icon">🚀</div>
-<div class="text">计算</div>
+<a class="card" href="h.html">
+<div class="icon">🎤</div><div class="text">录音</div>
 </a>
 
-<a class="card" href="a.html">
-<div class="icon">🧭</div>
-<div class="text">地图</div>
+<a class="card" href="i.html">
+<div class="icon">🧭</div><div class="text">地图</div>
 </a>
 
-<a class="card" href="b.html">
-<div class="icon">🛰️</div>
-<div class="text">雷达</div>
+<a class="card" href="j.html">
+<div class="icon">💡</div><div class="text">雷达</div>
 </a>
 
-<a class="card" href="c.html">
-<div class="icon">🎮</div>
-<div class="text">游戏</div>
+<a class="card" href="k.html">
+<div class="icon">🎮</div><div class="text">游戏</div>
 </a>
 
-<a class="card" href="d.html">
-<div class="icon">⚙️</div>
-<div class="text">设置</div>
+<a class="card" href="l.html">
+<div class="icon">⚙️</div><div class="text">设置</div>
 </a>
 
-<a class="card" href="a.html">
-<div class="icon">👽</div>
-<div class="text">播放器</div>
+<a class="card" href="m.html">
+<div class="icon">👽</div><div class="text">播放器</div>
 </a>
 
-<a class="card" href="b.html">
-<div class="icon">🐯</div>
-<div class="text">编译器</div>
+<a class="card" href="n.html">
+<div class="icon">🐯</div><div class="text">编译器</div>
 </a>
 
-<a class="card" href="c.html">
-<div class="icon">📚</div>
-<div class="text">学习工具</div>
+<a class="card" href="o.html">
+<div class="icon">📚</div><div class="text">学习工具</div>
 </a>
 
 </div>
 <div class="footer">
-        <p>© 2026ʕ◦`꒳◦ʔ 超级工具箱 | 看起来更简单‎ദ്ദിᵔ.ᵔ₎✧</p>
+        <p>© 2026ଘ(੭ˊᵕˋ)੭*超级工具箱 | 看起来更香‎ദ്ദിᵔ..ᵔ₎✧</p>
     </div>
 </div>
 
