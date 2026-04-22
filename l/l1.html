@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>意见反馈系统</title>
+<style>
+*{box-sizing:border-box;font-family:微软雅黑}
+body{background:#f5f7fa;padding:20px;max-width:700px;margin:0 auto}
+.box{background:#fff;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+h3{font-size:16px;margin-bottom:12px;color:#333}
+input,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;margin-bottom:10px}
+textarea{height:110px;resize:none}
+button{padding:10px 16px;background:#007bff;color:#fff;border:none;border-radius:6px;cursor:pointer;margin-right:6px}
+.btn-gray{background:#6c757d}
+.btn-green{background:#28a745}
+.btn-orange{background:#ff9800}
+.feedback-item{padding:12px 0;border-bottom:1px solid #f2f2f2}
+.time{font-size:12px;color:#999}
+.reply{color:#007bff;margin-top:6px;font-weight:bold}
+.code-tip{margin-top:10px;font-weight:bold;color:#ff5722}
+select{padding:10px;border:1px solid #ddd;border-radius:6px;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<div class="box">
+  <h3>提交反馈</h3>
+  <input type="text" id="nickname" placeholder="你的昵称（必填）">
+  <input type="text" id="email" placeholder="邮箱（选填）">
+  <input type="text" id="userCode" placeholder="不填则自动生成6位提取码，换手机请输入此码找回记录">
+  <textarea id="content" placeholder="请输入反馈内容"></textarea>
+  <button onclick="submitFeedback()">提交反馈</button>
+  <button class="btn-orange" onclick="showTip()">数据提示</button>
+</div>
+
+<div class="box">
+  <h3>我的反馈记录</h3>
+  <div id="myRecord"></div>
+  <div id="codeDisplay" class="code-tip"></div>
+</div>
+
+<div class="box">
+  <h3>管理员入口</h3>
+  <button class="btn-gray" onclick="showAdminLogin()">进入管理员面板</button>
+</div>
+
+<div class="box" id="adminLoginBox" style="display:none">
+  <h3>管理员登录</h3>
+  <input type="password" id="adminPwd" placeholder="输入管理员密码">
+  <button onclick="adminLogin()">登录</button>
+</div>
+
+<div class="box" id="adminPanel" style="display:none">
+  <h3>管理员管理面板</h3>
+  <div style="padding:15px;margin-bottom:15px;background:#f8f9fa;border-radius:8px">
+    <h4>修改管理员密码</h4>
+    <input type="password" id="oldPwd" placeholder="原密码">
+    <input type="password" id="newPwd" placeholder="新密码">
+    <input type="password" id="confirmPwd" placeholder="确认新密码">
+    <button class="btn-green" onclick="changePwd()">修改密码</button>
+    <button class="btn-gray" onclick="skipChangePwd()">不修改，直接管理</button>
+  </div>
+  <select id="filterCode" onchange="renderAdminList()"></select>
+  <div id="adminList"></div>
+</div>
+
+<script>
+const DEFAULT_PWD = "123456";
+
+function getData() {
+  return JSON.parse(localStorage.getItem("feedbacks")) || [];
+}
+function saveData(arr) {
+  localStorage.setItem("feedbacks", JSON.stringify(arr));
+}
+function getAdminPwd() {
+  return localStorage.getItem("admin_pwd") || DEFAULT_PWD;
+}
+
+function genCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function submitFeedback() {
+  let nickname = document.getElementById("nickname").value.trim();
+  let email = document.getElementById("email").value.trim();
+  let code = document.getElementById("userCode").value.trim();
+  let content = document.getElementById("content").value.trim();
+
+  if (!nickname || !content) {
+    alert("请填写昵称和反馈内容");
+    return;
+  }
+
+  if (!code) {
+    code = genCode();
+  }
+  if (code.length !== 6 || isNaN(Number(code))) {
+    alert("提取码必须是6位数字");
+    return;
+  }
+
+  localStorage.setItem("lastUserCode", code);
+
+  let list = getData();
+  list.unshift({
+    code, nickname, email, content,
+    time: new Date().toLocaleString(),
+    reply: ""
+  });
+  saveData(list);
+
+  alert("提交成功！");
+  document.getElementById("nickname").value = "";
+  document.getElementById("email").value = "";
+  document.getElementById("userCode").value = "";
+  document.getElementById("content").value = "";
+  renderMyRecord();
+}
+
+function showTip() {
+  alert("温馨提示☝️：本反馈系统数据存储在当前设备本地，更换手机、清理浏览器缓存或使用其他设备访问。相关反馈记录将按提供的6位提取码识别用户身份，输入相同提取码即可查看自己历史反馈记录，每个提取码独立对应一位用户。");
+}
+
+function renderMyRecord() {
+  let code = localStorage.getItem("lastUserCode");
+  if (!code) {
+    document.getElementById("myRecord").innerHTML = "暂无记录";
+    document.getElementById("codeDisplay").innerText = "";
+    return;
+  }
+
+  let list = getData();
+  let my = list.filter(item => item.code === code);
+
+  let html = my.map(item => `
+  <div class="feedback-item">
+    <div class="time">${item.time}｜${item.nickname}${item.email?"｜"+item.email:""}</div>
+    <div>${item.content}</div>
+    ${item.reply ? `<div class="reply">管理员回复：${item.reply}</div>` : "<div style='color:#999'>等待管理员回复...</div>"}
+  </div>
+  `).join("");
+
+  document.getElementById("myRecord").innerHTML = html || "暂无反馈记录";
+  // 一直显示提取码
+  document.getElementById("codeDisplay").innerText = "你的提取码为：" + code;
+}
+
+// 管理员登录
+function showAdminLogin() {
+  document.getElementById("adminLoginBox").style.display = "block";
+}
+function adminLogin() {
+  let pwd = document.getElementById("adminPwd").value;
+  if (pwd !== getAdminPwd()) {
+    alert("密码错误");
+    return;
+  }
+  document.getElementById("adminLoginBox").style.display = "none";
+  document.getElementById("adminPanel").style.display = "block";
+  renderAdminList();
+}
+
+// 修改密码
+function changePwd() {
+  let old = document.getElementById("oldPwd").value;
+  let np = document.getElementById("newPwd").value;
+  let cp = document.getElementById("confirmPwd").value;
+  if (old !== getAdminPwd()) return alert("原密码错误");
+  if (np !== cp) return alert("两次密码不一致");
+  localStorage.setItem("admin_pwd", np);
+  alert("密码修改成功");
+}
+function skipChangePwd() {
+  renderAdminList();
+}
+
+// 管理员列表
+function renderAdminList() {
+  let list = getData();
+  let filter = document.getElementById("filterCode").value;
+
+  let codes = [...new Set(list.map(i => i.code))];
+  let opts = `<option value="">全部用户</option>`;
+  codes.forEach(c => {
+    opts += `<option value="${c}">提取码：${c}</option>`;
+  });
+  document.getElementById("filterCode").innerHTML = opts;
+  document.getElementById("filterCode").value = filter;
+
+  let showList = filter ? list.filter(i => i.code === filter) : list;
+  let html = showList.map((item, idx) => `
+  <div class="feedback-item">
+    <div class="time">${item.time}｜${item.nickname}${item.email?"｜"+item.email:""}｜${item.code}</div>
+    <div>内容：${item.content}</div>
+    <input style="margin-top:6px" placeholder="输入回复" id="reply_${idx}" value="${item.reply || ''}">
+    <button style="margin-top:6px" onclick="saveReply(${idx})">保存回复</button>
+    ${item.reply ? `<div class="reply">已回复：${item.reply}</div>` : ''}
+  </div>
+  `).join("");
+
+  document.getElementById("adminList").innerHTML = html || "暂无反馈";
+}
+
+// 保存回复
+function saveReply(index) {
+  let list = getData();
+  let filter = document.getElementById("filterCode").value;
+  let targetList = filter ? list.filter(i => i.code === filter) : list;
+  let reply = document.getElementById(`reply_${index}`).value.trim();
+  if (!reply) return alert("请输入回复内容");
+  targetList[index].reply = reply;
+  saveData(list);
+  alert("回复成功！用户查看记录时即可看到");
+  renderAdminList();
+  renderMyRecord();
+}
+
+// 初始化
+renderMyRecord();
+</script>
+</body>
+</html>
