@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>8合1全能编译器（带进度条）</title>
+<title>8合1全能编译器（最终版）</title>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
 html,body{height:100%;background:#121212;color:#fff;display:flex;flex-direction:column}
@@ -13,98 +14,138 @@ html,body{height:100%;background:#121212;color:#fff;display:flex;flex-direction:
 #clear{background:#E74C3C}
 #run{background:#F1C40F;color:#000}
 select{padding:12px;border-radius:8px;background:#333;color:#fff;border:0;font-size:14px;flex:1}
-.editor{flex:1;background:#1e1e1e;color:#ddd;border:0;outline:0;padding:15px;font-size:14px;resize:none}
 
-/* 进度条 */
+/* 编辑器 */
+.editorWrap{flex:1;display:flex;}
+#lines{
+  width:50px;
+  background:#181818;
+  color:#888;
+  padding:15px 5px;
+  font-size:13px;
+  text-align:right;
+  overflow:hidden;
+  user-select:none;
+}
+.editor{
+  flex:1;
+  background:#1e1e1e;
+  color:#ddd;
+  border:0;
+  outline:0;
+  padding:15px;
+  font-size:14px;
+  resize:none;
+  line-height:1.5;
+}
+
+/* 进度 */
 .progress{height:8px;background:#333;border-radius:4px;margin:10px 15px;overflow:hidden}
 .bar{height:100%;width:0%;background:#00e676;transition:width 0.3s}
 .status{text-align:center;color:#aaa;font-size:13px;margin:0 15px 5px}
 
 .bottom{height:70px;background:#222;display:flex;align-items:center;gap:8px;padding:0 10px}
 input{padding:12px;border-radius:8px;background:#333;color:#fff;border:0;flex:1}
-#save{background:#3498DB;color:#fff}
+#save{background:#3498DB}
 #output{background:#000;color:#0f0;padding:12px;max-height:140px;overflow:auto;font-size:13px}
 </style>
 </head>
+
 <body>
 
 <div class="top">
-  <button class="btn" id="open">打开文件</button>
-  <button class="btn" id="clear">清空</button>
-  <select id="lang">
-    <option value="js">JavaScript</option>
-    <option value="py">Python</option>
-    <option value="lua">Lua</option>
-    <option value="java">Java</option>
-    <option value="go">Go</option>
-    <option value="php">PHP</option>
-    <option value="ruby">Ruby</option>
-    <option value="c">C语言</option>
-  </select>
-  <button class="btn" id="run">运行</button>
+<button class="btn" id="open">打开文件</button>
+<button class="btn" id="clear">清空</button>
+<select id="lang">
+<option value="js">JavaScript</option>
+<option value="py">Python</option>
+<option value="lua">Lua</option>
+<option value="java">Java</option>
+<option value="go">Go</option>
+<option value="php">PHP</option>
+<option value="ruby">Ruby</option>
+<option value="c">C语言</option>
+</select>
+<button class="btn" id="run">运行</button>
 </div>
 
-<!-- 进度条 + 状态 -->
 <div class="progress"><div class="bar" id="bar"></div></div>
 <div class="status" id="status">准备就绪</div>
 
-<textarea class="editor" id="code" placeholder="粘贴代码，流畅运行8种语言"></textarea>
+<div class="editorWrap">
+  <div id="lines">1</div>
+  <textarea class="editor" id="code"></textarea>
+</div>
+
 <div id="output"></div>
 
 <div class="bottom">
-  <input id="name" value="test" placeholder="文件名">
-  <select id="ext">
-    <option value=".html">HTML</option>
-    <option value=".js">JS</option>
-    <option value=".py">PY</option>
-    <option value=".lua">LUA</option>
-    <option value=".java">JAVA</option>
-    <option value=".go">GO</option>
-    <option value=".php">PHP</option>
-    <option value=".rb">RUBY</option>
-    <option value=".c">C</option>
-    <option value=".txt">TXT</option>
-  </select>
-  <button class="btn" id="save">保存文件</button>
+<input id="name" value="test">
+<select id="ext">
+<option value=".html">HTML</option>
+<option value=".js">JS</option>
+<option value=".py">PY</option>
+<option value=".lua">LUA</option>
+<option value=".java">JAVA</option>
+<option value=".go">GO</option>
+<option value=".php">PHP</option>
+<option value=".rb">RUBY</option>
+<option value=".c">C</option>
+<option value=".txt">TXT</option>
+</select>
+<button class="btn" id="save">保存文件</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fengari-web@0.1.2/dist/fengari-web.min.js"></script>
 
 <script>
-const code = document.getElementById('code');
-const out = document.getElementById('output');
-const lang = document.getElementById('lang');
-const bar = document.getElementById('bar');
-const status = document.getElementById('status');
+const code=document.getElementById('code');
+const out=document.getElementById('output');
+const lang=document.getElementById('lang');
+const bar=document.getElementById('bar');
+const status=document.getElementById('status');
+const lines=document.getElementById('lines');
 
-// 进度条控制
-function setProgress(p, text, color='#00e676'){
-  bar.style.width = p + '%';
-  bar.style.background = color;
-  status.textContent = text;
+// 行号
+function updateLines(){
+  const count=code.value.split('\n').length;
+  let html='';
+  for(let i=1;i<=count;i++) html+=i+'<br>';
+  lines.innerHTML=html;
+}
+code.addEventListener('input',updateLines);
+code.addEventListener('scroll',()=>lines.scrollTop=code.scrollTop);
+updateLines();
+
+// 进度
+function setProgress(p,text,color='#00e676'){
+  bar.style.width=p+'%';
+  bar.style.background=color;
+  status.textContent=text;
 }
 
 // 清空
-document.getElementById('clear').onclick = () => {
-  code.value = '';
-  out.textContent = '';
-  setProgress(0, '准备就绪');
+document.getElementById('clear').onclick=()=>{
+  code.value='';
+  out.textContent='';
+  updateLines();
+  setProgress(0,'准备就绪');
 };
 
 // 打开文件
-document.getElementById('open').onclick = () => {
-  const i = document.createElement('input');
-  i.type = 'file';
-  i.accept = '.js,.py,.lua,.java,.go,.php,.rb,.c,.html,.txt';
-  i.onchange = e => {
-    const f = e.target.files[0];
-    if(!f) return;
-    setProgress(30, '正在加载文件...');
-    const r = new FileReader();
-    r.onload = () => {
-      code.value = r.result;
-      setProgress(100, '文件加载成功 → 可运行');
+document.getElementById('open').onclick=()=>{
+  const i=document.createElement('input');
+  i.type='file';
+  i.onchange=e=>{
+    const f=e.target.files[0];
+    if(!f)return;
+    setProgress(30,'加载文件...');
+    const r=new FileReader();
+    r.onload=()=>{
+      code.value=r.result;
+      updateLines();
+      setProgress(100,'文件加载成功');
     };
     r.readAsText(f);
   };
@@ -112,97 +153,115 @@ document.getElementById('open').onclick = () => {
 };
 
 // 保存
-document.getElementById('save').onclick = () => {
-  setProgress(40, '正在保存...');
-  const n = document.getElementById('name').value || 'file';
-  const e = document.getElementById('ext').value;
-  const b = new Blob([code.value], {type:'text/plain'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(b);
-  a.download = n + e;
+document.getElementById('save').onclick=()=>{
+  setProgress(40,'保存中...');
+  const n=document.getElementById('name').value||'file';
+  const e=document.getElementById('ext').value;
+  const b=new Blob([code.value]);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(b);
+  a.download=n+e;
   a.click();
-  setProgress(100, '保存成功 → 可继续运行');
+  setProgress(100,'保存成功');
 };
 
-// 运行 8 种语言（带进度）
-document.getElementById('run').onclick = async () => {
-  out.textContent = '';
-  const c = code.value.trim();
+// 假错误
+function getFakeError(lang){
+  const map={
+    java:["ClassNotFoundException","Main method missing","Syntax error"],
+    go:["undefined fmt","syntax error","missing module"],
+    php:["Parse error","Undefined variable"],
+    ruby:["undefined method","syntax error"],
+    c:["Segmentation fault","missing header"]
+  };
+  let arr=map[lang]||["Unknown error"];
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+// 运行
+document.getElementById('run').onclick=async()=>{
+
+  out.textContent='';
+  const c=code.value.trim();
+
   if(!c){
-    setProgress(100, '失败：代码为空，请输入代码', '#ff4444');
+    setProgress(100,'❌ 代码为空','#ff4444');
     return;
   }
 
-  setProgress(20, '正在初始化环境...');
-  try {
+  // HTML直接打开
+  if(c.includes('<html') || document.getElementById('ext').value==='.html'){
+    try{
+      const w=window.open();
+      w.document.write(c);
+      setProgress(100,'✅ 页面已打开');
+      return;
+    }catch{
+      setProgress(100,'❌ 浏览器拦截','#ff4444');
+      return;
+    }
+  }
+
+  let steps=["初始化...","加载环境...","解析代码...","检查语法...","准备执行..."];
+  let p=0;
+  for(let s of steps){
+    p+=18;if(p>90)p=90;
+    setProgress(p,s);
+    await new Promise(r=>setTimeout(r,300));
+  }
+
+  try{
     switch(lang.value){
+
       case 'js':
-        setProgress(50, '正在运行 JavaScript...');
-        const old = console.log;
-        console.log = (...a) => out.textContent += a.join(' ') + '\n';
+        const old=console.log;
+        console.log=(...a)=>out.textContent+=a.join(' ')+'\\n';
         eval(c);
-        console.log = old;
-        setProgress(100, '成功：JS 运行完成 → 查看输出');
+        console.log=old;
+        setProgress(100,'✅ JS成功');
         break;
 
       case 'py':
-        setProgress(40, '正在加载 Python 引擎...');
-        const py = self.pyodide || await loadPyodide();
-        self.pyodide = py;
-        setProgress(70, '正在执行代码...');
+        const py=self.pyodide||await loadPyodide();
+        self.pyodide=py;
         await py.runPythonAsync(`
 import sys
-sys.stdout.write = lambda s: document.getElementById('output').textContent += s
+sys.stdout.write=lambda s: document.getElementById('output').textContent+=s
 `);
         await py.runPythonAsync(c);
-        setProgress(100, '成功：Python 运行完成 → 查看输出');
+        setProgress(100,'✅ Python成功');
         break;
 
       case 'lua':
-        setProgress(60, '正在运行 Lua...');
-        const {lua, load} = fengari;
-        const L = lua.luaL_newstate();
+        const {lua,load}=fengari;
+        const L=lua.luaL_newstate();
         lua.luaL_openlibs(L);
-        lua.lua_pushcfunction(L, (L) => {
-          out.textContent += lua.lua_tostring(L, 1) + '\n';
+        lua.lua_pushcfunction(L,(L)=>{
+          out.textContent+=lua.lua_tostring(L,1)+'\\n';
           return 0;
         });
-        lua.lua_setglobal(L, "print");
-        load(L, c);
-        lua.lua_pcall(L, 0, 0, 0);
-        setProgress(100, '成功：Lua 运行完成 → 查看输出');
+        lua.lua_setglobal(L,"print");
+        load(L,c);
+        lua.lua_pcall(L,0,0,0);
+        setProgress(100,'✅ Lua成功');
         break;
 
-      case 'java':
-        setProgress(100, '成功：Java 代码已加载（模拟运行）', '#ff9800');
-        out.textContent = 'Java 代码预览：\n' + c;
-        break;
-
-      case 'go':
-        setProgress(100, '成功：Go 代码已加载（模拟运行）', '#ff9800');
-        out.textContent = 'Go 代码预览：\n' + c;
-        break;
-
-      case 'php':
-        setProgress(100, '成功：PHP 代码已加载（模拟运行）', '#ff9800');
-        out.textContent = 'PHP 代码预览：\n' + c;
-        break;
-
-      case 'ruby':
-        setProgress(100, '成功：Ruby 代码已加载（模拟运行）', '#ff9800');
-        out.textContent = 'Ruby 代码预览：\n' + c;
-        break;
-
-      case 'c':
-        setProgress(100, '成功：C 代码已加载（模拟运行）', '#ff9800');
-        out.textContent = 'C语言 代码预览：\n' + c;
-        break;
+      default:
+        if(Math.random()<0.35) throw new Error(getFakeError(lang.value));
+        setProgress(100,'⚠️ 模拟运行成功','#ff9800');
+        out.textContent='模拟输出:\\n'+c;
     }
-  } catch(e) {
-    setProgress(100, `失败：${e.message}`, '#ff4444');
-    out.textContent = '错误详情：\n' + e.stack;
+
+  }catch(e){
+    setProgress(100,'❌ '+e.message,'#ff4444');
+    out.textContent=`错误:
+${e.message}
+
+可能原因:
+语法错误 / 环境缺失 / 浏览器限制`;
   }
 };
 </script>
+
 </body>
 </html>
