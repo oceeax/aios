@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>腾讯云快捷导航</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:system-ui, sans-serif;
+        }
+        body{
+            background:#f5f7fa;
+            padding:20px;
+            max-width:600px;
+            margin:40px auto;
+        }
+        .title{
+            text-align:center;
+            font-size:24px;
+            margin-bottom:30px;
+            color:#111;
+        }
+        .grid-box{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:14px;
+        }
+        .btn{
+            padding:16px 10px;
+            border-radius:12px;
+            border:none;
+            background:#006eff;
+            color:white;
+            font-size:15px;
+            font-weight:500;
+            text-align:center;
+            text-decoration:none;
+            transition:0.2s;
+            box-shadow:0 2px 6px rgba(0,110,255,0.15);
+        }
+        .btn:hover{
+            transform:translateY(-2px);
+            opacity:0.92;
+        }
+        .back-group{
+            margin-top:24px;
+            display:flex;
+            gap:14px;
+        }
+        .back-btn{
+            flex:1;
+            padding:14px;
+            border-radius:12px;
+            background:#555;
+            color:white;
+            text-align:center;
+            text-decoration:none;
+        }
+    </style>
+</head>
+<body>
+    <h2 class="title">腾讯云快捷导航</h2>
+
+    <div class="grid-box">
+        <a href="https://cloud.tencent.com/"
+target="_blank" class="btn">腾讯云官网</a>
+        <a href="https://orcaterm.cloud.tencent.com/terminal?type=lighthouse&instanceId=lhins-rbq6heyw&region=ap-shanghai&from=lh_console_login_btn" target="_blank" class="btn">服务器登录</a>
+
+        <a href="https://console.cloud.tencent.com/lighthouse/instance/index?rid=1" target="_blank" class="btn">控制台</a>
+
+        <a href="https://cloud.tencent.com/wechat/jumpWxa?path=%2Fpages%2Fweb-view%2Fweb-view%3Furl%3Dhttps%253A%252F%252Fcloud.tencent.com%252Fonline-service%253Fsource%253DPRESALE%2526from%253Dconnect-us&h5Url=https%3A%2F%2Fcloud.tencent.com%2Fonline-service%3Fsource%3DPRESALE%26from%3Dconnect-us" target="_blank" class="btn">微信小程序</a>
+
+        <a href="https://cloud.tencent.com/document/product/1207/44550" target="_blank" class="btn">联系方式</a>
+
+        <a href="https://cloud.tencent.com/developer" target="_blank" class="btn">开发者社区</a>
+    </div>
+
+    <div class="back-group">
+        <a href="javascript:history.back()" class="back-btn">返回上一页</a>
+        <a href="./index.html" class="back-btn">返回主页</a>
+    </div>
+</body>
+</html>
