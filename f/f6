@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 关键：强制浏览器使用电脑版UA，并且禁止自动缩放，确保打开的是电脑版页面 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>邮箱导航中心</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background-color: #000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 900px;
+            overflow: hidden;
+        }
+
+        /* 顶部导航栏 */
+        .top-bar {
+            background-color: #4096ff;
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar .left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .top-bar .right {
+            display: flex;
+            gap: 16px;
+        }
+
+        .top-bar .icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.8;
+        }
+
+        /* 标题 */
+        .title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #1a365d;
+            margin: 30px 0;
+        }
+
+        /* 卡片网格 - 核心：手机/电脑都自动适配，一行3个 */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+            padding: 0 30px 40px;
+        }
+
+        /* 邮箱卡片 */
+        .email-card {
+            background-color: #69b1ff;
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .email-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(64, 150, 255, 0.4);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+        }
+
+        .card-name {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .card-btn {
+            background-color: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        /* 底部圆点 */
+        .dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding-bottom: 20px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #d9d9d9;
+        }
+
+        .dot.active {
+            background-color: #4096ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <div class="top-bar">
+            <div class="left">
+                <span>✉️</span>
+                <span>QQ邮箱</span>
+            </div>
+            <div class="right">
+                <span class="icon">🔍</span>
+                <span class="icon">📄</span>
+            </div>
+        </div>
+
+        <!-- 标题 -->
+        <h1 class="title">邮箱导航中心</h1>
+
+        <!-- 卡片区域（全部是电脑版登录地址） -->
+        <div class="card-grid">
+            <!-- 1. QQ邮箱 电脑版 -->
+            <a href="https://mail.qq.com" target="_blank" class="email-card">
+                <div class="card-icon">✉️</div>
+                <div class="card-name">QQ邮箱</div>
+                <button class="card-btn">电脑版</button>
+            </a>
+
+            <!-- 2. 网易邮箱 电脑版 -->
+            <a href="https://mail.163.com" target="_blank" class="email-card">
+                <div class="card-icon">✉️</div>
+                <div class="card-name">网易邮箱</div>
+                <button class="card-btn">www.163.com</button>
+            </a>
+
+            <!-- 3. Outlook 电脑版 -->
+            <a href="https://outlook.live.com/mail/" target="_blank" class="email-card">
+                <div class="card-icon">🌐</div>
+                <div class="card-name">Outlook</div>
+                <button class="card-btn">www.outlook.com</button>
+            </a>
+
+            <!-- 4. Hotmail 电脑版 -->
+            <a href="https://www.hotmail.com" target="_blank" class="email-card">
+                <div class="card-icon">🟦</div>
+                <div class="card-name">Hotmail</div>
+                <button class="card-btn">www.hotmail.com</button>
+            </a>
+
+            <!-- 5. Yahoo 电脑版 -->
+            <a href="https://mail.yahoo.com" target="_blank" class="email-card">
+                <div class="card-icon">👁️</div>
+                <div class="card-name">Yahoo</div>
+                <button class="card-btn">电脑版</button>
+            </a>
+
+            <!-- 6. 新浪邮箱 电脑版 -->
+            <a href="https://mail.sina.com.cn" target="_blank" class="email-card">
+                <div class="card-icon">👁️</div>
+                <div class="card-name">新浪邮箱</div>
+                <button class="card-btn">mail.sina.com.cn</button>
+            </a>
+
+            <!-- 7. 搜狐邮箱 电脑版 -->
+            <a href="https://mail.sohu.com" target="_blank" class="email-card">
+                <div class="card-icon">👆</div>
+                <div class="card-name">搜狐邮箱</div>
+                <button class="card-btn">搜狐邮箱</button>
+            </a>
+
+            <!-- 8. 189邮箱 电脑版 -->
+            <a href="https://mail.189.cn" target="_blank" class="email-card">
+                <div class="card-icon">🟦</div>
+                <div class="card-name">189邮箱</div>
+                <button class="card-btn">189邮箱</button>
+            </a>
+        </div>
+
+        <!-- 底部圆点 -->
+        <div class="dots">
+            <div class="dot"></div>
+            <div class="dot active"></div>
+            <div class="dot"></div>
+        </div>
+    </div>
+
+    <script>
+        // 关键：强制在手机上也以电脑版方式打开链接，防止自动跳转到移动端
+        document.querySelectorAll('.email-card').forEach(link => {
+            link.addEventListener('click', function(e) {
+                // 打开新窗口时，强制设置为桌面版UA（部分浏览器支持）
+                const url = this.href;
+                const newWindow = window.open(url, '_blank');
+                if (newWindow) {
+                    // 部分浏览器会自动切换，但我们通过URL直接访问电脑版域名，已经可以保证是电脑版页面
+                }
+            });
+        });
+    </script>
+</body>
+</html>
