@@ -1,27 +1,182 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>浏览器</title>
+<title>浏览器入口</title>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#e0f7fa;padding:30px 15px}
-.title{text-align:center;font-size:26px;margin-bottom:25px}
-.back{background:#00acc1;color:#fff;border:none;border-radius:8px;padding:10px 20px;margin-bottom:20px;cursor:pointer}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.item{background:#fff;border-radius:12px;padding:25px 10px;text-align:center;box-shadow:0 2px 8px #00000013;cursor:pointer}
+body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+    background:#000;
+    color:#fff;
+}
+
+/* 顶部栏 */
+.top{
+    padding:10px;
+    display:flex;
+    gap:8px;
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(10px);
+    flex-wrap:wrap;
+}
+
+input{
+    flex:1;
+    min-width:120px;
+    padding:10px;
+    border-radius:12px;
+    border:none;
+    outline:none;
+}
+
+/* 统一按钮 黑底协调高级灰蓝色 */
+button,.card{
+    padding:8px 12px;
+    border:none;
+    border-radius:10px;
+    background:#2b3445;
+    color:#e5e7eb;
+    font-size:13px;
+    text-align:center;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.card:active{
+    transform:scale(0.95);
+    background:#374151;
+}
+
+/* 6个按钮同行一排 */
+.grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    padding:12px;
+}
+
+/* 浏览区域 */
+.viewer{
+    height:calc(100vh - 260px);
+    overflow:hidden;
+    border-radius:16px 16px 0 0;
+    background:#111;
+    margin:0 10px;
+}
+
+.wrap{
+    width:100%;
+    height:100%;
+    transform-origin:0 0;
+}
+
+iframe{
+    width:100%;
+    height:100%;
+    border:none;
+    background:#fff;
+}
 </style>
 </head>
+
 <body>
-<button class="back" onclick="location.href='index.html'">← 返回主页</button>
-<div class="title">🌐 内置浏览器</div>
-<div class="grid">
-  <div class="item" onclick="alert('百度搜索')">百度搜索</div>
-  <div class="item" onclick="alert('抖音网页')">抖音网页</div>
-  <div class="item" onclick="alert('快手网页')">快手网页</div>
-  <div class="item" onclick="alert('新闻资讯')">新闻资讯</div>
-  <div class="item" onclick="alert('无痕模式')">无痕模式</div>
+
+<div class="top">
+<input id="url" placeholder="输入网址">
+<button onclick="go()">打开</button>
+<button onclick="toggleZoom()">缩放</button>
 </div>
+
+<div class="grid">
+<div class="card" onclick="openSite('https://www.google.com')">Google</div>
+<div class="card" onclick="openSite('https://www.sina.com.cn')">新浪</div>
+<div class="card" onclick="openSite('https://www.163.com')">网易</div>
+<div class="card" onclick="openSite('https://www.baidu.com')">百度</div>
+<div class="card" onclick="openSite('https://github.com')">GitHub</div>
+</div>
+
+<div class="viewer" id="viewer">
+    <div class="wrap" id="wrap">
+        <iframe id="frame"></iframe>
+    </div>
+</div>
+
+<script>
+let scale = 1;
+let zoomOn = false;
+
+// 打开网址
+function go(){
+    let input = document.getElementById("url").value.trim();
+    if(!input.startsWith("http")){
+        input = "https://" + input;
+    }
+    document.getElementById("frame").src = input;
+}
+
+// 快捷站点
+function openSite(url){
+    document.getElementById("frame").src = url;
+    document.getElementById("url").value = url;
+}
+
+function toggleZoom(){
+    zoomOn = !zoomOn;
+    if(!zoomOn){
+        scale = 1;
+        apply();
+    }else{
+        alert("已开启缩放（支持双指）");
+    }
+}
+
+function apply(){
+    document.getElementById("wrap").style.transform = "scale(" + scale + ")";
+}
+
+/* 手势缩放 */
+let startDist = 0;
+function getDistance(t){
+    let dx = t[0].clientX - t[1].clientX;
+    let dy = t[0].clientY - t[1].clientY;
+    return Math.sqrt(dx*dx + dy*dy);
+}
+
+const viewer = document.getElementById("viewer");
+viewer.addEventListener("touchstart", e=>{
+    if(!zoomOn) return;
+    if(e.touches.length === 2){
+        startDist = getDistance(e.touches);
+    }
+});
+
+viewer.addEventListener("touchmove", e=>{
+    if(!zoomOn) return;
+    if(e.touches.length === 2){
+        let newDist = getDistance(e.touches);
+        let diff = newDist - startDist;
+        scale += diff * 0.005;
+        if(scale < 0.3) scale = 0.3;
+        if(scale > 3) scale = 3;
+        startDist = newDist;
+        apply();
+    }
+});
+
+/* 双击恢复 */
+let lastTap = 0;
+viewer.addEventListener("touchend", ()=>{
+    let now = Date.now();
+    if(now - lastTap < 300){
+        scale = 1;
+        apply();
+    }
+    lastTap = now;
+});
+</script>
+
 </body>
 </html>
