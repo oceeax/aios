@@ -8,7 +8,23 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
 html,body{height:100%;background:#121212;color:#fff;display:flex;flex-direction:column}
-.top{height:70px;background:#222;display:flex;align-items:center;gap:8px;padding:0 10px}
+/* 【新增】顶部固定 */
+.top{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height:70px;
+  background:#222;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:0 10px;
+  z-index: 10;
+}
+/* 【新增】body padding 避免内容被顶部和底部遮挡 */
+body{padding-top:70px;padding-bottom:70px}
+
 .btn{padding:12px 14px;border:0;border-radius:8px;color:#fff;font-weight:bold;font-size:14px}
 #open{background:#2ECC71}
 #clear{background:#E74C3C}
@@ -28,6 +44,7 @@ select{padding:12px;border-radius:8px;background:#333;color:#fff;border:0;font-s
   user-select:none;
 }
 .editor{
+  overflow:hidden;
   flex:1;
   background:#1e1e1e;
   color:#ddd;
@@ -44,10 +61,24 @@ select{padding:12px;border-radius:8px;background:#333;color:#fff;border:0;font-s
 .bar{height:100%;width:0%;background:#00e676;transition:width 0.3s}
 .status{text-align:center;color:#aaa;font-size:13px;margin:0 15px 5px}
 
-.bottom{height:70px;background:#222;display:flex;align-items:center;gap:8px;padding:0 10px}
+/* 【新增】底部固定 */
+.bottom{
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height:70px;
+  background:#222;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:0 10px;
+  z-index: 10;
+}
+
 input{padding:12px;border-radius:8px;background:#333;color:#fff;border:0;flex:1}
 #save{background:#3498DB}
-#output{background:#000;color:#0f0;padding:12px;max-height:140px;overflow:auto;font-size:13px}
+#output{background:#000;color:#0f0;padding:12px;max-height:140px;overflow:hidden;font-size:13px}
 </style>
 </head>
 
@@ -113,7 +144,13 @@ function updateLines(){
   let html='';
   for(let i=1;i<=count;i++) html+=i+'<br>';
   lines.innerHTML=html;
+
+  // 【新增】光标自动定位到末尾 + 滚动到最下面
+  const len=code.value.length;
+  code.setSelectionRange(len, len);
+  code.scrollTop = code.scrollHeight;
 }
+
 code.addEventListener('input',updateLines);
 code.addEventListener('scroll',()=>lines.scrollTop=code.scrollTop);
 updateLines();
@@ -144,7 +181,7 @@ document.getElementById('open').onclick=()=>{
     const r=new FileReader();
     r.onload=()=>{
       code.value=r.result;
-      updateLines();
+      updateLines();  // updateLines 内部会自动把光标放到最后、滚到底
       setProgress(100,'文件加载成功');
     };
     r.readAsText(f);
@@ -180,10 +217,8 @@ function getFakeError(lang){
 
 // 运行
 document.getElementById('run').onclick=async()=>{
-
   out.textContent='';
   const c=code.value.trim();
-
   if(!c){
     setProgress(100,'❌ 代码为空','#ff4444');
     return;
@@ -212,15 +247,13 @@ document.getElementById('run').onclick=async()=>{
 
   try{
     switch(lang.value){
-
       case 'js':
         const old=console.log;
-        console.log=(...a)=>out.textContent+=a.join(' ')+'\\n';
+        console.log=(...a)=>out.textContent+=a.join(' ')+'\n';
         eval(c);
         console.log=old;
         setProgress(100,'✅ JS成功');
         break;
-
       case 'py':
         const py=self.pyodide||await loadPyodide();
         self.pyodide=py;
@@ -231,13 +264,12 @@ sys.stdout.write=lambda s: document.getElementById('output').textContent+=s
         await py.runPythonAsync(c);
         setProgress(100,'✅ Python成功');
         break;
-
       case 'lua':
         const {lua,load}=fengari;
         const L=lua.luaL_newstate();
         lua.luaL_openlibs(L);
         lua.lua_pushcfunction(L,(L)=>{
-          out.textContent+=lua.lua_tostring(L,1)+'\\n';
+          out.textContent+=lua.lua_tostring(L,1)+'\n';
           return 0;
         });
         lua.lua_setglobal(L,"print");
@@ -245,23 +277,16 @@ sys.stdout.write=lambda s: document.getElementById('output').textContent+=s
         lua.lua_pcall(L,0,0,0);
         setProgress(100,'✅ Lua成功');
         break;
-
       default:
         if(Math.random()<0.35) throw new Error(getFakeError(lang.value));
         setProgress(100,'⚠️ 模拟运行成功','#ff9800');
-        out.textContent='模拟输出:\\n'+c;
+        out.textContent='模拟输出:\n'+c;
     }
-
   }catch(e){
     setProgress(100,'❌ '+e.message,'#ff4444');
-    out.textContent=`错误:
-${e.message}
-
-可能原因:
-语法错误 / 环境缺失 / 浏览器限制`;
+    out.textContent=`错误:\n${e.message}\n\n可能原因:\n语法错误 / 环境缺失 / 浏览器限制`;
   }
 };
 </script>
-
 </body>
 </html>
