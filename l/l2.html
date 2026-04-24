@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>性能测试</title>
+
+<style>
+body{text-align:center;font-family:system-ui;background:#f3f3f3;}
+button{padding:10px 20px;margin:10px;border-radius:10px;}
+</style>
+</head>
+
+<body>
+
+<h2>性能测试</h2>
+
+<button onclick="cpu()">CPU测试</button>
+<button onclick="dom()">DOM测试</button>
+<button onclick="memory()">内存测试</button>
+
+<p id="res"></p>
+
+<script>
+function show(t){document.getElementById("res").innerText=t}
+
+function cpu(){
+    let s=performance.now();
+    let sum=0;
+    for(let i=0;i<1e7;i++){sum+=i}
+    show("CPU耗时："+(performance.now()-s).toFixed(2)+"ms")
+}
+
+function dom(){
+    let s=performance.now();
+    for(let i=0;i<2000;i++){
+        let d=document.createElement("div");
+        document.body.appendChild(d);
+    }
+    show("DOM耗时："+(performance.now()-s).toFixed(2)+"ms")
+}
+
+function memory(){
+    let arr=[];
+    let s=performance.now();
+    for(let i=0;i<1e5;i++){arr.push(i)}
+    show("内存耗时："+(performance.now()-s).toFixed(2)+"ms")
+}
+</script>
+
+</body>
+</html>

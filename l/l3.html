@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图像测试</title>
+
+<style>
+body{text-align:center;font-family:system-ui;background:#f3f3f3;}
+canvas{border:1px solid #aaa;margin-top:20px;}
+button{margin:5px;padding:10px;border-radius:10px;}
+</style>
+</head>
+
+<body>
+
+<h2>图像测试</h2>
+
+<button onclick="noise()">噪点</button>
+<button onclick="circle()">圆形</button>
+<button onclick="gradient()">渐变</button>
+
+<canvas id="c" width="300" height="300"></canvas>
+
+<script>
+let ctx=document.getElementById("c").getContext("2d");
+
+function noise(){
+    for(let i=0;i<2000;i++){
+        ctx.fillStyle=`rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`;
+        ctx.fillRect(Math.random()*300,Math.random()*300,3,3);
+    }
+}
+
+function circle(){
+    ctx.clearRect(0,0,300,300);
+    ctx.beginPath();
+    ctx.arc(150,150,100,0,Math.PI*2);
+    ctx.fillStyle="skyblue";
+    ctx.fill();
+}
+
+function gradient(){
+    let g=ctx.createLinearGradient(0,0,300,300);
+    g.addColorStop(0,"red");
+    g.addColorStop(1,"blue");
+    ctx.fillStyle=g;
+    ctx.fillRect(0,0,300,300);
+}
+</script>
+
+</body>
+</html>

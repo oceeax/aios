@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{text-align:center;font-family:system-ui;background:#f3f3f3;}
+textarea{width:85%;height:120px;border-radius:10px;margin-top:20px;}
+button{padding:10px 20px;margin-top:10px;border-radius:10px;}
+</style>
+</head>
+
+<body>
+
+<button onclick="back()">←返回</button>
+
+<h2>意见反馈（真实提交）</h2>
+
+<textarea id="t" placeholder="输入你的意见..."></textarea>
+<br>
+<button onclick="send()">提交</button>
+
+<p id="msg"></p>
+
+<script>
+function back(){location.href="../index.html"}
+
+async function send(){
+    let v=document.getElementById("t").value;
+    if(!v){alert("不能为空");return}
+
+    try{
+        let res = await fetch("https://xxx.com/api/feedback",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                content:v,
+                time:Date.now(),
+                ua:navigator.userAgent
+            })
+        });
+
+        let data = await res.json();
+
+        document.getElementById("msg").innerText="提交成功";
+    }catch(e){
+        document.getElementById("msg").innerText="提交失败（接口没开）";
+    }
+}
+</script>
+
+</body>
+</html>
