@@ -19,7 +19,7 @@ button{padding:10px 20px;border-radius:10px;background:#444;color:#fff;border:no
 <h3>意见反馈</h3>
 
 <input id="name" placeholder="昵称">
-<input id="code" placeholder="提取码（必填）">
+<input id="code" placeholder="提取码（可选）">
 <input id="email" placeholder="邮箱（可选）">
 <textarea id="msg" placeholder="输入内容"></textarea>
 
@@ -39,14 +39,14 @@ function saveLocal(data){
 async function send(){
     let data={
         name:name.value,
-        code:code.value,
+        msg:msg.value,
         email:email.value,
         msg:msg.value,
         time:Date.now()
     };
 
     if(!data.name || !data.code || !data.msg){
-        alert("必填没填");
+        alert("填的真好估计就是牛逼🤛");
         return;
     }
 
@@ -60,7 +60,7 @@ async function send(){
         });
         res.innerText="提交成功";
     }catch{
-        res.innerText="已本地保存（服务器未连接）";
+        res.innerText="已本地保存（服务器未连接）Struts";
     }
 }
 </script>
