@@ -2,25 +2,300 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>设置</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>定位天气 | 唤起高德百度APP</title>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-        body{background:#f8f9fa;padding:30px}
-        .back{position:absolute;left:15px;top:15px}
-        button{background:#007bff;color:white;border:none;padding:10px 15px;border-radius:8px;cursor:pointer}
-        .title{text-align:center;font-size:28px;margin:20px 0}
-        .item{padding:15px;background:#fff;border-radius:10px;margin:10px 0;display:flex;justify-content:space-between;align-items:center}
-        .item input{margin-left:10px}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        body {
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        .wrap {
+            max-width: 520px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        h2 {
+            text-align: center;
+            color: #222;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            margin: 8px 0 15px;
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .btn-loc { background: #1677ff; }
+        .btn-copy { background: #722ed1; }
+        .btn-search { background: #00b96b; width: 100%; }
+        .btn-gaode { background: #ff7d00; }
+        .btn-baidu { background: #2982ff; }
+        .result {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 10px;
+            line-height: 2;
+            color: #333;
+            margin-top: 15px;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
-    <div class="back"><button onclick="location.href='/aios/'">← 返回主页</button></div>
-    <div class="title">⚙️ 设置</div>
+    <div class="wrap">
+        <h2>定位坐标 · 实时天气 · 唤起地图APP</h2>
 
-    <div class="item">夜间模式 <input type="checkbox"></div>
-    <div class="item">通知 <input type="checkbox" checked></div>
-    <div class="item">清理缓存 <button onclick="alert('已清理')">清理</button></div>
-    <div class="item">关于我们 <button onclick="alert('全能工具箱 v1.0')">查看</button></div>
+        <div class="btn-row">
+            <button class="btn-loc" onclick="getGps()">📍 获取当前定位</button>
+            <button class="btn-copy" onclick="copyCoord()">📋 复制坐标</button>
+        </div>
+
+        <input type="text" id="cityInput" placeholder="输入：北京 / 成都 / 纬度,经度">
+        <button class="btn-search" onclick="searchInfo()">🔍 查询坐标+天气</button>
+
+        <input type="text" id="keyInput" placeholder="密钥（查询失败时填写后重试）">
+
+        <div class="btn-row" style="margin-top:15px">
+            <button class="btn-gaode" onclick="openGaodeApp()">🗺️ 打开高德APP</button>
+            <button class="btn-baidu" onclick="openBaiduApp()">🗺️ 打开百度APP</button>
+        </div>
+
+        <div class="result" id="resBox">等待操作...</div>
+    </div>
+
+    <script>
+        var lat = "";
+        var lon = "";
+
+        /* JSONP（中国天气网搜索用，绕过跨域） */
+        function jsonp(url, cbName) {
+            return new Promise(function(resolve, reject) {
+                var s = document.createElement("script");
+                var t = setTimeout(function() { clean(); reject(); }, 6000);
+                function clean() {
+                    clearTimeout(t);
+                    delete window[cbName];
+                    if (s.parentNode) s.parentNode.removeChild(s);
+                }
+                window[cbName] = function(d) { clean(); resolve(d); };
+                s.src = url;
+                s.onerror = function() { clean(); reject(); };
+                document.head.appendChild(s);
+            });
+        }
+
+        /* 1. 获取GPS定位 */
+        function getGps() {
+            var res = document.getElementById("resBox");
+            res.innerText = "正在定位，请授权...";
+            if (!navigator.geolocation) {
+                res.innerText = "❌ 浏览器不支持定位";
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(async function(pos) {
+                lat = pos.coords.latitude.toFixed(6);
+                lon = pos.coords.longitude.toFixed(6);
+                var addr = await geoDecode(lon, lat);
+                var weather = await getTrueWeather(addr.city);
+                res.innerHTML =
+                    "✅ 定位成功\n" +
+                    "纬度：" + lat + "\n" +
+                    "经度：" + lon + "\n" +
+                    "所在地：" + addr.province + " " + addr.city + "\n" +
+                    "——————————\n" +
+                    weather;
+            }, function() {
+                res.innerText = "❌ 定位失败，请开启定位权限";
+            });
+        }
+
+        /* 2. 经纬度转省市（原接口，有密钥则带上） */
+        async function geoDecode(lng, la) {
+            try {
+                var key = document.getElementById("keyInput").value.trim();
+                var url = "https://geo.heatapi.com/v1/regeo?lat=" + la + "&lon=" + lng;
+                if (key) url += "&key=" + key;
+                var res = await fetch(url);
+                var d = await res.json();
+                return { province: d.data.province, city: d.data.city };
+            } catch(e) {
+                return { province: "未知省份", city: "未知城市" };
+            }
+        }
+
+        /* 3. 天气：中国天气网 → wttr.in → 提示输入密钥 */
+        async function getTrueWeather(city) {
+            /* 方案1：中国天气网（JSONP搜编码 + fetch取数据） */
+            try {
+                var cb = "cw_" + Date.now();
+                var sUrl = "http://toy1.weather.com.cn/search?cityname=" + encodeURIComponent(city) + "&callback=" + cb;
+                var sData = await jsonp(sUrl, cb);
+                if (sData && sData.length > 0) {
+                    var parts = sData[0].split("|");
+                    var code = parts[1];
+                    if (code && code.length === 9) {
+                        var wUrl = "http://www.weather.com.cn/data/cityinfo/" + code + ".html";
+                        var wRes = await fetch(wUrl);
+                        var wJson = await wRes.json();
+                        if (wJson && wJson.weatherinfo) {
+                            var w = wJson.weatherinfo;
+                            return "实时天气（中国天气网）：\n" +
+                                "城市：" + w.city + "\n" +
+                                "天气：" + w.weather + "\n" +
+                                "温度：" + w.temp1 + " ~ " + w.temp2 + "\n" +
+                                "发布时间：" + w.ptime;
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            /* 方案2：wttr.in */
+            try {
+                var url = "https://wttr.in/" + encodeURIComponent(city) + "?format=3&m";
+                var res = await fetch(url);
+                var text = await res.text();
+                if (text && text.trim()) return "实时天气：" + text.trim();
+            } catch(e) {}
+
+            return "天气查询失败，请输入密钥";
+        }
+
+        /* 4. 城市/坐标查询 */
+        async function searchInfo() {
+            var val = document.getElementById("cityInput").value.trim();
+            var res = document.getElementById("resBox");
+            if (!val) {
+                alert("请输入城市名称或坐标");
+                return;
+            }
+
+            /* 输入坐标（兼容中英文逗号） */
+            if (val.indexOf(",") > -1 || val.indexOf("，") > -1) {
+                var arr = val.split(/[,，]/);
+                lat = arr[0].trim();
+                lon = arr[1].trim();
+                var addr = await geoDecode(lon, lat);
+                var weather = await getTrueWeather(addr.city);
+                res.innerHTML =
+                    "✅ 坐标查询完成\n" +
+                    "坐标：" + lat + " , " + lon + "\n" +
+                    "地区：" + addr.province + " " + addr.city + "\n" +
+                    "——————————\n" +
+                    weather;
+                return;
+            }
+
+            /* 输入地名（不用加市/县） */
+            try {
+                var key = document.getElementById("keyInput").value.trim();
+                var cityUrl = "https://geo.heatapi.com/v1/geo?address=" + encodeURIComponent(val);
+                if (key) cityUrl += "&key=" + key;
+                var cityRes = await fetch(cityUrl);
+                var cityData = await cityRes.json();
+                lat = cityData.data.lat;
+                lon = cityData.data.lon;
+                var weather = await getTrueWeather(val);
+                res.innerHTML =
+                    "✅ 地区查询成功\n" +
+                    "地名：" + val + "\n" +
+                    "纬度：" + lat + "\n" +
+                    "经度：" + lon + "\n" +
+                    "——————————\n" +
+                    weather;
+            } catch(e) {
+                res.innerText = "查询失败，请输入密钥";
+            }
+        }
+
+        /* 5. 复制经纬度 */
+        function copyCoord() {
+            if (!lat) {
+                alert("暂无坐标可复制");
+                return;
+            }
+            var text = lat + "," + lon;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(
+                    function() { alert("✅ 坐标复制成功"); },
+                    function() { fbCopy(text); }
+                );
+            } else {
+                fbCopy(text);
+            }
+        }
+        function fbCopy(text) {
+            var ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.cssText = "position:fixed;left:-9999px";
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+            alert("✅ 坐标复制成功");
+        }
+
+        /* 6. 打开高德APP（有坐标带坐标，没有直接打开） */
+        function openGaodeApp() {
+            if (lat && lon) {
+                window.location.href = "https://uri.amap.com/marker?position=" + lon + "," + lat + "&name=我的位置&src=myapp&coordinate=gaode";
+            } else {
+                window.location.href = "https://uri.amap.com/";
+            }
+        }
+
+        /* 7. 打开百度APP：方案1失败自动换方案2 */
+        function openBaiduApp() {
+            /* 方案1：原生scheme */
+            var scheme = lat && lon
+                ? "baidumap://map/show?center=" + lat + "," + lon + "&coord_type=gcj02&src=myapp"
+                : "baidumap://";
+            /* 方案2：百度URI API，有APP唤起APP，没APP开网页版 */
+            var fallback = lat && lon
+                ? "http://api.map.baidu.com/uri?location=" + lat + "," + lon + "&coord_type=gcj02&name=我的位置&src=myapp"
+                : "http://map.baidu.com/";
+
+            var done = false;
+            function onBlurred() {
+                done = true;
+                clearTimeout(t);
+                window.removeEventListener("blur", onBlurred);
+            }
+            window.addEventListener("blur", onBlurred);
+
+            /* 1.5秒内APP没唤起成功，自动换方案2 */
+            var t = setTimeout(function() {
+                window.removeEventListener("blur", onBlurred);
+                if (!done) window.location.href = fallback;
+            }, 1500);
+
+            window.location.href = scheme;
+        }
+    </script>
 </body>
 </html>
