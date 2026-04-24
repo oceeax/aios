@@ -5,60 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>图片中心</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial; }
-        body { background: #f0f9ff; padding: 30px 15px; }
-        .header { display: flex; align-items: center; justify-content: center; margin-bottom: 25px; }
-        .back { position: absolute; left: 15px; top: 15px; }
-        button { background: #22c55e; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 16px; }
-        .title { font-size: 28px; font-weight: bold; }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 600px; margin: 0 auto; }
-        .item { background: #ffffff; border-radius: 16px; padding: 25px 10px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); font-size: 18px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100px; }
-        .item:active { transform: scale(0.98); }
-        /* 隐藏原生文件上传框 */
-        input[type="file"] { display: none; }
+        *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif;}
+        body{background:#f5f7fa;padding:20px;}
+        h1{text-align:center;margin:30px 0;font-size:28px;}
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:600px;margin:0 auto;}
+        .box{background:#fff;border-radius:16px;padding:35px 15px;text-align:center;text-decoration:none;color:#222;font-size:18px;box-shadow:0 2px 8px #00000012;}
     </style>
 </head>
 <body>
-    <div class="back">
-        <button onclick="location.href='/aios/'">← 返回主页</button>
-    </div>
-    <div class="header">
-        <span class="title">🖼️ 图片中心</span>
-    </div>
+    <h1>图片中心</h1>
     <div class="grid">
-        <!-- 1. 手机相册 - 真实调用功能 -->
-        <div class="item" onclick="document.getElementById('fileInput').click();">
-            <label for="fileInput">手机相册</label>
-            <input id="fileInput" type="file" accept="image/*" capture="filesystem">
-        </div>
-
-        <!-- 2. 壁纸大全 - 跳转功能 -->
-        <div class="item" onclick="alert('即将进入壁纸大全')">壁纸大全</div>
-
-        <!-- 3. 头像库 - 跳转功能 -->
-        <div class="item" onclick="alert('即将进入头像库')">头像库</div>
-
-        <!-- 4. 表情包 - 跳转功能 -->
-        <div class="item" onclick="alert('即将进入表情包')">表情包</div>
-
-        <!-- 5. 风景图 - 跳转功能 -->
-        <div class="item" onclick="alert('即将进入风景图')">风景图</div>
+        <a href="b/b1.html" class="box">本地相册</a>
+        <a href="b/b2.html" class="box">壁纸大全</a>
+        <a href="b/b3.html" class="box">头像库</a>
+        <a href="b/b4.html" class="box">表情包</a>
+        <a href="b/b5.html" class="box">风景图库</a>
     </div>
-
-    <script>
-        // 可选：实现图片预览功能
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    // 这里可以添加图片预览逻辑，比如弹出层显示
-                    alert("图片选择成功！\n文件名：" + file.name);
-                    // 示例：document.body.style.backgroundImage = `url(${event.target.result})`;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    </script>
 </body>
 </html>
