@@ -1,0 +1,6 @@
+<resources>
+    <!-- 这里改成你想给APP起的名字，比如 CartApp -->
+    <string name="app_name">CartApp</string>
+    <!-- 这里改成你的 GitHub Pages 网页地址 -->
+    <string name="url">https://oceeax.github.io/aios/index.html</string>
+</resources>
