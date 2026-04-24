@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高级图片叠加编辑器</title>
+
+<style>
+body{
+    margin:0;
+    background:#121212;
+    color:#fff;
+    text-align:center;
+    font-family:sans-serif;
+}
+
+button{
+    margin:5px;
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    background:#333;
+    color:#fff;
+}
+
+.active{
+    background:#00aaff;
+}
+
+/* 编辑框 */
+.viewer{
+    width:320px;
+    height:420px;
+    position:absolute;
+    left:50%;
+    top:55%;
+    transform:translate(-50%,-50%);
+    border:2px solid #555;
+    border-radius:15px;
+    overflow:hidden;
+    background:#000;
+}
+
+/* resize */
+.resize{
+    width:20px;
+    height:20px;
+    background:#fff;
+    position:absolute;
+    right:0;
+    bottom:0;
+}
+
+/* canvas */
+canvas{
+    position:absolute;
+    left:0;
+    top:0;
+    background:#fff;
+    touch-action:none;
+}
+</style>
+</head>
+
+<body>
+
+<h3>图片叠加编辑器</h3>
+
+<!-- 模式按钮 -->
+<button onclick="setMode('viewer')" id="btnViewer">拖网页</button>
+<button onclick="setMode('canvas')" id="btnCanvas">拖编辑区</button>
+<button onclick="setMode('image')" id="btnImage" class="active">拖图片</button>
+
+<br>
+
+<button onclick="selectBase()">底图</button>
+<button onclick="addImage()">添加</button>
+<button onclick="deleteOne()">删除</button>
+<button onclick="clearAll()">清空</button>
+<button onclick="download()">下载JPG</button>
+
+<div class="viewer" id="viewer">
+    <canvas id="canvas"></canvas>
+    <div class="resize" id="resize"></div>
+</div>
+
+<input type="file" id="baseInput" hidden>
+<input type="file" id="addInput" hidden multiple>
+
+<script>
+let mode="image";
+
+function setMode(m){
+    mode=m;
+    document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+    if(m==="viewer") btnViewer.classList.add("active");
+    if(m==="canvas") btnCanvas.classList.add("active");
+    if(m==="image") btnImage.classList.add("active");
+}
+
+/* 画布 */
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+let baseImage=null;
+let images=[];
+let selected=null;
+
+let canvasOffsetX=0;
+let canvasOffsetY=0;
+
+/* 图片 */
+baseInput.onchange=e=>{
+    let img=new Image();
+    img.onload=()=>{
+        canvas.width=img.width;
+        canvas.height=img.height;
+        baseImage=img;
+        images=[];
+        draw();
+    }
+    img.src=URL.createObjectURL(e.target.files[0]);
+}
+
+addInput.onchange=e=>{
+    [...e.target.files].forEach(file=>{
+        let img=new Image();
+        img.onload=()=>{
+            let scale=0.8-images.length*0.01;
+            if(scale<0.2) scale=0.2;
+
+            images.push({
+                img,
+                x:canvas.width/2,
+                y:canvas.height/2,
+                scale,
+                rotation:0
+            });
+
+            selected=images[images.length-1];
+            draw();
+        }
+        img.src=URL.createObjectURL(file);
+    });
+}
+
+function selectBase(){baseInput.click();}
+function addImage(){addInput.click();}
+
+/* 删除 */
+function deleteOne(){
+    if(!selected)return;
+    images=images.filter(i=>i!==selected);
+    selected=images[images.length-1];
+    draw();
+}
+function clearAll(){
+    images=[];
+    selected=null;
+    draw();
+}
+
+/* 绘制 */
+function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(baseImage) ctx.drawImage(baseImage,0,0);
+
+    images.forEach(obj=>{
+        ctx.save();
+        ctx.translate(obj.x,obj.y);
+        ctx.rotate(obj.rotation);
+        ctx.scale(obj.scale,obj.scale);
+
+        ctx.drawImage(obj.img,-obj.img.width/2,-obj.img.height/2);
+
+        if(obj===selected){
+            ctx.strokeStyle="red";
+            ctx.strokeRect(-obj.img.width/2,-obj.img.height/2,obj.img.width,obj.img.height);
+        }
+
+        ctx.restore();
+    });
+}
+
+/* 触控 */
+let lastX,lastY,dragging=false;
+
+canvas.addEventListener("touchstart",e=>{
+    let t=e.touches[0];
+    lastX=t.clientX;
+    lastY=t.clientY;
+    dragging=true;
+    selected=images[images.length-1];
+});
+
+canvas.addEventListener("touchmove",e=>{
+    if(!dragging)return;
+
+    let t=e.touches[0];
+    let dx=t.clientX-lastX;
+    let dy=t.clientY-lastY;
+
+    if(mode==="image" && selected){
+        selected.x+=dx;
+        selected.y+=dy;
+    }
+
+    if(mode==="canvas"){
+        canvasOffsetX+=dx;
+        canvasOffsetY+=dy;
+        canvas.style.left=canvasOffsetX+"px";
+        canvas.style.top=canvasOffsetY+"px";
+    }
+
+    lastX=t.clientX;
+    lastY=t.clientY;
+
+    draw();
+});
+
+canvas.addEventListener("touchend",()=>dragging=false);
+
+/* viewer拖动 */
+const viewer=document.getElementById("viewer");
+let vdrag=false,ox,oy;
+
+viewer.addEventListener("touchstart",e=>{
+    if(mode!=="viewer")return;
+    let t=e.touches[0];
+    vdrag=true;
+    ox=t.clientX-viewer.offsetLeft;
+    oy=t.clientY-viewer.offsetTop;
+});
+
+document.addEventListener("touchmove",e=>{
+    if(!vdrag)return;
+    let t=e.touches[0];
+    viewer.style.left=(t.clientX-ox)+"px";
+    viewer.style.top=(t.clientY-oy)+"px";
+});
+
+document.addEventListener("touchend",()=>vdrag=false);
+
+/* resize */
+resize.ontouchstart=e=>{
+    let t=e.touches[0];
+    let w=viewer.offsetWidth;
+    let h=viewer.offsetHeight;
+    let sx=t.clientX;
+    let sy=t.clientY;
+
+    document.ontouchmove=ev=>{
+        let tt=ev.touches[0];
+        viewer.style.width=(w+(tt.clientX-sx))+"px";
+        viewer.style.height=(h+(tt.clientY-sy))+"px";
+    }
+
+    document.ontouchend=()=>document.ontouchmove=null;
+}
+
+/* 下载 JPG（≤20MB） */
+function download(){
+    let quality=0.95;
+
+    function tryExport(){
+        let data=canvas.toDataURL("image/jpeg",quality);
+        let size=data.length*0.75/1024/1024;
+
+        if(size>20 && quality>0.3){
+            quality-=0.05;
+            tryExport();
+        }else{
+            let a=document.createElement("a");
+            a.href=data;
+            a.download="高清图.jpg";
+            a.click();
+        }
+    }
+
+    tryExport();
+}
+</script>
+
+</body>
+</html>
