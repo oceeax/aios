@@ -3,14 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>二维码中心</title>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
-body{text-align:center;font-family:system-ui;background:#f3f3f3;}
-.top{padding:15px;}
-input{width:80%;padding:10px;margin:8px;border-radius:10px;}
-button{padding:10px 20px;border-radius:10px;}
+body{margin:0;font-family:system-ui;background:#f3f3f3;text-align:center;}
+.top{padding:15px;background:#333;color:#fff;}
+.box{padding:20px;}
+input{width:85%;padding:10px;margin:6px;border-radius:10px;border:1px solid #ccc;}
+button{padding:10px 18px;margin:5px;border-radius:10px;border:none;background:#444;color:#fff;}
+#reader{width:300px;margin:20px auto;}
+canvas{margin-top:15px;}
 </style>
 </head>
 
@@ -18,16 +23,28 @@ button{padding:10px 20px;border-radius:10px;}
 
 <div class="top">
 <button onclick="back()">←返回</button>
-<h2>二维码生成（4种）</h2>
+<h3>二维码中心（生成+扫码）</h3>
+</div>
+
+<div class="box">
 
 <input id="text" placeholder="文本">
 <input id="url" placeholder="网址">
 <input id="wifi" placeholder="WiFi格式">
 <input id="emoji" placeholder="表情 😎🔥❤️">
 
-<button onclick="gen()">生成</button>
+<button onclick="gen()">生成二维码</button>
 
 <div id="q"></div>
+
+<hr>
+
+<h3>扫码（调用相机）</h3>
+<div id="reader"></div>
+<p id="scanResult"></p>
+
+<button onclick="startScan()">开始扫码</button>
+
 </div>
 
 <script>
@@ -35,18 +52,33 @@ function back(){location.href="../index.html"}
 
 function gen(){
     let val =
-        document.getElementById("text").value ||
-        document.getElementById("url").value ||
-        document.getElementById("wifi").value ||
-        document.getElementById("emoji").value;
+    document.getElementById("text").value ||
+    document.getElementById("url").value ||
+    document.getElementById("wifi").value ||
+    document.getElementById("emoji").value;
 
     document.getElementById("q").innerHTML="";
-
-    QRCode.toCanvas(val,{width:200},(e,c)=>{
+    QRCode.toCanvas(val,{width:220},(e,c)=>{
         document.getElementById("q").appendChild(c);
     });
+}
+
+// 扫码
+let scanner;
+
+function startScan(){
+    scanner = new Html5Qrcode("reader");
+
+    scanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        (decodedText)=>{
+            document.getElementById("scanResult").innerText="结果："+decodedText;
+            scanner.stop();
+        }
+    );
 }
 </script>
 
 </body>
-</html>
+    </html>
