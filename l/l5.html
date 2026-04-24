@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>反馈</title>
 
 <style>
 body{text-align:center;font-family:system-ui;background:#f3f3f3;}
-textarea{width:85%;height:120px;border-radius:10px;margin-top:20px;}
-button{padding:10px 20px;margin-top:10px;border-radius:10px;}
+input,textarea{width:85%;padding:10px;margin:6px;border-radius:10px;border:1px solid #ccc;}
+button{padding:10px 20px;border-radius:10px;background:#444;color:#fff;border:none;}
 </style>
 </head>
 
@@ -15,39 +16,51 @@ button{padding:10px 20px;margin-top:10px;border-radius:10px;}
 
 <button onclick="back()">←返回</button>
 
-<h2>意见反馈（真实提交）</h2>
+<h3>意见反馈</h3>
 
-<textarea id="t" placeholder="输入你的意见..."></textarea>
-<br>
+<input id="name" placeholder="昵称">
+<input id="code" placeholder="提取码（必填）">
+<input id="email" placeholder="邮箱（可选）">
+<textarea id="msg" placeholder="输入内容"></textarea>
+
 <button onclick="send()">提交</button>
 
-<p id="msg"></p>
+<p id="res"></p>
 
 <script>
 function back(){location.href="../index.html"}
 
+function saveLocal(data){
+    let arr=JSON.parse(localStorage.getItem("fb")||"[]");
+    arr.push(data);
+    localStorage.setItem("fb",JSON.stringify(arr));
+}
+
 async function send(){
-    let v=document.getElementById("t").value;
-    if(!v){alert("不能为空");return}
+    let data={
+        name:name.value,
+        code:code.value,
+        email:email.value,
+        msg:msg.value,
+        time:Date.now()
+    };
+
+    if(!data.name || !data.code || !data.msg){
+        alert("必填没填");
+        return;
+    }
+
+    saveLocal(data);
 
     try{
-        let res = await fetch("https://xxx.com/api/feedback",{
+        await fetch("https://xxx.com/api/feedback",{
             method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({
-                content:v,
-                time:Date.now(),
-                ua:navigator.userAgent
-            })
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(data)
         });
-
-        let data = await res.json();
-
-        document.getElementById("msg").innerText="提交成功";
-    }catch(e){
-        document.getElementById("msg").innerText="提交失败（接口没开）";
+        res.innerText="提交成功";
+    }catch{
+        res.innerText="已本地保存（服务器未连接）";
     }
 }
 </script>
