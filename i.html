@@ -135,7 +135,7 @@
             });
         }
 
-        /* 2. 经纬度转省市（原接口，有密钥则带上） */
+        /* 2. 经纬度转省市 */
         async function geoDecode(lng, la) {
             try {
                 var key = document.getElementById("keyInput").value.trim();
@@ -151,7 +151,6 @@
 
         /* 3. 天气：中国天气网 → wttr.in → 提示输入密钥 */
         async function getTrueWeather(city) {
-            /* 方案1：中国天气网（JSONP搜编码 + fetch取数据） */
             try {
                 var cb = "cw_" + Date.now();
                 var sUrl = "http://toy1.weather.com.cn/search?cityname=" + encodeURIComponent(city) + "&callback=" + cb;
@@ -174,15 +173,12 @@
                     }
                 }
             } catch(e) {}
-
-            /* 方案2：wttr.in */
             try {
                 var url = "https://wttr.in/" + encodeURIComponent(city) + "?format=3&m";
                 var res = await fetch(url);
                 var text = await res.text();
                 if (text && text.trim()) return "实时天气：" + text.trim();
             } catch(e) {}
-
             return "天气查询失败，请输入密钥";
         }
 
@@ -190,12 +186,7 @@
         async function searchInfo() {
             var val = document.getElementById("cityInput").value.trim();
             var res = document.getElementById("resBox");
-            if (!val) {
-                alert("请输入城市名称或坐标");
-                return;
-            }
-
-            /* 输入坐标（兼容中英文逗号） */
+            if (!val) { alert("请输入城市名称或坐标"); return; }
             if (val.indexOf(",") > -1 || val.indexOf("，") > -1) {
                 var arr = val.split(/[,，]/);
                 lat = arr[0].trim();
@@ -210,8 +201,6 @@
                     weather;
                 return;
             }
-
-            /* 输入地名（不用加市/县） */
             try {
                 var key = document.getElementById("keyInput").value.trim();
                 var cityUrl = "https://geo.heatapi.com/v1/geo?address=" + encodeURIComponent(val);
@@ -235,19 +224,14 @@
 
         /* 5. 复制经纬度 */
         function copyCoord() {
-            if (!lat) {
-                alert("暂无坐标可复制");
-                return;
-            }
+            if (!lat) { alert("暂无坐标可复制"); return; }
             var text = lat + "," + lon;
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(
                     function() { alert("✅ 坐标复制成功"); },
                     function() { fbCopy(text); }
                 );
-            } else {
-                fbCopy(text);
-            }
+            } else { fbCopy(text); }
         }
         function fbCopy(text) {
             var ta = document.createElement("textarea");
@@ -260,41 +244,14 @@
             alert("✅ 坐标复制成功");
         }
 
-        /* 6. 打开高德APP（有坐标带坐标，没有直接打开） */
+        /* 6. 打开高德APP */
         function openGaodeApp() {
-            if (lat && lon) {
-                window.location.href = "https://uri.amap.com/marker?position=" + lon + "," + lat + "&name=我的位置&src=myapp&coordinate=gaode";
-            } else {
-                window.location.href = "https://uri.amap.com/";
-            }
+            window.location.href = "iosamap://";
         }
 
-        /* 7. 打开百度APP：方案1失败自动换方案2 */
+        /* 7. 打开百度APP */
         function openBaiduApp() {
-            /* 方案1：原生scheme */
-            var scheme = lat && lon
-                ? "baidumap://map/show?center=" + lat + "," + lon + "&coord_type=gcj02&src=myapp"
-                : "baidumap://";
-            /* 方案2：百度URI API，有APP唤起APP，没APP开网页版 */
-            var fallback = lat && lon
-                ? "http://api.map.baidu.com/uri?location=" + lat + "," + lon + "&coord_type=gcj02&name=我的位置&src=myapp"
-                : "http://map.baidu.com/";
-
-            var done = false;
-            function onBlurred() {
-                done = true;
-                clearTimeout(t);
-                window.removeEventListener("blur", onBlurred);
-            }
-            window.addEventListener("blur", onBlurred);
-
-            /* 1.5秒内APP没唤起成功，自动换方案2 */
-            var t = setTimeout(function() {
-                window.removeEventListener("blur", onBlurred);
-                if (!done) window.location.href = fallback;
-            }, 1500);
-
-            window.location.href = scheme;
+            window.location.href = "baidumap://";
         }
     </script>
 </body>
