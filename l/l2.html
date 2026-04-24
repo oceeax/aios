@@ -6,29 +6,35 @@
 <title>性能测试</title>
 
 <style>
-body{text-align:center;font-family:system-ui;background:#f3f3f3;}
-button{padding:10px 20px;margin:10px;border-radius:10px;}
+body{margin:0;font-family:system-ui;background:#f3f3f3;text-align:center;}
+.top{background:#333;color:#fff;padding:15px;}
+button{padding:10px;margin:6px;border-radius:10px;background:#444;color:#fff;border:none;}
 </style>
 </head>
 
 <body>
 
-<h2>性能测试</h2>
+<div class="top">
+<button onclick="back()">←返回</button>
+<h3>性能测试中心</h3>
+</div>
 
-<button onclick="cpu()">CPU测试</button>
-<button onclick="dom()">DOM测试</button>
-<button onclick="memory()">内存测试</button>
+<button onclick="cpu()">CPU</button>
+<button onclick="dom()">DOM</button>
+<button onclick="memory()">内存</button>
+<button onclick="fps()">FPS</button>
+<button onclick="network()">网络延迟</button>
 
 <p id="res"></p>
 
 <script>
-function show(t){document.getElementById("res").innerText=t}
+function back(){location.href="../index.html"}
+function show(t){res.innerText=t}
 
 function cpu(){
     let s=performance.now();
-    let sum=0;
-    for(let i=0;i<1e7;i++){sum+=i}
-    show("CPU耗时："+(performance.now()-s).toFixed(2)+"ms")
+    for(let i=0;i<1e7;i++){}
+    show("CPU："+(performance.now()-s).toFixed(2)+"ms");
 }
 
 function dom(){
@@ -37,14 +43,39 @@ function dom(){
         let d=document.createElement("div");
         document.body.appendChild(d);
     }
-    show("DOM耗时："+(performance.now()-s).toFixed(2)+"ms")
+    show("DOM："+(performance.now()-s).toFixed(2)+"ms");
 }
 
 function memory(){
     let arr=[];
     let s=performance.now();
-    for(let i=0;i<1e5;i++){arr.push(i)}
-    show("内存耗时："+(performance.now()-s).toFixed(2)+"ms")
+    for(let i=0;i<1e5;i++){arr.push(i);}
+    show("内存："+(performance.now()-s).toFixed(2)+"ms");
+}
+
+function fps(){
+    let frames=0;
+    let start=performance.now();
+
+    function loop(){
+        frames++;
+        if(performance.now()-start<1000){
+            requestAnimationFrame(loop);
+        }else{
+            show("FPS："+frames);
+        }
+    }
+    loop();
+}
+
+async function network(){
+    let s=performance.now();
+    try{
+        await fetch("https://www.baidu.com",{mode:"no-cors"});
+        show("网络延迟："+(performance.now()-s).toFixed(2)+"ms");
+    }catch{
+        show("网络测试失败");
+    }
 }
 </script>
 
