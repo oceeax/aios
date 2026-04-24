@@ -3,94 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>本地相册</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, sans-serif;
-        }
-        body {
-            background-color: #f5f7fa;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background-color: #409eff;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        h1 {
-            text-align: center;
-            font-size: 36px;
-            margin: 40px 0;
-        }
-        .grid-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .grid-item {
-            background-color: white;
-            border-radius: 20px;
-            padding: 40px 20px;
-            text-align: center;
-            text-decoration: none;
-            color: #000;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            cursor: pointer;
-        }
-        /* 隐藏原生文件选择框 */
-        #fileInput {
-            display: none;
-        }
-    </style>
+    <title>调用相册</title>
 </head>
 <body>
-    <a href="../b.html" class="back-btn">← 返回首页</a>
+    <!-- 隐藏的文件选择控件，负责唤起系统相册 -->
+    <input type="file" id="albumInput" accept="image/*" multiple style="display: none;">
 
-    <h1>本地相册</h1>
-
-    <!-- 隐藏的文件选择框，用于唤起系统相册 -->
-    <input type="file" id="fileInput" accept="image/*" multiple>
-
-    <div class="grid-container">
-        <div class="grid-item" onclick="openAlbum()">全部图片</div>
-        <div class="grid-item" onclick="openAlbum()">相机照片</div>
-        <div class="grid-item" onclick="openAlbum()">截图相册</div>
-        <div class="grid-item" onclick="openAlbum()">保存图片</div>
-        <div class="grid-item" onclick="openAlbum()">收藏图集</div>
-    </div>
-
-    <script>
-        // 获取隐藏的文件选择框
-        const fileInput = document.getElementById('fileInput');
-
-        // 点击按钮时触发文件选择
-        function openAlbum() {
-            fileInput.click();
-        }
-
-        // 监听文件选择结果（这里可以扩展处理逻辑）
-        fileInput.addEventListener('change', function(e) {
-            const files = e.target.files;
-            if (files.length > 0) {
-                alert(`成功选择了 ${files.length} 张图片！`);
-                // 这里可以继续写上传、预览等逻辑
-            }
-        });
-    </script>
+    <!-- 点击这个按钮就能唤起相册 -->
+    <button onclick="document.getElementById('albumInput').click()">打开本机相册</button>
 </body>
 </html>
