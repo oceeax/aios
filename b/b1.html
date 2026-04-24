@@ -3,281 +3,269 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>高级图片叠加编辑器</title>
+<title>图片编辑器</title>
 
 <style>
-body{
-    margin:0;
-    background:#121212;
-    color:#fff;
-    text-align:center;
-    font-family:sans-serif;
-}
-
-button{
-    margin:5px;
-    padding:10px;
-    border:none;
-    border-radius:10px;
-    background:#333;
-    color:#fff;
-}
-
-.active{
-    background:#00aaff;
-}
-
-/* 编辑框 */
-.viewer{
-    width:320px;
-    height:420px;
-    position:absolute;
-    left:50%;
-    top:55%;
-    transform:translate(-50%,-50%);
-    border:2px solid #555;
-    border-radius:15px;
-    overflow:hidden;
-    background:#000;
-}
-
-/* resize */
-.resize{
-    width:20px;
-    height:20px;
-    background:#fff;
-    position:absolute;
-    right:0;
-    bottom:0;
-}
-
-/* canvas */
-canvas{
-    position:absolute;
-    left:0;
-    top:0;
-    background:#fff;
-    touch-action:none;
-}
+body{margin:0;background:#111;color:#fff;text-align:center;}
+button{margin:5px;padding:10px;border:none;border-radius:8px;background:#333;color:#fff;}
+.viewer{width:95%;height:70vh;margin:10px auto;border:2px solid #555;overflow:auto;background:#000;}
+canvas{background:#fff;display:block;}
+#info{color:#0f0;margin-top:5px;}
 </style>
 </head>
 
 <body>
 
-<h3>图片叠加编辑器</h3>
-
-<!-- 模式按钮 -->
-<button onclick="setMode('viewer')" id="btnViewer">拖网页</button>
-<button onclick="setMode('canvas')" id="btnCanvas">拖编辑区</button>
-<button onclick="setMode('image')" id="btnImage" class="active">拖图片</button>
-
-<br>
+<h3>稳定版（最终裁剪版）</h3>
 
 <button onclick="selectBase()">底图</button>
-<button onclick="addImage()">添加</button>
+<button onclick="addImage()">添加图片</button>
 <button onclick="deleteOne()">删除</button>
 <button onclick="clearAll()">清空</button>
-<button onclick="download()">下载JPG</button>
+<button onclick="download()">下载</button>
 
-<div class="viewer" id="viewer">
-    <canvas id="canvas"></canvas>
-    <div class="resize" id="resize"></div>
+<div id="info">坐标：0 , 0</div>
+
+<div class="viewer">
+<canvas id="canvas"></canvas>
 </div>
 
 <input type="file" id="baseInput" hidden>
 <input type="file" id="addInput" hidden multiple>
 
 <script>
-let mode="image";
+const W=5000;
+const H=6666;
 
-function setMode(m){
-    mode=m;
-    document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
-    if(m==="viewer") btnViewer.classList.add("active");
-    if(m==="canvas") btnCanvas.classList.add("active");
-    if(m==="image") btnImage.classList.add("active");
-}
-
-/* 画布 */
 const canvas=document.getElementById("canvas");
 const ctx=canvas.getContext("2d");
 
-let baseImage=null;
-let images=[];
+canvas.width=W;
+canvas.height=H;
+
+let base=null;
+let imgs=[];
 let selected=null;
 
-let canvasOffsetX=0;
-let canvasOffsetY=0;
+let displayScale=1;
 
-/* 图片 */
+function fitScreen(){
+    let scale=Math.min(window.innerWidth/W,(window.innerHeight*0.7)/H);
+    displayScale=scale;
+    canvas.style.width=W*scale+"px";
+    canvas.style.height=H*scale+"px";
+}
+fitScreen();
+
+function selectBase(){baseInput.click();}
+function addImage(){addInput.click();}
+
 baseInput.onchange=e=>{
+    let f=e.target.files[0];
+    if(!f)return;
+
     let img=new Image();
     img.onload=()=>{
-        canvas.width=img.width;
-        canvas.height=img.height;
-        baseImage=img;
-        images=[];
+        base=img;
+        imgs=[];
+        selected=null;
         draw();
     }
-    img.src=URL.createObjectURL(e.target.files[0]);
+    img.src=URL.createObjectURL(f);
 }
 
 addInput.onchange=e=>{
     [...e.target.files].forEach(file=>{
         let img=new Image();
         img.onload=()=>{
-            let scale=0.8-images.length*0.01;
-            if(scale<0.2) scale=0.2;
-
-            images.push({
+            let obj={
                 img,
-                x:canvas.width/2,
-                y:canvas.height/2,
-                scale,
-                rotation:0
-            });
-
-            selected=images[images.length-1];
+                x:W/2,
+                y:H/2,
+                scale:1,
+                rot:0
+            };
+            imgs.push(obj);
+            selected=obj;
             draw();
         }
         img.src=URL.createObjectURL(file);
     });
 }
 
-function selectBase(){baseInput.click();}
-function addImage(){addInput.click();}
-
-/* 删除 */
 function deleteOne(){
     if(!selected)return;
-    images=images.filter(i=>i!==selected);
-    selected=images[images.length-1];
+    imgs=imgs.filter(i=>i!==selected);
+    selected=imgs[imgs.length-1]||null;
     draw();
 }
+
 function clearAll(){
-    images=[];
+    imgs=[];
     selected=null;
     draw();
 }
 
-/* 绘制 */
 function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    if(baseImage) ctx.drawImage(baseImage,0,0);
+    ctx.clearRect(0,0,W,H);
 
-    images.forEach(obj=>{
+    if(base){
+        ctx.drawImage(base,0,0);
+    }
+
+    imgs.forEach(o=>{
         ctx.save();
-        ctx.translate(obj.x,obj.y);
-        ctx.rotate(obj.rotation);
-        ctx.scale(obj.scale,obj.scale);
+        ctx.translate(o.x,o.y);
+        ctx.rotate(o.rot);
+        ctx.scale(o.scale,o.scale);
+        ctx.drawImage(o.img,-o.img.width/2,-o.img.height/2);
 
-        ctx.drawImage(obj.img,-obj.img.width/2,-obj.img.height/2);
-
-        if(obj===selected){
+        if(o===selected){
             ctx.strokeStyle="red";
-            ctx.strokeRect(-obj.img.width/2,-obj.img.height/2,obj.img.width,obj.img.height);
+            ctx.lineWidth=3;
+            ctx.strokeRect(-o.img.width/2,-o.img.height/2,o.img.width,o.img.height);
         }
 
         ctx.restore();
     });
+
+    if(selected){
+        info.innerText="坐标："+Math.round(selected.x)+" , "+Math.round(selected.y);
+    }
 }
 
-/* 触控 */
-let lastX,lastY,dragging=false;
+/* 手势 */
+let lastX,lastY,lastDist,lastAng;
 
 canvas.addEventListener("touchstart",e=>{
-    let t=e.touches[0];
-    lastX=t.clientX;
-    lastY=t.clientY;
-    dragging=true;
-    selected=images[images.length-1];
+    if(e.touches.length==1){
+        let t=e.touches[0];
+        lastX=t.clientX;
+        lastY=t.clientY;
+        selected=imgs[imgs.length-1];
+    }
+
+    if(e.touches.length==2){
+        let dx=e.touches[0].clientX-e.touches[1].clientX;
+        let dy=e.touches[0].clientY-e.touches[1].clientY;
+        lastDist=Math.hypot(dx,dy);
+        lastAng=Math.atan2(dy,dx);
+    }
 });
 
 canvas.addEventListener("touchmove",e=>{
-    if(!dragging)return;
+    e.preventDefault();
 
-    let t=e.touches[0];
-    let dx=t.clientX-lastX;
-    let dy=t.clientY-lastY;
+    if(e.touches.length==1 && selected){
+        let t=e.touches[0];
 
-    if(mode==="image" && selected){
+        let dx=(t.clientX-lastX)/displayScale;
+        let dy=(t.clientY-lastY)/displayScale;
+
         selected.x+=dx;
         selected.y+=dy;
+
+        lastX=t.clientX;
+        lastY=t.clientY;
     }
 
-    if(mode==="canvas"){
-        canvasOffsetX+=dx;
-        canvasOffsetY+=dy;
-        canvas.style.left=canvasOffsetX+"px";
-        canvas.style.top=canvasOffsetY+"px";
-    }
+    if(e.touches.length==2 && selected){
+        let dx=e.touches[0].clientX-e.touches[1].clientX;
+        let dy=e.touches[0].clientY-e.touches[1].clientY;
 
-    lastX=t.clientX;
-    lastY=t.clientY;
+        let dist=Math.hypot(dx,dy);
+        let ang=Math.atan2(dy,dx);
+
+        selected.scale*=dist/lastDist;
+        selected.rot+=ang-lastAng;
+
+        lastDist=dist;
+        lastAng=ang;
+    }
 
     draw();
 });
 
-canvas.addEventListener("touchend",()=>dragging=false);
+canvas.addEventListener("touchend",()=>{lastDist=null});
 
-/* viewer拖动 */
-const viewer=document.getElementById("viewer");
-let vdrag=false,ox,oy;
+/* ✅ 核心：像素级裁剪 */
+function download(){
+    let imgData=ctx.getImageData(0,0,W,H).data;
 
-viewer.addEventListener("touchstart",e=>{
-    if(mode!=="viewer")return;
-    let t=e.touches[0];
-    vdrag=true;
-    ox=t.clientX-viewer.offsetLeft;
-    oy=t.clientY-viewer.offsetTop;
-});
+    let top=0,bottom=H-1,left=0,right=W-1;
+    let found=false;
 
-document.addEventListener("touchmove",e=>{
-    if(!vdrag)return;
-    let t=e.touches[0];
-    viewer.style.left=(t.clientX-ox)+"px";
-    viewer.style.top=(t.clientY-oy)+"px";
-});
-
-document.addEventListener("touchend",()=>vdrag=false);
-
-/* resize */
-resize.ontouchstart=e=>{
-    let t=e.touches[0];
-    let w=viewer.offsetWidth;
-    let h=viewer.offsetHeight;
-    let sx=t.clientX;
-    let sy=t.clientY;
-
-    document.ontouchmove=ev=>{
-        let tt=ev.touches[0];
-        viewer.style.width=(w+(tt.clientX-sx))+"px";
-        viewer.style.height=(h+(tt.clientY-sy))+"px";
+    // top
+    for(let y=0;y<H;y++){
+        for(let x=0;x<W;x++){
+            if(imgData[(y*W+x)*4+3]>0){
+                top=y; found=true; break;
+            }
+        }
+        if(found)break;
     }
 
-    document.ontouchend=()=>document.ontouchmove=null;
-}
+    // bottom
+    found=false;
+    for(let y=H-1;y>=0;y--){
+        for(let x=0;x<W;x++){
+            if(imgData[(y*W+x)*4+3]>0){
+                bottom=y; found=true; break;
+            }
+        }
+        if(found)break;
+    }
 
-/* 下载 JPG（≤20MB） */
-function download(){
-    let quality=0.95;
+    // left
+    found=false;
+    for(let x=0;x<W;x++){
+        for(let y=0;y<H;y++){
+            if(imgData[(y*W+x)*4+3]>0){
+                left=x; found=true; break;
+            }
+        }
+        if(found)break;
+    }
 
-    function tryExport(){
-        let data=canvas.toDataURL("image/jpeg",quality);
+    // right
+    found=false;
+    for(let x=W-1;x>=0;x--){
+        for(let y=0;y<H;y++){
+            if(imgData[(y*W+x)*4+3]>0){
+                right=x; found=true; break;
+            }
+        }
+        if(found)break;
+    }
+
+    let cw=right-left+1;
+    let ch=bottom-top+1;
+
+    let temp=document.createElement("canvas");
+    temp.width=cw;
+    temp.height=ch;
+    let tctx=temp.getContext("2d");
+
+    tctx.drawImage(canvas,left,top,cw,ch,0,0,cw,ch);
+
+    let q=0.98;
+
+    function run(){
+        let data=temp.toDataURL("image/jpeg",q);
         let size=data.length*0.75/1024/1024;
 
-        if(size>20 && quality>0.3){
-            quality-=0.05;
-            tryExport();
+        if(size>30 && q>0.3){
+            q-=0.05;
+            run();
         }else{
             let a=document.createElement("a");
             a.href=data;
-            a.download="高清图.jpg";
+            a.download="裁剪完成.jpg";
             a.click();
         }
     }
 
-    tryExport();
+    run();
 }
 </script>
 
