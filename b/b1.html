@@ -1,15 +1,262 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>调用相册</title>
-</head>
-<body>
-    <!-- 隐藏的文件选择控件，负责唤起系统相册 -->
-    <input type="file" id="albumInput" accept="image/*" multiple style="display: none;">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图片叠加编辑器</title>
 
-    <!-- 点击这个按钮就能唤起相册 -->
-    <button onclick="document.getElementById('albumInput').click()">打开本机相册</button>
+<style>
+body{
+    margin:0;
+    background:#121212;
+    color:#fff;
+    font-family:sans-serif;
+    text-align:center;
+}
+
+button{
+    margin:5px;
+    padding:10px 12px;
+    border:none;
+    border-radius:10px;
+    background:#333;
+    color:#fff;
+    font-size:13px;
+}
+
+/* 外层查看框 */
+.viewer{
+    width:95%;
+    height:60vh;
+    margin:10px auto;
+    border:2px solid #555;
+    border-radius:15px;
+    overflow:hidden;
+    background:#000;
+    position:relative;
+}
+
+canvas{
+    position:absolute;
+    left:0;
+    top:0;
+    background:#fff;
+    touch-action:none;
+}
+</style>
+</head>
+
+<body>
+
+<h3>图片叠加编辑器</h3>
+<button onclick="clearAll()">❌ 清空</button>
+<button onclick="selectBase()">📄 本地图片</button>
+<button onclick="addImage()">➕ 添加图片</button>
+<button onclick="deleteOne()">🗑 删除当前</button>
+    <br>
+
+
+<button onclick="zoomIn()">🔍 放大</button>
+<button onclick="zoomOut()">🔍 缩小</button>
+<button onclick="download()">💾 下载</button>
+<div class="viewer">
+    <canvas id="canvas"></canvas>
+</div>
+
+<input type="file" id="baseInput" accept="image/*" hidden>
+<input type="file" id="addInput" accept="image/*" hidden multiple>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let baseImage = null;
+let images = [];
+let selected = null;
+
+let globalScale = 1;
+
+const MAX = 100;
+
+/* 选择底图 */
+function selectBase(){
+    document.getElementById("baseInput").click();
+}
+
+/* 添加图 */
+function addImage(){
+    if(images.length >= MAX){
+        alert("最多100张");
+        return;
+    }
+    document.getElementById("addInput").click();
+}
+
+document.getElementById("baseInput").onchange = e=>{
+    const file = e.target.files[0];
+    const img = new Image();
+
+    img.onload = ()=>{
+        canvas.width = img.width;
+        canvas.height = img.height;
+        baseImage = img;
+        images = [];
+        draw();
+    }
+    img.src = URL.createObjectURL(file);
+}
+
+document.getElementById("addInput").onchange = e=>{
+    [...e.target.files].forEach(file=>{
+        if(images.length >= MAX) return;
+
+        const img = new Image();
+
+        img.onload = ()=>{
+            let scale = 0.8 - images.length * 0.005;
+            if(scale < 0.2) scale = 0.2;
+
+            images.push({
+                img,
+                x: canvas.width/2,
+                y: canvas.height/2,
+                scale,
+                rotation:0
+            });
+
+            selected = images[images.length-1];
+            draw();
+        }
+
+        img.src = URL.createObjectURL(file);
+    });
+}
+
+/* 删除 */
+function deleteOne(){
+    if(!selected) return;
+    images = images.filter(i=>i!==selected);
+    selected = images[images.length-1] || null;
+    draw();
+}
+
+/* 清空 */
+function clearAll(){
+    images = [];
+    selected = null;
+    draw();
+}
+
+/* 全局缩放 */
+function zoomIn(){
+    globalScale *= 1.1;
+    updateCanvasTransform();
+}
+
+function zoomOut(){
+    globalScale *= 0.9;
+    updateCanvasTransform();
+}
+
+function updateCanvasTransform(){
+    canvas.style.transform = `scale(${globalScale})`;
+}
+
+/* 绘制 */
+function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    if(baseImage){
+        ctx.drawImage(baseImage,0,0);
+    }
+
+    images.forEach(obj=>{
+        ctx.save();
+        ctx.translate(obj.x,obj.y);
+        ctx.rotate(obj.rotation);
+        ctx.scale(obj.scale,obj.scale);
+
+        ctx.drawImage(obj.img,-obj.img.width/2,-obj.img.height/2);
+
+        if(obj === selected){
+            ctx.strokeStyle="red";
+            ctx.lineWidth=2;
+            ctx.strokeRect(-obj.img.width/2,-obj.img.height/2,obj.img.width,obj.img.height);
+        }
+
+        ctx.restore();
+    });
+}
+
+/* 拖动 */
+let isDragging = false;
+let lastX=0,lastY=0;
+
+canvas.addEventListener("touchstart",e=>{
+    const t = e.touches[0];
+    lastX = t.clientX;
+    lastY = t.clientY;
+
+    selected = images[images.length-1];
+    isDragging = true;
+});
+
+canvas.addEventListener("touchmove",e=>{
+    if(!isDragging || !selected) return;
+
+    const t = e.touches[0];
+
+    selected.x += (t.clientX - lastX) / globalScale;
+    selected.y += (t.clientY - lastY) / globalScale;
+
+    lastX = t.clientX;
+    lastY = t.clientY;
+
+    draw();
+});
+
+canvas.addEventListener("touchend",()=>{
+    isDragging = false;
+});
+
+/* 双指缩放旋转 */
+canvas.addEventListener("touchmove",function(e){
+    if(e.touches.length==2 && selected){
+
+        let dx = e.touches[0].clientX - e.touches[1].clientX;
+        let dy = e.touches[0].clientY - e.touches[1].clientY;
+
+        let dist = Math.sqrt(dx*dx+dy*dy);
+        let angle = Math.atan2(dy,dx);
+
+        if(!this.lastDist){
+            this.lastDist = dist;
+            this.lastAngle = angle;
+        }else{
+            selected.scale *= dist / this.lastDist;
+            selected.rotation += angle - this.lastAngle;
+
+            this.lastDist = dist;
+            this.lastAngle = angle;
+
+            draw();
+        }
+    }
+});
+
+canvas.addEventListener("touchend",function(){
+    this.lastDist=null;
+});
+
+/* 下载 */
+function download(){
+    const link = document.createElement("a");
+    link.download = "合成图.png";
+    link.href = canvas.toDataURL();
+    link.click();
+}
+
+</script>
+
 </body>
 </html>
