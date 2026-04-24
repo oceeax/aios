@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图像与颜色测试</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;700;900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg: #08090e;
+    --fg: #e8ecf4;
+    --muted: #5a6478;
+    --accent: #c084fc;
+    --accent2: #f472b6;
+    --card: rgba(14, 16, 26, 0.92);
+    --border: rgba(192, 132, 252, 0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+  }
+
+  .bg-layer {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 600px 500px at 20% 30%, rgba(192,132,252,0.05), transparent),
+      radial-gradient(ellipse 400px 400px at 80% 70%, rgba(244,114,182,0.04), transparent);
+  }
+
+  .container {
+    position: relative; z-index: 1;
+    max-width: 1100px; margin: 0 auto; padding: 40px 20px;
+  }
+
+  header { text-align: center; margin-bottom: 40px; }
+
+  header h1 {
+    font-size: clamp(28px, 5vw, 48px); font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  header p { color: var(--muted); font-size: 14px; font-weight: 200; margin-top: 6px; }
+
+  .section {
+    margin-bottom: 36px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(20px);
+  }
+
+  .section-title {
+    font-size: 13px; font-weight: 700;
+    color: var(--accent); text-transform: uppercase;
+    letter-spacing: 1.5px; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .section-title i { font-size: 15px; }
+
+  /* 色彩渐变条 */
+  .gradient-strip {
+    height: 60px; border-radius: 10px; margin-bottom: 8px;
+    position: relative; overflow: hidden;
+  }
+
+  .gradient-label {
+    font-size: 11px; color: var(--muted); text-align: center; margin-bottom: 16px;
+  }
+
+  /* 颜色块网格 */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 6px;
+  }
+
+  .color-swatch {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: 4px;
+  }
+
+  .color-swatch:hover { transform: scale(1.1); z-index: 2; }
+
+  .color-swatch .hex {
+    font-size: 9px; font-weight: 700;
+    padding: 1px 4px; border-radius: 3px;
+    background: rgba(0,0,0,0.5); color: #fff;
+    opacity: 0; transition: opacity 0.2s;
+  }
+
+  .color-swatch:hover .hex { opacity: 1; }
+
+  /* 对比度测试 */
+  .contrast-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+  }
+
+  .contrast-cell {
+    padding: 16px 12px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 14px; font-weight: 700;
+    position: relative;
+  }
+
+  .contrast-cell .ratio {
+    position: absolute; top: 4px; right: 6px;
+    font-size: 10px; font-weight: 400; opacity: 0.6;
+  }
+
+  .contrast-cell .grade {
+    position: absolute; bottom: 4px; right: 6px;
+    font-size: 10px; font-weight: 700;
+    padding: 0 4px; border-radius: 3px;
+  }
+
+  .grade.pass { background: rgba(34,197,94,0.3); color: #22c55e; }
+  .grade.fail { background: rgba(239,68,68,0.3); color: #ef4444; }
+
+  /* 灰阶条 */
+  .grayscale-strip {
+    height: 40px; border-radius: 8px;
+    display: flex; overflow: hidden; margin-bottom: 12px;
+  }
+
+  .grayscale-strip div { flex: 1; }
+
+  /* 色盲模拟 */
+  .sim-row {
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+
+  .sim-canvas-wrap {
+    flex: 1; min-width: 200px;
+    border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .sim-canvas-wrap canvas {
+    width: 100%; display: block;
+  }
+
+  .sim-label {
+    text-align: center; font-size: 12px; color: var(--muted);
+    padding: 8px 0;
+  }
+
+  /* 图案测试 */
+  .pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  .pattern-item {
+    border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .pattern-item canvas {
+    width: 100%; display: block;
+  }
+
+  .pattern-label {
+    text-align: center; font-size: 12px; color: var(--muted);
+    padding: 8px 0;
+  }
+
+  /* 分辨率测试线 */
+  .res-canvas-wrap {
+    border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+
+  .res-canvas-wrap canvas { width: 100%; display: block; }
+
+  /* 色彩空间 */
+  .space-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  .space-item {
+    border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .space-item canvas { width: 100%; display: block; }
+  .space-label { text-align: center; font-size: 12px; color: var(--muted); padding: 8px 0; }
+
+  /* 色环 */
+  .wheel-wrap {
+    display: flex; justify-content: center; margin-bottom: 16px;
+  }
+
+  .wheel-wrap canvas { border-radius: 50%; }
+
+  /* toast */
+  .toast-container {
+    position: fixed; top: 20px; right: 20px; z-index: 9999;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+
+  .toast {
+    padding: 10px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px; font-size: 13px;
+    backdrop-filter: blur(20px);
+    animation: toast-in 0.3s ease, toast-out 0.3s ease 2.7s forwards;
+  }
+
+  @keyframes toast-in { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes toast-out { to { opacity: 0; transform: translateX(30px); } }
+
+  .fade-in { opacity: 0; transform: translateY(16px); animation: fadeUp 0.5s ease forwards; }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 640px) {
+    .contrast-grid { grid-template-columns: repeat(2, 1fr); }
+    .color-grid { grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container">
+  <header class="fade-in">
+    <h1>图像与颜色测试</h1>
+    <p>渐变 / 灰阶 / 对比度 / 色盲模拟 / 图案 / 分辨率 / 色彩空间</p>
+  </header>
+
+  <!-- 1. 色环 -->
+  <div class="section fade-in">
+    <div class="section-title"><i class="fa-solid fa-circle-notch"></i> HSL 色环</div>
+    <div class="wheel-wrap">
+      <canvas id="colorWheel" width="300" height="300"></canvas>
+    </div>
+    <div class="gradient-label">360度色相环 — 点击任意位置复制颜色值</div>
+  </div>
+
+  <!-- 2. 渐变条 -->
+  <div class="section fade-in">
+    <div class="section-title"><i class="fa-solid fa-rainbow"></i> 渐变光谱</div>
+    <div class="gradient-strip" id="grad1"></div>
+    <div class="gradient-label">RGB 全光谱线性渐变</div>
+    <div class="gradient-strip" id="grad2"></div>
+    <div class="gradient-label">HSL 色相渐变（饱和度 100%，亮度 50%）</div>
+    <div class="gradient-strip" id="grad3"></div>
+    <div class="gradient-label">亮度渐变（黑 → 白）</div>
+    <div class="gradient-strip" id="grad4"></div>
+    <div class="gradient-label">饱和度渐变（灰 → 纯色）</div>
+  </div>
+
+  <!-- 3. 灰阶 -->
+  <div class="section fade-in">
+    <div class="section-title"><i class="fa-solid fa-adjust"></i> 灰阶测试</div>
+    <div class="grayscale-strip" id="grayStrip"></div>
+    <div class="gradient-label">256 级灰阶（0 ~ 255），检查显示器灰度过渡是否平滑</div>
+  </div>
+
+  <!-- 4. 颜色块 -->
+  <div class="section fade-in">
+    <div class="section-title"><i class="fa-solid fa-swatchbook"></i> 基础色板</div>
+    <div class="color-grid" id="colorGrid"></div>
+    <div class="gradient-label">点击色块复制 HEX 值</div>
+  </div>
+
+  <!-- 5. 对比度 -->
+  <div class="section fade-in">
+    <div class="section-title"><i class="fa-solid fa-eye"></i> 对比度测试</div>
+    <div class="contrast-grid" id="contrastGrid"></div>
+    <div class="gradient-label">WCAG 对比度标准：AA 级 ≥ 4.5:1，AAA 级 ≥ 7:1</div>
+  </div>
+
+  <!-- 6. 色盲模拟 -->
+  <div class="section fade-in">
+    <div class="section-title"><i class="fa-solid fa-universal-access"></i> 色盲模拟</div>
+    <div class="sim-row" id="simRow"></div>
+    <div class="gradient-label">模拟不同色觉缺陷下的色彩表现</div>
+  </div>
+
+  <!-- 7. 图案测试 -->
+  <div class="section fade-in">
+    <div class="section-title"><i class="fa-solid fa-border-all"></i> 图案与纹理测试</div>
+    <div class="pattern-grid" id="patternGrid"></div>
+  </div>
+
+  <!-- 8. 分辨率测试 -->
+  <div class="section fade-in">
+    <div class="section-title"><i class="fa-solid fa-expand"></i> 分辨率测试线</div>
+    <div class="res-canvas-wrap">
+      <canvas id="resCanvas" width="1000" height="400"></canvas>
+    </div>
+    <div class="gradient-label">水平与垂直线条组，检查显示器清晰度与子像素渲染</div>
+  </div>
+
+  <!-- 9. 色彩空间 -->
+  <div class="section fade-in">
+    <div class="section-title"><i class="fa-solid fa-cube"></i> 色彩空间可视化</div>
+    <div class="space-grid" id="spaceGrid"></div>
+  </div>
+</div>
+
+<script>
+  function toast(msg) {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  function copyText(text) {
+    navigator.clipboard.writeText(text).then(() => toast('已复制：' + text));
+  }
+
+  // ====== 1. 色环 ======
+    const cvs = document.getElementById('colorWheel');
+    const ctx = cvs.getContext('2d');
+    const cx = 150, cy = 150, r = 140;
+
+    for (let angle = 0; angle < 360; angle += 0.5) {
+      const startAngle = (angle - 1) * Math.PI / 180;
+      const endAngle = (angle + 1) * Math.PI / 180;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, startAngle, endAngle);
+      ctx.closePath();
+      ctx.fillStyle = `hsl(${angle}, 100%, 50%)`;
+      ctx.fill();
+    }
+
+    // 中心白圆
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grad.addColorStop(0, 'rgba(255,255,255,1)');
+    grad.addColorStop(0.3, 'rgba(255,255,255,0.8)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    cvs.addEventListener('click', function(e) {
+      const rect = cvs.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (cvs.width / rect.width);
+      const y = (e.clientY - rect.top) * (cvs.height / rect.height);
+      const pixel = ctx.getImageData(x, y, 1, 1).data;
+      const hex = '#' + [pixel[0], pixel[1], pixel[2]].map(v => v.toString(16).padStart(2, '0')).join('');
+      copyText(hex.toUpperCase());
+    });
+  })();
+
+  // ====== 2. 渐变条 ======
+  document.getElementById('grad1').style.background = 'linear-gradient(90deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)';
+  document.getElementById('grad2').style.background = 'linear-gradient(90deg, hsl(0,100%,50%), hsl(60,100%,50%), hsl(120,100%,50%), hsl(180,100%,50%), hsl(240,100%,50%), hsl(300,100%,50%), hsl(360,100%,50%))';
+  document.getElementById('grad3').style.background = 'linear-gradient(90deg, #000000, #ffffff)';
+  document.getElementById('grad4').style.background = 'linear-gradient(90deg, hsl(280,0%,50%), hsl(280,100%,50%))';
+
+  // ====== 3. 灰阶 ======
+    const strip = document.getElementById('grayStrip');
+    for (let i = 0; i < 256; i++) {
+      const d = document.createElement('div');
+      d.style.background = `rgb(${i},${i},${i})`;
+      strip.appendChild(d);
+    }
+  })();
+
+  // ====== 4. 颜色块 ======
+    const grid = document.getElementById('colorGrid');
+    // 生成系统色板
+    const colors = [];
+    // 灰色系
+    for (let i = 0; i <= 10; i++) {
+      const v = Math.round(i * 25.5);
+      colors.push({ hex: `#${v.toString(16).padStart(2,'0').repeat(3)}`, name: `Gray ${v}` });
+    }
+    // 红色系
+    for (let s = 0; s <= 4; s++) {
+      for (let l = 1; l <= 4; l++) {
+        const hex = hslToHex(0, s * 25, l * 20 + 10);
+        colors.push({ hex, name: `R${s}${l}` });
+      }
+    }
+    // 橙色系
+    for (let s = 1; s <= 4; s++) {
+      for (let l = 1; l <= 4; l++) {
+        const hex = hslToHex(30, s * 25, l * 20 + 10);
+        colors.push({ hex, name: `O${s}${l}` });
+      }
+    }
+    // 黄色系
+    for (let s = 1; s <= 4; s++) {
+      for (let l = 1; l <= 4; l++) {
+        const hex = hslToHex(55, s * 25, l * 20 + 10);
+        colors.push({ hex, name: `Y${s}${l}` });
+      }
+    }
+    // 绿色系
+    for (let s = 1; s <= 4; s++) {
+      for (let l = 1; l <= 4; l++) {
+        const hex = hslToHex(120, s * 25, l * 20 + 10);
+        colors.push({ hex, name: `G${s}${l}` });
+      }
+    }
+    // 青色系
+    for (let s = 1; s <= 4; s++) {
+      for (let l = 1; l <= 4; l++) {
+        const hex = hslToHex(180, s * 25, l * 20 + 10);
+        colors.push({ hex, name: `C${s}${l}` });
+      }
+    }
+    // 蓝色系
+    for (let s = 1; s <= 4; s++) {
+      for (let l = 1; l <= 4; l++) {
+        const hex = hslToHex(220, s * 25, l * 20 + 10);
+        colors.push({ hex, name: `B${s}${l}` });
+      }
+    }
+    // 紫色系
+    for (let s = 1; s <= 4; s++) {
+      for (let l = 1; l <= 4; l++) {
+        const hex = hslToHex(280, s * 25, l * 20 + 10);
+        colors.push({ hex, name: `P${s}${l}` });
+      }
+    }
+
+    colors.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'color-swatch';
+      div.style.background = c.hex;
+      div.innerHTML = `<span class="hex">${c.hex.toUpperCase()}</span>`;
+      div.addEventListener('click', () => copyText(c.hex.toUpperCase()));
+      grid.appendChild(div);
+    });
+  })();
+
+  function hslToHex(h, s, l) {
+    s /= 100; l /= 100;
+    const a = s * Math.min(l, 1 - l);
+    const f = n => {
+      const k = (n + h / 30) % 12;
+      const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+      return Math.round(255 * color).toString(16).padStart(2, '0');
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
+  }
+
+  // ====== 5. 对比度 ======
+    const grid = document.getElementById('contrastGrid');
+    const pairs = [
+      ['#000000', '#ffffff'], ['#1a1a2e', '#e0e0e0'], ['#16213e', '#a8d8ea'],
+      ['#0f3460', '#e94560'], ['#533483', '#f5f5f5'], ['#2b2d42', '#8d99ae'],
+      ['#ffffff', '#000000'], ['#f8f9fa', '#212529'], ['#e9ecef', '#495057'],
+      ['#dee2e6', '#6c757d'], ['#343a40', '#adb5bd'], ['#212529', '#f8f9fa'],
+      ['#ff0000', '#00ff00'], ['#0000ff', '#ffff00'], ['#ff6600', '#0066ff'],
+      ['#333333', '#666666'], ['#888888', '#aaaaaa'], ['#cccccc', '#eeeeee'],
+      ['#1b4332', '#b7e4c7'], ['#7f0000', '#ff8a80'], ['#003049', '#fcbf49'],
+    ];
+
+    pairs.forEach(([bg, fg]) => {
+      const lum1 = relativeLuminance(hexToRGB(bg));
+      const lum2 = relativeLuminance(hexToRGB(fg));
+      const ratio = (Math.max(lum1, lum2) + 0.05) / (Math.min(lum1, lum2) + 0.05);
+      const ratioStr = ratio.toFixed(2);
+      const pass = ratio >= 4.5;
+
+      const div = document.createElement('div');
+      div.className = 'contrast-cell';
+      div.style.background = bg;
+      div.style.color = fg;
+      div.innerHTML = `
+        示例文本 Aa
+        <span class="ratio">${ratioStr}:1</span>
+        <span class="grade ${pass ? 'pass' : 'fail'}">${pass ? 'PASS' : 'FAIL'}</span>
+      `;
+      grid.appendChild(div);
+    });
+  })();
+
+  function hexToRGB(hex) {
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    return [r, g, b];
+  }
+
+  function relativeLuminance(rgb) {
+    const [r, g, b] = rgb.map(c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
+
+  // ====== 6. 色盲模拟 ======
+    const row = document.getElementById('simRow');
+    const types = [
+      { name: '正常视觉', fn: (r, g, b) => [r, g, b] },
+      { name: '红色盲', fn: (r, g, b) => simulateCB(r, g, b, 'protan') },
+      { name: '绿色盲', fn: (r, g, b) => simulateCB(r, g, b, 'deutan') },
+      { name: '蓝色盲', fn: (r, g, b) => simulateCB(r, g, b, 'tritan') },
+    ];
+
+    types.forEach(type => {
+      const wrap = document.createElement('div');
+      wrap.className = 'sim-canvas-wrap';
+      const cvs = document.createElement('canvas');
+      cvs.width = 400; cvs.height = 200;
+      const ctx = cvs.getContext('2d');
+
+      // 绘制彩色条纹
+      const stripeColors = [
+        [255, 0, 0], [255, 127, 0], [255, 255, 0], [0, 255, 0],
+        [0, 255, 255], [0, 0, 255], [127, 0, 255], [255, 0, 255],
+        [255, 128, 128], [128, 255, 128], [128, 128, 255],
+      ];
+
+      const sw = cvs.width / stripeColors.length;
+      stripeColors.forEach(([r, g, b], i) => {
+        const [sr, sg, sb] = type.fn(r, g, b);
+        ctx.fillStyle = `rgb(${sr},${sg},${sb})`;
+        ctx.fillRect(i * sw, 0, sw + 1, 100);
+      });
+
+      // 绘制渐变色块
+      for (let x = 0; x < cvs.width; x++) {
+        const hue = (x / cvs.width) * 360;
+        const [r, g, b] = hslToRGBArr(hue, 100, 50);
+        const [sr, sg, sb] = type.fn(r, g, b);
+        ctx.fillStyle = `rgb(${sr},${sg},${sb})`;
+        ctx.fillRect(x, 100, 1, 50);
+      }
+
+      // 绘制色点
+      for (let i = 0; i < 20; i++) {
+        for (let j = 0; j < 4; j++) {
+          const hue = (i * 18 + j * 45) % 360;
+          const [r, g, b] = hslToRGBArr(hue, 90, 50 + j * 10);
+          const [sr, sg, sb] = type.fn(r, g, b);
+          ctx.fillStyle = `rgb(${sr},${sg},${sb})`;
+          ctx.beginPath();
+          ctx.arc(10 + i * 20, 170 + j * 0, 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      wrap.appendChild(cvs);
+      const label = document.createElement('div');
+      label.className = 'sim-label';
+      label.textContent = type.name;
+      wrap.appendChild(label);
+      row.appendChild(wrap);
+    });
+  })();
+
+  function hslToRGBArr(h, s, l) {
+    s /= 100; l /= 100;
+    const a = s * Math.min(l, 1 - l);
+    const f = n => {
+      const k = (n + h / 30) % 12;
+      return Math.round(255 * (l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1)));
+    };
+    return [f(0), f(8), f(4)];
+  }
+
+  // 简化的色盲模拟矩阵
+  function simulateCB(r, g, b, type) {
+    let nr, ng, nb;
+    if (type === 'protan') {
+      nr = 0.56667 * r + 0.43333 * g + 0.0 * b;
+      ng = 0.55833 * r + 0.44167 * g + 0.0 * b;
+      nb = 0.0 * r + 0.24167 * g + 0.75833 * b;
+    } else if (type === 'deutan') {
+      nr = 0.625 * r + 0.375 * g + 0.0 * b;
+      ng = 0.70 * r + 0.30 * g + 0.0 * b;
+      nb = 0.0 * r + 0.30 * g + 0.70 * b;
+    } else { // tritan
+      nr = 0.95 * r + 0.05 * g + 0.0 * b;
+      ng = 0.0 * r + 0.43333 * g + 0.56667 * b;
+      nb = 0.0 * r + 0.475 * g + 0.525 * b;
+    }
+    return [Math.min(255, Math.max(0, Math.round(nr))),
+            Math.min(255, Math.max(0, Math.round(ng))),
+            Math.min(255, Math.max(0, Math.round(nb)))];
+  }
+
+  // ====== 7. 图案测试 ======
+    const grid = document.getElementById('patternGrid');
+    const patterns = [
+      { name: '棋盘格', draw: drawCheckerboard },
+      { name: '水平条纹', draw: drawHStripes },
+      { name: '垂直条纹', draw: drawVStripes },
+      { name: '同心圆', draw: drawConcentricCircles },
+      { name: '对角线', draw: drawDiagonals },
+      { name: '点阵', draw: drawDotGrid },
+      { name: '渐变网格', draw: drawGradientGrid },
+      { name: '莫尔条纹', draw: drawMoire },
+    ];
+
+    patterns.forEach(p => {
+      const item = document.createElement('div');
+      item.className = 'pattern-item';
+      const cvs = document.createElement('canvas');
+      cvs.width = 400; cvs.height = 200;
+      p.draw(cvs);
+      item.appendChild(cvs);
+      const label = document.createElement('div');
+      label.className = 'pattern-label';
+      label.textContent = p.name;
+      item.appendChild(label);
+      grid.appendChild(item);
+    });
+  })();
+
+  function drawCheckerboard(cvs) {
+    const ctx = cvs.getContext('2d');
+    const size = 20;
+    for (let y = 0; y < cvs.height; y += size) {
+      for (let x = 0; x < cvs.width; x += size) {
+        ctx.fillStyle = ((x / size + y / size) % 2 === 0) ? '#ffffff' : '#000000';
+        ctx.fillRect(x, y, size, size);
+      }
+    }
+  }
+
+  function drawHStripes(cvs) {
+    const ctx = cvs.getContext('2d');
+    const h = 4;
+    for (let y = 0; y < cvs.height; y += h * 2) {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, y, cvs.width, h);
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, y + h, cvs.width, h);
+    }
+  }
+
+  function drawVStripes(cvs) {
+    const ctx = cvs.getContext('2d');
+    const w = 4;
+    for (let x = 0; x < cvs.width; x += w * 2) {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x, 0, w, cvs.height);
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(x + w, 0, w, cvs.height);
+    }
+  }
+
+  function drawConcentricCircles(cvs) {
+    const ctx = cvs.getContext('2d');
+    const cx = cvs.width / 2, cy = cvs.height / 2;
+    for (let r = 5; r < 150; r += 8) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, Math.max(1, r), 0, Math.PI * 2);
+      ctx.strokeStyle = (r / 8) % 2 === 0 ? '#ffffff' : '#000000';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+  }
+
+  function drawDiagonals(cvs) {
+    const ctx = cvs.getContext('2d');
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, cvs.width, cvs.height);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    for (let i = -cvs.height; i < cvs.width + cvs.height; i += 10) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i + cvs.height, cvs.height);
+      ctx.stroke();
+    }
+  }
+
+  function drawDotGrid(cvs) {
+    const ctx = cvs.getContext('2d');
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, cvs.width, cvs.height);
+    ctx.fillStyle = '#ffffff';
+    for (let y = 10; y < cvs.height; y += 20) {
+      for (let x = 10; x < cvs.width; x += 20) {
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  function drawGradientGrid(cvs) {
+    const ctx = cvs.getContext('2d');
+    const cols = 16, rows = 8;
+    const cw = cvs.width / cols, ch = cvs.height / rows;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const hue = (c / cols) * 360;
+        const light = 20 + (r / rows) * 60;
+        ctx.fillStyle = `hsl(${hue}, 80%, ${light}%)`;
+        ctx.fillRect(c * cw, r * ch, cw + 0.5, ch + 0.5);
+      }
+    }
+  }
+
+  function drawMoire(cvs) {
+    const ctx = cvs.getContext('2d');
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, cvs.width, cvs.height);
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 1;
+    // 两组同心圆偏移产生莫尔纹
+    [cvs.width * 0.35, cvs.width * 0.65].forEach(cx => {
+      for (let r = 2; r < 300; r += 3) {
+        ctx.beginPath();
+        ctx.arc(cx, cvs.height / 2, Math.max(1, r), 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    });
+  }
+
+  // ====== 8. 分辨率测试线 ======
+    const cvs = document.getElementById('resCanvas');
+    const ctx = cvs.getContext('2d');
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, cvs.width, cvs.height);
+
+    // 水平线组
+    const lineWidths = [1, 0.5, 2, 3, 4, 0.25];
+    let y = 20;
+    ctx.font = '11px Outfit';
+    ctx.fillStyle = '#888888';
+    lineWidths.forEach(w => {
+      ctx.fillText(`${w}px`, 5, y + 4);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = Math.max(0.25, w);
+      ctx.beginPath();
+      ctx.moveTo(50, y);
+      ctx.lineTo(cvs.width - 10, y);
+      ctx.stroke();
+      y += 20;
+    });
+
+    y += 10;
+    ctx.fillStyle = '#888888';
+    ctx.fillText('垂直线组', 5, y);
+    y += 15;
+    lineWidths.forEach(w => {
+      ctx.fillText(`${w}px`, 5, y + 40);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = Math.max(0.25, w);
+      let x = 50;
+      for (let i = 0; i < 30; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y + 80);
+        ctx.stroke();
+        x += 8 + w;
+      }
+      y += 100;
+    });
+
+    // 渐变细线
+    y += 5;
+    ctx.fillStyle = '#888888';
+    ctx.fillText('渐变灰度线', 5, y + 4);
+    y += 10;
+    for (let i = 0; i < 256; i++) {
+      ctx.strokeStyle = `rgb(${i},${i},${i})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(50 + i * 3.5, y);
+      ctx.lineTo(50 + i * 3.5, y + 30);
+      ctx.stroke();
+    }
+  })();
+
+  // ====== 9. 色彩空间 ======
+    const grid = document.getElementById('spaceGrid');
+    const spaces = [
+      { name: 'RGB 立方体（R-G平面）', draw: drawRGB_RG },
+      { name: 'RGB 立方体（R-B平面）', draw: drawRGB_RB },
+      { name: 'HSL 色相-饱和度', draw: drawHS_HS },
+      { name: 'HSL 色相-亮度', draw: drawHL_HL },
+    ];
+
+    spaces.forEach(s => {
+      const item = document.createElement('div');
+      item.className = 'space-item';
+      const cvs = document.createElement('canvas');
+      cvs.width = 300; cvs.height = 200;
+      s.draw(cvs);
+      item.appendChild(cvs);
+      const label = document.createElement('div');
+      label.className = 'space-label';
+      label.textContent = s.name;
+      item.appendChild(label);
+      grid.appendChild(item);
+    });
+  })();
+
+  function drawRGB_RG(cvs) {
+    const ctx = cvs.getContext('2d');
+    for (let y = 0; y < cvs.height; y++) {
+      for (let x = 0; x < cvs.width; x++) {
+        const r = Math.round((x / cvs.width) * 255);
+        const g = Math.round((1 - y / cvs.height) * 255);
+        ctx.fillStyle = `rgb(${r},${g},128)`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
+
+  function drawRGB_RB(cvs) {
+    const ctx = cvs.getContext('2d');
+    for (let y = 0; y < cvs.height; y++) {
+      for (let x = 0; x < cvs.width; x++) {
+        const r = Math.round((x / cvs.width) * 255);
+        const b = Math.round((1 - y / cvs.height) * 255);
+        ctx.fillStyle = `rgb(${r},128,${b})`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
+
+  function drawHS_HS(cvs) {
+    const ctx = cvs.getContext('2d');
+    for (let y = 0; y < cvs.height; y++) {
+      for (let x = 0; x < cvs.width; x++) {
+        const h = (x / cvs.width) * 360;
+        const s = 100 - (y / cvs.height) * 100;
+        ctx.fillStyle = `hsl(${h},${s}%,50%)`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
+
+  function drawHL_HL(cvs) {
+    const ctx = cvs.getContext('2d');
+    for (let y = 0; y < cvs.height; y++) {
+      for (let x = 0; x < cvs.width; x++) {
+        const h = (x / cvs.width) * 360;
+        const l = (1 - y / cvs.height) * 100;
+        ctx.fillStyle = `hsl(${h},100%,${l}%)`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>性能测试实验室</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;700;900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg: #090d14;
+    --fg: #e2e8f0;
+    --muted: #4a5568;
+    --accent: #06d6a0;
+    --accent2: #118ab2;
+    --card: rgba(14, 20, 32, 0.92);
+    --border: rgba(6, 214, 160, 0.12);
+    --danger: #ef476f;
+    --warn: #ffd166;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .bg-layer {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 600px 400px at 30% 20%, rgba(6,214,160,0.05), transparent),
+      radial-gradient(ellipse 500px 500px at 70% 80%, rgba(17,138,178,0.04), transparent);
+  }
+
+  .scan-line {
+    position: fixed; left: 0; right: 0; height: 2px; z-index: 0; pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.15;
+    animation: scan 4s linear infinite;
+  }
+
+  @keyframes scan { from { top: -2px; } to { top: 100vh; } }
+
+  .container {
+    position: relative; z-index: 1;
+    max-width: 1000px; margin: 0 auto; padding: 40px 20px;
+  }
+
+  header { text-align: center; margin-bottom: 40px; }
+
+  header h1 {
+    font-size: clamp(30px, 5vw, 48px); font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  header p { color: var(--muted); font-size: 14px; font-weight: 200; margin-top: 6px; }
+
+  /* FPS 显示器 */
+  .fps-monitor {
+    position: fixed; top: 16px; right: 16px; z-index: 100;
+    padding: 10px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    backdrop-filter: blur(20px);
+    font-variant-numeric: tabular-nums;
+    font-size: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .fps-num { font-weight: 900; font-size: 20px; color: var(--accent); }
+  .fps-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* 进度条 */
+  .progress-bar {
+    width: 100%; height: 6px; background: rgba(255,255,255,0.05);
+    border-radius: 3px; overflow: hidden; margin: 12px 0;
+  }
+
+  .progress-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    width: 0%; transition: width 0.3s;
+  }
+
+  .progress-fill.active {
+    animation: progress-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes progress-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  /* 测试卡片 */
+  .test-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(20px);
+    margin-bottom: 16px;
+    transition: border-color 0.3s;
+  }
+
+  .test-card:hover { border-color: rgba(6,214,160,0.3); }
+
+  .test-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .test-title {
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .test-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  .test-icon.green { background: rgba(6,214,160,0.12); color: var(--accent); }
+  .test-icon.blue { background: rgba(17,138,178,0.12); color: var(--accent2); }
+  .test-icon.yellow { background: rgba(255,209,102,0.12); color: var(--warn); }
+  .test-icon.red { background: rgba(239,71,111,0.12); color: var(--danger); }
+
+  .test-name { font-size: 16px; font-weight: 700; }
+  .test-desc { font-size: 12px; color: var(--muted); }
+
+  .test-score {
+    font-size: 28px; font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    transition: color 0.3s;
+  }
+
+  .test-score.good { color: var(--accent); }
+  .test-score.mid { color: var(--warn); }
+  .test-score.bad { color: var(--danger); }
+
+  .test-score .unit { font-size: 12px; font-weight: 400; color: var(--muted); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 10px;
+    font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700;
+    border: none; cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .btn:active { transform: scale(0.95); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: var(--bg);
+  }
+
+  .btn-primary:hover { box-shadow: 0 4px 20px rgba(6,214,160,0.3); }
+
+  .btn-outline {
+    background: transparent; border: 1px solid var(--border); color: var(--fg);
+  }
+
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-lg { padding: 14px 36px; font-size: 16px; border-radius: 12px; }
+
+  /* 详情网格 */
+  .detail-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px; margin-top: 12px;
+  }
+
+  .detail-item {
+    padding: 10px 12px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    font-size: 12px;
+  }
+
+  .detail-item .dl { color: var(--muted); margin-bottom: 2px; }
+  .detail-item .dv { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* 综合评分 */
+  .total-score-section {
+    text-align: center; margin: 40px 0;
+    padding: 40px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+  }
+
+  .total-score-ring {
+    width: 180px; height: 180px; margin: 0 auto 20px;
+    position: relative;
+  }
+
+  .total-score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+
+  .total-score-ring .track { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 8; }
+  .total-score-ring .fill {
+    fill: none; stroke: url(#totalGrad); stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 502.654;
+    stroke-dashoffset: 502.654;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .total-score-num {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+
+  .total-score-num .num { font-size: 52px; font-weight: 900; line-height: 1; }
+  .total-score-num .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-top: 4px; }
+
+  .total-verdict { font-size: 18px; font-weight: 700; margin-top: 8px; }
+
+  /* toast */
+  .toast-container {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999;
+    display: flex; flex-direction: column; gap: 8px; align-items: center;
+  }
+
+  .toast {
+    padding: 12px 24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px; font-size: 14px; font-weight: 700;
+    backdrop-filter: blur(20px);
+    animation: toast-in 0.3s ease, toast-out 0.3s ease 2.7s forwards;
+    white-space: nowrap;
+  }
+
+  @keyframes toast-in { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes toast-out { to { opacity: 0; transform: translateY(-20px); } }
+
+  .fade-in { opacity: 0; transform: translateY(20px); animation: fadeUp 0.6s ease forwards; }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 640px) {
+    .fps-monitor { top: auto; bottom: 16px; right: 16px; }
+    .detail-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="scan-line"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- FPS 监视器 -->
+<div class="fps-monitor">
+  <span class="fps-num" id="fpsNum">--</span>
+  <span class="fps-label">FPS</span>
+</div>
+
+<div class="container">
+  <header class="fade-in">
+    <h1>性能测试实验室</h1>
+    <p>CPU / 内存 / Canvas / DOM / 数学运算 — 全面评估浏览器性能</p>
+  </header>
+
+  <!-- 一键测试 -->
+  <div style="text-align:center;margin-bottom:36px;" class="fade-in">
+    <button class="btn btn-primary btn-lg" id="btnRunAll" onclick="runAllTests()">
+      <i class="fa-solid fa-play"></i> 运行全部测试
+    </button>
+    <button class="btn btn-outline btn-lg" onclick="resetAll()" style="margin-left:10px;">
+      <i class="fa-solid fa-rotate-left"></i> 重置
+    </button>
+  </div>
+
+  <!-- 测试 1：CPU 基准 -->
+  <div class="test-card fade-in" id="cardCPU">
+    <div class="test-header">
+      <div class="test-title">
+        <div class="test-icon green"><i class="fa-solid fa-microchip"></i></div>
+        <div>
+          <div class="test-name">CPU 基准测试</div>
+          <div class="test-desc">素数筛选 + 排序 + 递归斐波那契</div>
+        </div>
+      </div>
+      <div class="test-score" id="scoreCPU">--<span class="unit"> ms</span></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progCPU"></div></div>
+    <button class="btn btn-outline" onclick="runCPUTest()" style="width:100%;">
+      <i class="fa-solid fa-play"></i> 运行 CPU 测试
+    </button>
+    <div class="detail-grid" id="detailCPU"></div>
+  </div>
+
+  <!-- 测试 2：内存 -->
+  <div class="test-card fade-in" id="cardMem" style="animation-delay:0.08s;">
+    <div class="test-header">
+      <div class="test-title">
+        <div class="test-icon blue"><i class="fa-solid fa-memory"></i></div>
+        <div>
+          <div class="test-name">内存分配测试</div>
+          <div class="test-desc">大量对象创建与垃圾回收压力</div>
+        </div>
+      </div>
+      <div class="test-score" id="scoreMem">--<span class="unit"> ms</span></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progMem"></div></div>
+    <button class="btn btn-outline" onclick="runMemTest()" style="width:100%;">
+      <i class="fa-solid fa-play"></i> 运行内存测试
+    </button>
+    <div class="detail-grid" id="detailMem"></div>
+  </div>
+
+  <!-- 测试 3：Canvas 渲染 -->
+  <div class="test-card fade-in" id="cardCanvas" style="animation-delay:0.16s;">
+    <div class="test-header">
+      <div class="test-title">
+        <div class="test-icon yellow"><i class="fa-solid fa-paintbrush"></i></div>
+        <div>
+          <div class="test-name">Canvas 渲染测试</div>
+          <div class="test-desc">大量图形绘制与像素操作</div>
+        </div>
+      </div>
+      <div class="test-score" id="scoreCanvas">--<span class="unit"> ms</span></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progCanvas"></div></div>
+    <button class="btn btn-outline" onclick="runCanvasTest()" style="width:100%;">
+      <i class="fa-solid fa-play"></i> 运行 Canvas 测试
+    </button>
+    <div class="detail-grid" id="detailCanvas"></div>
+  </div>
+
+  <!-- 测试 4：DOM 操作 -->
+  <div class="test-card fade-in" id="cardDOM" style="animation-delay:0.24s;">
+    <div class="test-header">
+      <div class="test-title">
+        <div class="test-icon red"><i class="fa-solid fa-code"></i></div>
+        <div>
+          <div class="test-name">DOM 操作测试</div>
+          <div class="test-desc">元素创建、插入、查询、删除</div>
+        </div>
+      </div>
+      <div class="test-score" id="scoreDOM">--<span class="unit"> ms</span></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progDOM"></div></div>
+    <button class="btn btn-outline" onclick="runDOMTest()" style="width:100%;">
+      <i class="fa-solid fa-play"></i> 运行 DOM 测试
+    </button>
+    <div class="detail-grid" id="detailDOM"></div>
+  </div>
+
+  <!-- 测试 5：数学运算 -->
+  <div class="test-card fade-in" id="cardMath" style="animation-delay:0.32s;">
+    <div class="test-header">
+      <div class="test-title">
+        <div class="test-icon green"><i class="fa-solid fa-calculator"></i></div>
+        <div>
+          <div class="test-name">数学运算测试</div>
+          <div class="test-desc">矩阵乘法 + 三角函数 + 随机数统计</div>
+        </div>
+      </div>
+      <div class="test-score" id="scoreMath">--<span class="unit"> ms</span></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progMath"></div></div>
+    <button class="btn btn-outline" onclick="runMathTest()" style="width:100%;">
+      <i class="fa-solid fa-play"></i> 运行数学测试
+    </button>
+    <div class="detail-grid" id="detailMath"></div>
+  </div>
+
+  <!-- 综合评分 -->
+  <div class="total-score-section fade-in" style="animation-delay:0.4s;">
+    <svg viewBox="0 0 180 180">
+      <defs>
+        <linearGradient id="totalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#06d6a0"/>
+          <stop offset="100%" style="stop-color:#118ab2"/>
+        </linearGradient>
+      </defs>
+      <circle class="track" cx="90" cy="90" r="80"/>
+      <circle class="fill" id="totalRing" cx="90" cy="90" r="80"/>
+    </svg>
+    <div class="total-score-ring" style="position:relative;">
+      <svg viewBox="0 0 180 180" style="position:absolute;inset:0;">
+        <defs>
+          <linearGradient id="totalGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#06d6a0"/>
+            <stop offset="100%" style="stop-color:#118ab2"/>
+          </linearGradient>
+        </defs>
+        <circle class="track" cx="90" cy="90" r="80"/>
+        <circle class="fill" id="totalRing2" cx="90" cy="90" r="80"/>
+      </svg>
+      <div class="total-score-num">
+        <span class="num" id="totalScoreNum">--</span>
+        <span class="label">综合评分</span>
+      </div>
+    </div>
+    <div class="total-verdict" id="totalVerdict" style="color:var(--muted)">等待测试...</div>
+  </div>
+</div>
+
+<script>
+  // ====== FPS 监测 ======
+  let fpsFrames = 0, fpsLast = performance.now();
+  const fpsEl = document.getElementById('fpsNum');
+
+  function fpsLoop() {
+    fpsFrames++;
+    const now = performance.now();
+    if (now - fpsLast >= 500) {
+      const fps = Math.round(fpsFrames / ((now - fpsLast) / 1000));
+      fpsEl.textContent = fps;
+      fpsEl.style.color = fps >= 55 ? 'var(--accent)' : fps >= 30 ? 'var(--warn)' : 'var(--danger)';
+      fpsFrames = 0;
+      fpsLast = now;
+    }
+    requestAnimationFrame(fpsLoop);
+  }
+  requestAnimationFrame(fpsLoop);
+
+  // ====== 工具 ======
+  function toast(msg) {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  function setProgress(id, pct) {
+    document.getElementById(id).style.width = pct + '%';
+  }
+
+  function setScore(id, val, unit) {
+    const el = document.getElementById(id);
+    el.innerHTML = val + `<span class="unit"> ${unit}</span>`;
+    el.className = 'test-score ' + (unit === 'ms' ? (val < 100 ? 'good' : val < 500 ? 'mid' : 'bad') : 'good');
+  }
+
+  function addDetail(containerId, label, value) {
+    const grid = document.getElementById(containerId);
+    const div = document.createElement('div');
+    div.className = 'detail-item';
+    div.innerHTML = `<div class="dl">${label}</div><div class="dv">${value}</div>`;
+    grid.appendChild(div);
+  }
+
+  function clearDetail(containerId) {
+    document.getElementById(containerId).innerHTML = '';
+  }
+
+  // ====== CPU 测试 ======
+  function runCPUTest() {
+    clearDetail('detailCPU');
+    setProgress('progCPU', 10);
+    const prog = document.getElementById('progCPU');
+    prog.classList.add('active');
+
+    setTimeout(() => {
+      // 素数筛选
+      const t1 = performance.now();
+      const limit = 2000000;
+      const sieve = new Uint8Array(limit + 1);
+      let primeCount = 0;
+      for (let i = 2; i <= limit; i++) {
+        if (!sieve[i]) {
+          primeCount++;
+          for (let j = i * 2; j <= limit; j += i) sieve[j] = 1;
+        }
+      }
+      const primeTime = (performance.now() - t1).toFixed(1);
+      setProgress('progCPU', 35);
+      addDetail('detailCPU', '素数筛选 (200万)', primeTime + ' ms / ' + primeCount + ' 个');
+
+      // 排序
+      const t2 = performance.now();
+      const arr = new Float64Array(500000);
+      for (let i = 0; i < arr.length; i++) arr[i] = Math.random();
+      Array.from(arr).sort((a, b) => a - b);
+      const sortTime = (performance.now() - t2).toFixed(1);
+      setProgress('progCPU', 65);
+      addDetail('detailCPU', '排序 (50万元素)', sortTime + ' ms');
+
+      // 递归斐波那契
+      const t3 = performance.now();
+      function fib(n) { return n <= 1 ? n : fib(n - 1) + fib(n - 2); }
+      fib(35);
+      const fibTime = (performance.now() - t3).toFixed(1);
+      setProgress('progCPU', 90);
+      addDetail('detailCPU', '斐波那契 fib(35)', fibTime + ' ms');
+
+      const total = (parseFloat(primeTime) + parseFloat(sortTime) + parseFloat(fibTime)).toFixed(1);
+      setProgress('progCPU', 100);
+      prog.classList.remove('active');
+      setScore('scoreCPU', total, 'ms');
+      addDetail('detailCPU', '总耗时', total + ' ms');
+
+      return total;
+    }, 50);
+  }
+
+  // ====== 内存测试 ======
+  function runMemTest() {
+    clearDetail('detailMem');
+    setProgress('progMem', 10);
+    const prog = document.getElementById('progMem');
+    prog.classList.add('active');
+
+    setTimeout(() => {
+      const t1 = performance.now();
+      // 大量对象创建
+      const objs = [];
+      for (let i = 0; i < 500000; i++) {
+        objs.push({ a: i, b: 'str_' + i, c: [i, i + 1, i + 2], d: { x: i * 0.1 } });
+      }
+      const createTime = (performance.now() - t1).toFixed(1);
+      setProgress('progMem', 40);
+      addDetail('detailMem', '创建 50万对象', createTime + ' ms');
+
+      // 属性访问
+      const t2 = performance.now();
+      let sum = 0;
+      for (let i = 0; i < objs.length; i++) {
+        sum += objs[i].a + objs[i].c[0] + objs[i].d.x;
+      }
+      const accessTime = (performance.now() - t2).toFixed(1);
+      setProgress('progMem', 65);
+      addDetail('detailMem', '属性遍历', accessTime + ' ms');
+
+      // 释放
+      const t3 = performance.now();
+      objs.length = 0;
+      const freeTime = (performance.now() - t3).toFixed(1);
+      setProgress('progMem', 90);
+      addDetail('detailMem', '释放引用', freeTime + ' ms');
+
+      const total = (parseFloat(createTime) + parseFloat(accessTime) + parseFloat(freeTime)).toFixed(1);
+      setProgress('progMem', 100);
+      prog.classList.remove('active');
+      setScore('scoreMem', total, 'ms');
+
+      if (performance.memory) {
+        addDetail('detailMem', 'JS 堆已用', (performance.memory.usedJSHeapSize / 1048576).toFixed(1) + ' MB');
+        addDetail('detailMem', 'JS 堆总量', (performance.memory.totalJSHeapSize / 1048576).toFixed(1) + ' MB');
+      }
+
+      addDetail('detailMem', '总耗时', total + ' ms');
+      return total;
+    }, 50);
+  }
+
+  // ====== Canvas 测试 ======
+  function runCanvasTest() {
+    clearDetail('detailCanvas');
+    setProgress('progCanvas', 10);
+    const prog = document.getElementById('progCanvas');
+    prog.classList.add('active');
+
+    setTimeout(() => {
+      const cvs = document.createElement('canvas');
+      cvs.width = 800; cvs.height = 800;
+      const ctx = cvs.getContext('2d');
+
+      // 矩形绘制
+      const t1 = performance.now();
+      for (let i = 0; i < 50000; i++) {
+        ctx.fillStyle = `hsl(${Math.random()*360},70%,50%)`;
+        ctx.fillRect(Math.random() * 800, Math.random() * 800, 4, 4);
+      }
+      const rectTime = (performance.now() - t1).toFixed(1);
+      setProgress('progCanvas', 35);
+      addDetail('detailCanvas', '矩形绘制 (5万)', rectTime + ' ms');
+
+      // 圆形绘制
+      const t2 = performance.now();
+      ctx.clearRect(0, 0, 800, 800);
+      for (let i = 0; i < 10000; i++) {
+        ctx.beginPath();
+        ctx.arc(Math.random() * 800, Math.random() * 800, Math.max(1, Math.random() * 10), 0, Math.PI * 2);
+        ctx.fillStyle = `hsl(${Math.random()*360},80%,60%)`;
+        ctx.fill();
+      }
+      const circleTime = (performance.now() - t2).toFixed(1);
+      setProgress('progCanvas', 60);
+      addDetail('detailCanvas', '圆形绘制 (1万)', circleTime + ' ms');
+
+      // 像素操作
+      const t3 = performance.now();
+      const imgData = ctx.getImageData(0, 0, 800, 800);
+      const d = imgData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        d[i] = 255 - d[i];
+        d[i + 1] = 255 - d[i + 1];
+        d[i + 2] = 255 - d[i + 2];
+      }
+      ctx.putImageData(imgData, 0, 0);
+      const pixelTime = (performance.now() - t3).toFixed(1);
+      setProgress('progCanvas', 85);
+      addDetail('detailCanvas', '像素反转 (800x800)', pixelTime + ' ms');
+
+      const total = (parseFloat(rectTime) + parseFloat(circleTime) + parseFloat(pixelTime)).toFixed(1);
+      setProgress('progCanvas', 100);
+      prog.classList.remove('active');
+      setScore('scoreCanvas', total, 'ms');
+      addDetail('detailCanvas', '总耗时', total + ' ms');
+      return total;
+    }, 50);
+  }
+
+  // ====== DOM 测试 ======
+  function runDOMTest() {
+    clearDetail('detailDOM');
+    setProgress('progDOM', 10);
+    const prog = document.getElementById('progDOM');
+    prog.classList.add('active');
+
+    setTimeout(() => {
+      // 创建一个离屏容器
+      const container = document.createElement('div');
+      container.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
+      document.body.appendChild(container);
+
+      // 创建元素
+      const t1 = performance.now();
+      for (let i = 0; i < 10000; i++) {
+        const el = document.createElement('div');
+        el.className = 'test-item-' + i;
+        el.textContent = 'Item ' + i;
+        el.dataset.index = i;
+        container.appendChild(el);
+      }
+      const createTime = (performance.now() - t1).toFixed(1);
+      setProgress('progDOM', 35);
+      addDetail('detailDOM', '创建 1万元素', createTime + ' ms');
+
+      // 查询
+      const t2 = performance.now();
+      for (let i = 0; i < 1000; i++) {
+        container.querySelector('[data-index="' + (i * 10) + '"]');
+      }
+      const queryTime = (performance.now() - t2).toFixed(1);
+      setProgress('progDOM', 60);
+      addDetail('detailDOM', '查询 1000次', queryTime + ' ms');
+
+      // 修改样式
+      const t3 = performance.now();
+      const children = container.children;
+      for (let i = 0; i < children.length; i++) {
+        children[i].style.color = 'red';
+        children[i].style.padding = '2px';
+      }
+      const styleTime = (performance.now() - t3).toFixed(1);
+      setProgress('progDOM', 85);
+      addDetail('detailDOM', '样式修改 1万', styleTime + ' ms');
+
+      // 清理
+      container.remove();
+
+      const total = (parseFloat(createTime) + parseFloat(queryTime) + parseFloat(styleTime)).toFixed(1);
+      setProgress('progDOM', 100);
+      prog.classList.remove('active');
+      setScore('scoreDOM', total, 'ms');
+      addDetail('detailDOM', '总耗时', total + ' ms');
+      return total;
+    }, 50);
+  }
+
+  // ====== 数学测试 ======
+  function runMathTest() {
+    clearDetail('detailMath');
+    setProgress('progMath', 10);
+    const prog = document.getElementById('progMath');
+    prog.classList.add('active');
+
+    setTimeout(() => {
+      // 矩阵乘法 (50x50)
+      const t1 = performance.now();
+      const N = 50;
+      const A = [], B = [], C = [];
+      for (let i = 0; i < N; i++) {
+        A[i] = new Float64Array(N); B[i] = new Float64Array(N); C[i] = new Float64Array(N);
+        for (let j = 0; j < N; j++) {
+          A[i][j] = Math.random();
+          B[i][j] = Math.random();
+        }
+      }
+      for (let i = 0; i < N; i++)
+        for (let j = 0; j < N; j++) {
+          let s = 0;
+          for (let k = 0; k < N; k++) s += A[i][k] * B[k][j];
+          C[i][j] = s;
+        }
+      const matTime = (performance.now() - t1).toFixed(1);
+      setProgress('progMath', 35);
+      addDetail('detailMath', '矩阵乘法 50x50', matTime + ' ms');
+
+      // 三角函数
+      const t2 = performance.now();
+      let triSum = 0;
+      for (let i = 0; i < 5000000; i++) {
+        triSum += Math.sin(i * 0.001) + Math.cos(i * 0.001) + Math.tan(i * 0.0001);
+      }
+      const triTime = (performance.now() - t2).toFixed(1);
+      setProgress('progMath', 65);
+      addDetail('detailMath', '三角函数 500万次', triTime + ' ms');
+
+      // 随机数统计
+      const t3 = performance.now();
+      const buckets = new Float64Array(100);
+      for (let i = 0; i < 10000000; i++) {
+        buckets[Math.floor(Math.random() * 100)]++;
+      }
+      const randTime = (performance.now() - t3).toFixed(1);
+      setProgress('progMath', 90);
+      addDetail('detailMath', '随机数 1000万次', randTime + ' ms');
+
+      const total = (parseFloat(matTime) + parseFloat(triTime) + parseFloat(randTime)).toFixed(1);
+      setProgress('progMath', 100);
+      prog.classList.remove('active');
+      setScore('scoreMath', total, 'ms');
+      addDetail('detailMath', '总耗时', total + ' ms');
+      return total;
+    }, 50);
+  }
+
+  // ====== 全部测试 ======
+  const scores = {};
+
+  async function runAllTests() {
+    const btn = document.getElementById('btnRunAll');
+    btn.disabled = true;
+    toast('开始运行全部测试...');
+
+    runCPUTest();
+    await delay(1500);
+    runMemTest();
+    await delay(1500);
+    runCanvasTest();
+    await delay(1500);
+    runDOMTest();
+    await delay(1500);
+    runMathTest();
+    await delay(1500);
+
+    calculateTotal();
+    btn.disabled = false;
+    toast('全部测试完成');
+  }
+
+  function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function calculateTotal() {
+    // 读取各分数
+    const cpuText = document.getElementById('scoreCPU').textContent;
+    const memText = document.getElementById('scoreMem').textContent;
+    const canvasText = document.getElementById('scoreCanvas').textContent;
+    const domText = document.getElementById('scoreDOM').textContent;
+    const mathText = document.getElementById('scoreMath').textContent;
+
+    const vals = [cpuText, memText, canvasText, domText, mathText].map(v => parseFloat(v));
+    if (vals.some(isNaN)) return;
+
+    const total = vals.reduce((a, b) => a + b, 0);
+
+    // 基准分：越低越好。以 1000ms 总时间为基准，线性映射到 100 分
+    // 高性能设备约 100-300ms，一般 300-800ms，低性能 800+
+    let score = Math.max(0, Math.min(100, Math.round(100 - (total - 100) / 10)));
+
+    document.getElementById('totalScoreNum').textContent = score;
+    document.getElementById('totalScoreNum').style.color =
+      score >= 80 ? 'var(--accent)' : score >= 50 ? 'var(--warn)' : 'var(--danger)';
+
+    const circumference = 2 * Math.PI * 80; // 502.654
+    const offset = circumference * (1 - score / 100);
+    document.getElementById('totalRing2').style.strokeDashoffset = offset;
+
+    const verdict = document.getElementById('totalVerdict');
+    if (score >= 80) { verdict.textContent = '性能优秀 — 流畅运行各类应用'; verdict.style.color = 'var(--accent)'; }
+    else if (score >= 60) { verdict.textContent = '性能良好 — 可满足日常需求'; verdict.style.color = 'var(--accent2)'; }
+    else if (score >= 40) { verdict.textContent = '性能一般 — 部分应用可能卡顿'; verdict.style.color = 'var(--warn)'; }
+    else { verdict.textContent = '性能较弱 — 建议优化或升级设备'; verdict.style.color = 'var(--danger)'; }
+  }
+
+  function resetAll() {
+    ['CPU', 'Mem', 'Canvas', 'DOM', 'Math'].forEach(k => {
+      document.getElementById('score' + k).innerHTML = '--<span class="unit"> ms</span>';
+      document.getElementById('score' + k).className = 'test-score';
+      setProgress('prog' + k, 0);
+      clearDetail('detail' + k);
+    });
+    document.getElementById('totalScoreNum').textContent = '--';
+    document.getElementById('totalScoreNum').style.color = 'var(--fg)';
+    document.getElementById('totalRing2').style.strokeDashoffset = 502.654;
+    document.getElementById('totalVerdict').textContent = '等待测试...';
+    document.getElementById('totalVerdict').style.color = 'var(--muted)';
+    toast('已重置所有测试');
+  }
+</script>
+</body>
+</html>
