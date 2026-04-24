@@ -8,22 +8,26 @@
 <style>
 body{text-align:center;font-family:system-ui;background:#f3f3f3;}
 canvas{border:1px solid #aaa;margin-top:20px;}
-button{margin:5px;padding:10px;border-radius:10px;}
+button{margin:5px;padding:10px;border-radius:10px;background:#444;color:#fff;border:none;}
 </style>
 </head>
 
 <body>
 
-<h2>图像测试</h2>
+<button onclick="back()">←返回</button>
+<h3>图像测试</h3>
 
 <button onclick="noise()">噪点</button>
 <button onclick="circle()">圆形</button>
 <button onclick="gradient()">渐变</button>
+<button onclick="loadImg()">图片加载</button>
+<button onclick="animate()">动画</button>
 
 <canvas id="c" width="300" height="300"></canvas>
 
 <script>
-let ctx=document.getElementById("c").getContext("2d");
+function back(){location.href="../index.html"}
+let ctx=c.getContext("2d");
 
 function noise(){
     for(let i=0;i<2000;i++){
@@ -46,6 +50,23 @@ function gradient(){
     g.addColorStop(1,"blue");
     ctx.fillStyle=g;
     ctx.fillRect(0,0,300,300);
+}
+
+function loadImg(){
+    let img=new Image();
+    img.src="https://picsum.photos/300";
+    img.onload=()=>ctx.drawImage(img,0,0);
+}
+
+function animate(){
+    let x=0;
+    function loop(){
+        ctx.clearRect(0,0,300,300);
+        ctx.fillRect(x,100,50,50);
+        x+=2;
+        if(x<300) requestAnimationFrame(loop);
+    }
+    loop();
 }
 </script>
 
