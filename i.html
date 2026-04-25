@@ -29,6 +29,16 @@
     <p>详细地址：<span id="address">--</span></p>
 </div>
 
+<!-- 新增：打开本机浏览器按钮 -->
+<div class="card">
+    <button class="blue" onclick="openNativeBrowser()">🌐 打开本机浏览器</button>
+</div>
+
+<!-- 新增：提示按钮 -->
+<div class="card">
+    <button class="green" onclick="showTip()">点我</button>
+</div>
+
 <script>
 // === 定位功能 ===
 let watchId = null;
@@ -66,42 +76,18 @@ function toggleLocation() {
 }
 // 自动开启定位
 getLocation();
-</script>
 
-</body>
-</html>
-
-
-<button onclick="openNativeBrowser()">🌐 打开本机浏览器</button>
-
-<script>
+// === 打开本机浏览器 ===
 function openNativeBrowser() {
-    // 跳转到百度，唤起默认浏览器
-    window.open'https('https://dfdd.site', '_blank');
+    // 修复了原代码的语法错误（多了个括号）
+    window.open('https://dfdd.site', '_blank');
+}
+
+// === 提示按钮 ===
+function showTip() {
+    alert('提示：如无法查询经纬度请点击（打开本机浏览器）获取定位');
 }
 </script>
-
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>提示按钮</title>
-    <style>
-        button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            background: #2196F3;
-            color: #fff;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-
-<button onclick="alert('(提示：如无法查询经纬度请点击（打开本机浏览器）获取定位)')">点我</button>
 
 </body>
 </html>
