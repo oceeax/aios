@@ -34,6 +34,7 @@ canvas{margin-top:15px;}
 <input id="emoji" placeholder="表情 😎🔥❤️">
 
 <button onclick="gen()">生成二维码</button>
+<button onclick="saveQr()">保存二维码</button>
 
 <div id="q"></div>
 
@@ -50,6 +51,18 @@ canvas{margin-top:15px;}
 <script>
 function back(){location.href="../index.html"}
 
+// 输入框互斥：聚焦时清空其他三个
+const inputs = ["text","url","wifi","emoji"];
+inputs.forEach(id=>{
+    document.getElementById(id).addEventListener("focus",function(){
+        inputs.forEach(otherId=>{
+            if(otherId !== id){
+                document.getElementById(otherId).value = "";
+            }
+        });
+    });
+});
+
 function gen(){
     let val =
     document.getElementById("text").value ||
@@ -61,6 +74,19 @@ function gen(){
     QRCode.toCanvas(val,{width:220},(e,c)=>{
         document.getElementById("q").appendChild(c);
     });
+}
+
+// 保存二维码
+function saveQr(){
+    const canvas = document.querySelector("#q canvas");
+    if(!canvas){
+        alert("请先生成二维码");
+        return;
+    }
+    let a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = "二维码.png";
+    a.click();
 }
 
 // 扫码
@@ -81,4 +107,4 @@ function startScan(){
 </script>
 
 </body>
-    </html>
+</html>
