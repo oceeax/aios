@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手电</title>
+    <style>
+        *{margin:0;padding:0}
+        body{background:#000;height:100vh;display:flex;align-items:center;justify-content:center}
+        button{background:#ffc107;border:none;padding:20px 40px;border-radius:50px;font-size:24px;cursor:pointer}
+    </style>
+</head>
+<body>
+    <button onclick="toggleTorch()">🔦 开启手电</button>
+
+    <script>
+        let on=false;
+        async function toggleTorch(){
+            const s=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:'environment'}});
+            const t=s.getVideoTracks()[0];
+            const constraints={advanced:[{torch:!on}]};
+            await t.applyConstraints(constraints);
+            on=!on;
+        }
+    </script>
+</body>
+</html>
