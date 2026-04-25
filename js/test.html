@@ -135,12 +135,10 @@ async function check(){
   if(miList.includes(userMi)){
     tip.innerText = "✅ 验证通过，正在进入主页...";
     tip.style.color = "#39d353";
-    // 写入永久登录凭证
+    // 写入永久授权凭证
     localStorage.setItem("auth_ok","yes");
-    // 跳转真实主页 index2.html
-    setTimeout(()=>{
-        location.href = "index2.html";
-    },800);
+    // 【正确真实主页地址】
+    location.href = "h/h8/j9/jw/sd.html";
   }else{
     tip.innerText = "❌ 激活码错误，请重新输入";
     tip.style.color = "#f56c6c";
