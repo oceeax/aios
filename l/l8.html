@@ -1,193 +1,340 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>多功能应用（完整）</title>
-<style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
-    h2 { margin: 10px 0; text-align: center; }
-    .card { background: #fff; padding: 15px; margin: 12px; border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
-    button { margin: 6px; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; }
-    .blue { background: #2196F3; color: #fff; }
-    .green { background: #4CAF50; color: #fff; }
-    .red { background: #f44336; color: #fff; }
-    input, textarea { width: 95%; padding: 8px; margin: 8px 0; }
-    #canvas { width: 100%; height: 200px; border: 1px solid #ccc; border-radius: 10px; }
-    #score { font-size: 20px; font-weight: bold; float: right; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <title>阿里云&腾讯云 真实接口测试工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", system-ui;
+        }
+        body {
+            background: linear-gradient(135deg, #f0f4ff, #f5f8ff);
+            padding: 15px;
+        }
+        .header {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .tab-ali {
+            background: linear-gradient(90deg, #ff6a00, #ff9500);
+        }
+        .tab-tx {
+            background: linear-gradient(90deg, #00a0e9, #00c6ff);
+        }
+        .tab-btn.active {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: scale(1.03);
+        }
+        .page {
+            display: none;
+        }
+        .page.show {
+            display: block;
+        }
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .card h4 {
+            margin-bottom: 10px;
+            color: #222;
+            font-size: 15px;
+        }
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dde0e8;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .run-btn {
+            flex: 1;
+            padding: 9px;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .ali-btn {
+            background: #ff7800;
+        }
+        .tx-btn {
+            background: #0091ea;
+        }
+        .log-box {
+            background: #1a1a2e;
+            color: #00ff9d;
+            padding: 12px;
+            border-radius: 8px;
+            min-height: 120px;
+            max-height: 200px;
+            overflow: auto;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            margin-top: 8px;
+        }
+        .red {color: #ff5555;}
+        .yellow {color: #ffd700;}
+        .blue {color: #50b7ff;}
+        .green {color: #00ff9d;}
+    </style>
 </head>
 <body>
 
-<!-- 定位功能 -->
-<div class="card">
-    <h2>定位功能</h2>
-    <button class="blue" onclick="window.open('https://www.baidu.com','_blank')">前往百度</button>
-    <button class="green" onclick="openWeChat()">打开微信</button>
-    <button class="red" onclick="toggleLocation()"><span id="locBtn">关闭定位</span></button>
-    <p id="status">定位状态：等待中...</p>
-    <p id="time"></p>
-    <p>经度：<span id="lng">--</span></p>
-    <p>纬度：<span id="lat">--</span></p>
-    <p>县/市/镇：<span id="region">--</span></p>
-    <p>详细地址：<span id="address">--</span></p>
+<!-- 顶部切换标签 -->
+<div class="header">
+    <button class="tab-btn tab-ali active" onclick="switchPage('ali')">阿里云测试</button>
+    <button class="tab-btn tab-tx" onclick="switchPage('tx')">腾讯云测试</button>
 </div>
 
-<!-- 动画 -->
-<div class="card">
-    <h2>动画（演示）</h2>
-    <button onclick="startAnimation()">启动动画</button>
-    <canvas id="canvas"></canvas>
+<!-- 阿里云页面 -->
+<div class="page show" id="page-ali">
+    <!-- 1.服务器连通性检测 -->
+    <div class="card">
+        <h4>🔹 阿里云-服务器连通检测</h4>
+        <input type="text" id="ali-host1" placeholder="输入阿里云IP/域名 例：47.98.xx.xx">
+        <div class="btn-group">
+            <button class="run-btn ali-btn" onclick="checkConnect('ali')">立即检测</button>
+        </div>
+        <div class="log-box" id="log-ali-1"></div>
+    </div>
+
+    <!-- 2.端口开放检测 -->
+    <div class="card">
+        <h4>🔹 阿里云-端口开放测试</h4>
+        <input type="text" id="ali-host2" placeholder="服务器地址">
+        <input type="number" id="ali-port2" placeholder="端口 例：22、80、3389" value="22">
+        <div class="btn-group">
+            <button class="run-btn ali-btn" onclick="checkPort('ali')">检测端口</button>
+        </div>
+        <div class="log-box" id="log-ali-2"></div>
+    </div>
+
+    <!-- 3.DNS解析测试 -->
+    <div class="card">
+        <h4>🔹 阿里云-DNS解析</h4>
+        <input type="text" id="ali-dns" placeholder="输入域名 例：scsx.fun">
+        <div class="btn-group">
+            <button class="run-btn ali-btn" onclick="checkDns('ali')">解析查询</button>
+        </div>
+        <div class="log-box" id="log-ali-3"></div>
+    </div>
+
+    <!-- 4.网络延迟测速 -->
+    <div class="card">
+        <h4>🔹 阿里云-延迟测速</h4>
+        <input type="text" id="ali-ping" placeholder="阿里云节点/服务器地址">
+        <div class="btn-group">
+            <button class="run-btn ali-btn" onclick="checkPing('ali')">测试延迟</button>
+        </div>
+        <div class="log-box" id="log-ali-4"></div>
+    </div>
+
+    <!-- 5.跨域接口请求 -->
+    <div class="card">
+        <h4>🔹 阿里云-接口跨域测试</h4>
+        <input type="text" id="ali-api" placeholder="输入阿里云接口完整URL">
+        <div class="btn-group">
+            <button class="run-btn ali-btn" onclick="checkApi('ali')">请求接口</button>
+        </div>
+        <div class="log-box" id="log-ali-5"></div>
+    </div>
 </div>
 
-<!-- 文本输入与保存 -->
-<div class="card">
-    <h2>输入与保存</h2>
-    <textarea id="textInput" rows="4" placeholder="在此输入内容..."></textarea><br>
-    <button class="blue" onclick="saveTxt()">保存为TXT</button>
-    <button class="green" onclick="saveWord()">保存为Word</button>
-    <button class="blue" onclick="saveExcel()">保存为Excel</button>
-    <input type="file" id="imgInput" accept="image/*">
-</div>
+<!-- 腾讯云页面 -->
+<div class="page" id="page-tx">
+    <!-- 1.服务器连通性检测 -->
+    <div class="card">
+        <h4>🔹 腾讯云-服务器连通检测</h4>
+        <input type="text" id="tx-host1" placeholder="输入腾讯云IP/域名">
+        <div class="btn-group">
+            <button class="run-btn tx-btn" onclick="checkConnect('tx')">立即检测</button>
+        </div>
+        <div class="log-box" id="log-tx-1"></div>
+    </div>
 
-<!-- 游戏功能 -->
-<div class="card">
-    <h2>投篮小游戏 <span id="score">0</span></h2>
-    <canvas id="gameCanvas" width="300" height="300" style="border:1px solid #ccc;"></canvas><br>
-    <button class="blue" onclick="shoot(2)">两分球</button>
-    <button class="green" onclick="shoot(3)">三分球</button>
+    <!-- 2.端口开放检测 -->
+    <div class="card">
+        <h4>🔹 腾讯云-端口开放测试</h4>
+        <input type="text" id="tx-host2" placeholder="服务器地址">
+        <input type="number" id="tx-port2" placeholder="端口 例：22、80、3389" value="22">
+        <div class="btn-group">
+            <button class="run-btn tx-btn" onclick="checkPort('tx')">检测端口</button>
+        </div>
+        <div class="log-box" id="log-tx-2"></div>
+    </div>
+
+    <!-- 3.DNS解析测试 -->
+    <div class="card">
+        <h4>🔹 腾讯云-DNS解析</h4>
+        <input type="text" id="tx-dns" placeholder="输入域名 例：ddaa.online">
+        <div class="btn-group">
+            <button class="run-btn tx-btn" onclick="checkDns('tx')">解析查询</button>
+        </div>
+        <div class="log-box" id="log-tx-3"></div>
+    </div>
+
+    <!-- 4.网络延迟测速 -->
+    <div class="card">
+        <h4>🔹 腾讯云-延迟测速</h4>
+        <input type="text" id="tx-ping" placeholder="腾讯云节点/服务器地址">
+        <div class="btn-group">
+            <button class="run-btn tx-btn" onclick="checkPing('tx')">测试延迟</button>
+        </div>
+        <div class="log-box" id="log-tx-4"></div>
+    </div>
+
+    <!-- 5.跨域接口请求 -->
+    <div class="card">
+        <h4>🔹 腾讯云-接口跨域测试</h4>
+        <input type="text" id="tx-api" placeholder="输入腾讯云接口完整URL">
+        <div class="btn-group">
+            <button class="run-btn tx-btn" onclick="checkApi('tx')">请求接口</button>
+        </div>
+        <div class="log-box" id="log-tx-5"></div>
+    </div>
 </div>
 
 <script>
-// === 定位功能 ===
-let watchId = null;
-function updateTime() {
-    const now = new Date();
-    document.getElementById("time").innerText = "时间：" + now.toLocaleString();
-}
-setInterval(updateTime, 1000);
-
-function getLocation() {
-    if (navigator.geolocation) {
-        watchId = navigator.geolocation.watchPosition(showPosition, showError, { enableHighAccuracy: true });
-    } else {
-        document.getElementById("status").innerText = "浏览器不支持定位";
-    }
-}
-function showPosition(position) {
-    document.getElementById("status").innerText = "定位成功";
-    document.getElementById("lng").innerText = position.coords.longitude;
-    document.getElementById("lat").innerText = position.coords.latitude;
-    // TODO: 可以调用百度/高德 API 获取城市信息
-}
-function showError(error) {
-    document.getElementById("status").innerText = "定位失败：" + error.message;
-}
-function toggleLocation() {
-    if (watchId) {
-        navigator.geolocation.clearWatch(watchId);
-        watchId = null;
-        document.getElementById("status").innerText = "定位已关闭";
-        document.getElementById("locBtn").innerText = "开启定位";
-    } else {
-        getLocation();
-        document.getElementById("locBtn").innerText = "关闭定位";
-    }
-}
-getLocation();
-
-// === 打开微信 ===
-function openWeChat() {
-    try {
-        window.location.href = "weixin://";
-    } catch(e) {
-        alert("请安装微信");
+// 页面切换
+function switchPage(type){
+    // 切换标签激活
+    document.querySelectorAll('.tab-btn').forEach(btn=>btn.classList.remove('active'));
+    event.target.classList.add('active');
+    // 切换页面
+    document.getElementById('page-ali').classList.remove('show');
+    document.getElementById('page-tx').classList.remove('show');
+    if(type === 'ali'){
+        document.getElementById('page-ali').classList.add('show');
+    }else{
+        document.getElementById('page-tx').classList.add('show');
     }
 }
 
-// === 动画 ===
-let ctx = document.getElementById("canvas").getContext("2d");
-let dog = {x:20,y:150}, sun={x:150,y:40}, chickens=[{x:60,y:120},{x:100,y:100}];
-function drawScene(){
-    ctx.clearRect(0,0,300,200);
-    ctx.fillStyle="orange"; ctx.beginPath(); ctx.arc(sun.x,sun.y,20,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle="brown"; ctx.fillRect(dog.x,dog.y,20,20);
-    ctx.fillStyle="red";
-    chickens.forEach(c=>ctx.fillRect(c.x,c.y,15,15));
-}
-function moveScene(){
-    dog.x += 2; if(dog.x>300) dog.x=0;
-    chickens.forEach(c=>c.y-=1);
-    drawScene();
-}
-function startAnimation(){
-    setInterval(moveScene,100);
-}
-setTimeout(startAnimation,5000);
-
-// === 保存文件 ===
-function saveTxt(){
-    let text=document.getElementById("textInput").value;
-    let blob=new Blob([text],{type:"text/plain"});
-    let a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="output.txt";
-    a.click();
-}
-function saveWord(){
-    let text=document.getElementById("textInput").value;
-    let blob=new Blob(['\ufeff'+text],{type:"application/msword"});
-    let a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="output.doc";
-    a.click();
-}
-function saveExcel(){
-    let text=document.getElementById("textInput").value;
-    let cells=text.match(/.{1,20}/g) || [];
-    let csv=cells.join(",\n");
-    let blob=new Blob([csv],{type:"application/vnd.ms-excel"});
-    let a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="output.xls";
-    a.click();
+// 写入彩色日志
+function writeLog(id,msg,color=''){
+    const box = document.getElementById(id);
+    const time = new Date().toLocaleTimeString();
+    let colorClass = '';
+    if(color==='red') colorClass='red';
+    if(color==='yellow') colorClass='yellow';
+    if(color==='blue') colorClass='blue';
+    if(color==='green') colorClass='green';
+    box.innerHTML += `[${time}] <span class="${colorClass}">${msg}</span>\n`;
+    box.scrollTop = box.scrollHeight;
 }
 
-// === 投篮小游戏 ===
-let game=document.getElementById("gameCanvas");
-let gctx=game.getContext("2d");
-let ball={x:150,y:250,r:10,shooting:false,target:0},score=0;
-function drawGame(){
-    gctx.clearRect(0,0,300,300);
-    // 篮框
-    gctx.fillStyle="red"; gctx.fillRect(130,20,40,10);
-    // 小孩
-    gctx.fillStyle="blue"; gctx.fillRect(140,280,20,20);
-    // 篮球
-    gctx.beginPath(); gctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); gctx.fillStyle="orange"; gctx.fill();
+// 1.连通性检测（真实请求）
+function checkConnect(type){
+    let host = type==='ali' ? document.getElementById('ali-host1').value.trim() : document.getElementById('tx-host1').value.trim();
+    let logId = type==='ali' ? 'log-ali-1' : 'log-tx-1';
+    if(!host){writeLog(logId,'请输入服务器IP/域名','red');return;}
+    writeLog(logId,'开始检测服务器连通性...','blue');
+    const start = Date.now();
+    fetch(`https://${host}`,{mode:'no-cors'})
+    .then(()=>{
+        const cost = Date.now()-start;
+        writeLog(logId,`✅ 服务器连通正常，响应耗时：${cost}ms`,'green');
+    })
+    .catch(err=>{
+        writeLog(logId,`❌ 连通失败：${err.message}`,'red');
+        writeLog(logId,'可能原因：安全组未放行、防火墙拦截、IP禁止外网访问','yellow');
+    })
 }
-function shoot(points){
-    ball.y=250; ball.shooting=true; ball.target=(points===2)?230:200;
-    let interval=setInterval(()=>{
-        ball.y-=5;
-        if(ball.y<=ball.target){
-            clearInterval(interval);
-            ball.shooting=false;
-            score+=points;
-            document.getElementById("score").innerText=score;
+
+// 2.端口检测
+function checkPort(type){
+    let host = type==='ali' ? document.getElementById('ali-host2').value.trim() : document.getElementById('tx-host2').value.trim();
+    let port = type==='ali' ? document.getElementById('ali-port2').value : document.getElementById('tx-port2').value;
+    let logId = type==='ali' ? 'log-ali-2' : 'log-tx-2';
+    if(!host||!port){writeLog(logId,'请填写完整地址和端口','red');return;}
+    writeLog(logId,`正在检测端口 ${port} ...`,'blue');
+    fetch(`https://${host}:${port}`,{mode:'no-cors'})
+    .then(()=>writeLog(logId,`✅ 端口${port} 已开放`,'green'))
+    .catch(err=>{
+        writeLog(logId,`❌ 端口${port} 关闭/拦截`,'red');
+        writeLog(logId,'排查：安全组入站规则、服务器防火墙、端口未监听','yellow');
+    })
+}
+
+// 3.DNS解析（调用公共DNS接口 真实）
+function checkDns(type){
+    let domain = type==='ali' ? document.getElementById('ali-dns').value.trim() : document.getElementById('tx-dns').value.trim();
+    let logId = type==='ali' ? 'log-ali-3' : 'log-tx-3';
+    if(!domain){writeLog(logId,'请输入域名','red');return;}
+    writeLog(logId,'正在公共DNS解析...','blue');
+    fetch(`https://dns.google/resolve?name=${domain}`)
+    .then(res=>res.json())
+    .then(data=>{
+        if(data.Answer){
+            let ipList = data.Answer.map(item=>item.data).join(' | ');
+            writeLog(logId,`✅ 解析成功：\nIP列表：${ipList}`,'green');
+        }else{
+            writeLog(logId,'⚠️ 解析无结果，域名无效或未备案','yellow');
         }
-        drawGame();
-    },50);
+    })
+    .catch(err=>writeLog(logId,`❌ DNS解析失败：${err.message}`,'red'))
 }
-drawGame();
+
+// 4.延迟测速
+function checkPing(type){
+    let host = type==='ali' ? document.getElementById('ali-ping').value.trim() : document.getElementById('tx-ping').value.trim();
+    let logId = type==='ali' ? 'log-ali-4' : 'log-tx-4';
+    if(!host){writeLog(logId,'请输入测试地址','red');return;}
+    writeLog(logId,'开始测试网络延迟...','blue');
+    const start = Date.now();
+    fetch(`https://${host}`,{mode:'no-cors',cache:'no-cache'})
+    .then(()=>{
+        let ms = Date.now()-start;
+        let level = ms<100 ? '优秀' : ms<200 ? '良好' : '偏高';
+        writeLog(logId,`✅ 延迟：${ms}ms ｜ 网络质量：${level}`,'green');
+    })
+    .catch(()=>writeLog(logId,'❌ 测速失败，节点无法访问','red'))
+}
+
+// 5.真实接口请求测试
+function checkApi(type){
+    let url = type==='ali' ? document.getElementById('ali-api').value.trim() : document.getElementById('tx-api').value.trim();
+    let logId = type==='ali' ? 'log-ali-5' : 'log-tx-5';
+    if(!url){writeLog(logId,'请输入接口URL','red');return;}
+    writeLog(logId,'正在请求接口...','blue');
+    fetch(url)
+    .then(res=>{
+        writeLog(logId,`✅ 接口请求成功 状态码：${res.status}`,'green');
+        writeLog(logId,`请求类型：${res.type}`,'blue');
+    })
+    .catch(err=>{
+        writeLog(logId,`❌ 接口请求失败：${err.message}`,'red');
+        writeLog(logId,'大概率：跨域CORS限制、服务器防盗链、接口鉴权','yellow');
+    })
+}
 </script>
 
 </body>
 </html>
-
-
-
-
-
-把这里面的定位功能单独拨出来，其他的不要，就要定位功能的全部代码
