@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>输入与保存</title>
+
+<style>
+body{
+    margin:0;
+    font-family:sans-serif;
+    background:#f2f2f2;
+    text-align:center;
+}
+
+h1{
+    margin-top:20px;
+}
+
+textarea{
+    width:90%;
+    height:180px;
+    margin-top:15px;
+    padding:10px;
+    font-size:16px;
+    border-radius:10px;
+    border:1px solid #ccc;
+}
+
+/* 按钮 */
+.btn{
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    color:#fff;
+    font-size:15px;
+}
+
+/* 颜色 */
+.blue{background:#2196F3;}
+.green{background:#4CAF50;}
+.orange{background:#ff9800;}
+.red{background:#f44336;}
+.gray{background:#666;}
+/* 替换原来的颜色部分 */
+.pink{background:#F72585;}
+.lightpink{background:#FF80AB;}
+.red{background:#E53935;}
+.orange{background:#FB8C00;}
+.yellow{background:#FDD835;}
+.green{background:#43A047;}
+.teal{background:#00ACC1;}
+.blue{background:#1E88E5;}
+.purple{background:#8E24AA;}
+.gray{background:#757575;}
+
+/* 布局 */
+.row{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin-top:12px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    width:90%;
+    margin:12px auto;
+}
+</style>
+</head>
+
+<body>
+
+<h1>输入与保存</h1>
+
+<!-- 上方按钮 -->
+<div class="row">
+    <button class="btn red" onclick="clearText()">清空</button>
+    <button class="btn teal" onclick="pasteText()">粘贴</button>
+</div>
+
+<textarea id="text" placeholder="在此输入内容..."></textarea>
+
+<!-- 第一排 -->
+<div class="row">
+    <button class="btn blue" onclick="downloadFile('txt')">TXT</button>
+    <button class="btn green" onclick="downloadWord()">Word</button>
+    <button class="btn blue" onclick="downloadExcel()">Excel</button>
+    <button class="btn green" onclick="downloadPPT()">PPT</button>
+</div>
+
+<!-- 第二排（4个一行） -->
+<div class="grid">
+    <button class="btn red" onclick="downloadCode('py')">Python</button>
+    <button class="btn purple" onclick="downloadCode('java')">Java</button>
+    <button class="btn red" onclick="downloadCode('cs')">C#</button>
+    <button class="btn purple" onclick="downloadCode('html')">HTML</button>
+</div>
+
+
+
+<script>
+const textArea=document.getElementById("text");
+
+/* 清空 */
+function clearText(){
+    textArea.value="";
+}
+
+/* 粘贴 */
+async function pasteText(){
+    try{
+        let text=await navigator.clipboard.readText();
+        textArea.value+=text;
+    }catch{
+        alert("无法读取剪贴板");
+    }
+}
+
+/* 通用下载 */
+function saveFile(content,filename,type){
+    const blob=new Blob([content],{type});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=filename;
+    a.click();
+}
+
+/* TXT */
+function downloadFile(ext){
+    saveFile(textArea.value,"内容."+ext,"text/plain");
+}
+
+/* Word */
+function downloadWord(){
+    let html="<html><body>"+textArea.value.replace(/\n/g,"<br>")+"</body></html>";
+    saveFile(html,"内容.doc","application/msword");
+}
+
+/* Excel */
+function downloadExcel(){
+    let html="<table><tr><td>"+textArea.value.replace(/\n/g,"</td></tr><tr><td>")+"</td></tr></table>";
+    saveFile(html,"内容.xls","application/vnd.ms-excel");
+}
+
+/* 代码文件 */
+function downloadCode(ext){
+    let name="代码."+ext;
+    let type="text/plain";
+
+    if(ext==="html") type="text/html";
+
+    saveFile(textArea.value,name,type);
+}
+
+/* PDF（简单版） */
+function downloadPDF(){
+    let win=window.open("");
+    win.document.write("<pre>"+textArea.value+"</pre>");
+    win.print();
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多功能应用（完整）</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
+    h2 { margin: 10px 0; text-align: center; }
+    .card { background: #fff; padding: 15px; margin: 12px; border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+    button { margin: 6px; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; }
+    .blue { background: #2196F3; color: #fff; }
+    .green { background: #4CAF50; color: #fff; }
+    .red { background: #f44336; color: #fff; }
+    input, textarea { width: 95%; padding: 8px; margin: 8px 0; }
+    #canvas { width: 100%; height: 200px; border: 1px solid #ccc; border-radius: 10px; }
+    #score { font-size: 20px; font-weight: bold; float: right; }
+</style>
+</head>
+<body>
+
+<!-- 定位功能 -->
+<div class="card">
+    <h2>定位功能</h2>
+    <button class="blue" onclick="window.open('https://www.baidu.com','_blank')">前往百度</button>
+    <button class="green" onclick="openWeChat()">打开微信</button>
+    <button class="red" onclick="toggleLocation()"><span id="locBtn">关闭定位</span></button>
+    <p id="status">定位状态：等待中...</p>
+    <p id="time"></p>
+    <p>经度：<span id="lng">--</span></p>
+    <p>纬度：<span id="lat">--</span></p>
+    <p>县/市/镇：<span id="region">--</span></p>
+    <p>详细地址：<span id="address">--</span></p>
+</div>
+
+<!-- 动画 -->
+<div class="card">
+    <h2>动画（演示）</h2>
+    <button onclick="startAnimation()">启动动画</button>
+    <canvas id="canvas"></canvas>
+</div>
+
+<!-- 文本输入与保存 -->
+<div class="card">
+    <h2>输入与保存</h2>
+    <textarea id="textInput" rows="4" placeholder="在此输入内容..."></textarea><br>
+    <button class="blue" onclick="saveTxt()">保存为TXT</button>
+    <button class="green" onclick="saveWord()">保存为Word</button>
+    <button class="blue" onclick="saveExcel()">保存为Excel</button>
+    <input type="file" id="imgInput" accept="image/*">
+</div>
+
+<!-- 游戏功能 -->
+<div class="card">
+    <h2>投篮小游戏 <span id="score">0</span></h2>
+    <canvas id="gameCanvas" width="300" height="300" style="border:1px solid #ccc;"></canvas><br>
+    <button class="blue" onclick="shoot(2)">两分球</button>
+    <button class="green" onclick="shoot(3)">三分球</button>
+</div>
+
+<script>
+// === 定位功能 ===
+let watchId = null;
+function updateTime() {
+    const now = new Date();
+    document.getElementById("time").innerText = "时间：" + now.toLocaleString();
+}
+setInterval(updateTime, 1000);
+
+function getLocation() {
+    if (navigator.geolocation) {
+        watchId = navigator.geolocation.watchPosition(showPosition, showError, { enableHighAccuracy: true });
+    } else {
+        document.getElementById("status").innerText = "浏览器不支持定位";
+    }
+}
+function showPosition(position) {
+    document.getElementById("status").innerText = "定位成功";
+    document.getElementById("lng").innerText = position.coords.longitude;
+    document.getElementById("lat").innerText = position.coords.latitude;
+    // TODO: 可以调用百度/高德 API 获取城市信息
+}
+function showError(error) {
+    document.getElementById("status").innerText = "定位失败：" + error.message;
+}
+function toggleLocation() {
+    if (watchId) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+        document.getElementById("status").innerText = "定位已关闭";
+        document.getElementById("locBtn").innerText = "开启定位";
+    } else {
+        getLocation();
+        document.getElementById("locBtn").innerText = "关闭定位";
+    }
+}
+getLocation();
+
+// === 打开微信 ===
+function openWeChat() {
+    try {
+        window.location.href = "weixin://";
+    } catch(e) {
+        alert("请安装微信");
+    }
+}
+
+// === 动画 ===
+let ctx = document.getElementById("canvas").getContext("2d");
+let dog = {x:20,y:150}, sun={x:150,y:40}, chickens=[{x:60,y:120},{x:100,y:100}];
+function drawScene(){
+    ctx.clearRect(0,0,300,200);
+    ctx.fillStyle="orange"; ctx.beginPath(); ctx.arc(sun.x,sun.y,20,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle="brown"; ctx.fillRect(dog.x,dog.y,20,20);
+    ctx.fillStyle="red";
+    chickens.forEach(c=>ctx.fillRect(c.x,c.y,15,15));
+}
+function moveScene(){
+    dog.x += 2; if(dog.x>300) dog.x=0;
+    chickens.forEach(c=>c.y-=1);
+    drawScene();
+}
+function startAnimation(){
+    setInterval(moveScene,100);
+}
+setTimeout(startAnimation,5000);
+
+// === 保存文件 ===
+function saveTxt(){
+    let text=document.getElementById("textInput").value;
+    let blob=new Blob([text],{type:"text/plain"});
+    let a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="output.txt";
+    a.click();
+}
+function saveWord(){
+    let text=document.getElementById("textInput").value;
+    let blob=new Blob(['\ufeff'+text],{type:"application/msword"});
+    let a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="output.doc";
+    a.click();
+}
+function saveExcel(){
+    let text=document.getElementById("textInput").value;
+    let cells=text.match(/.{1,20}/g) || [];
+    let csv=cells.join(",\n");
+    let blob=new Blob([csv],{type:"application/vnd.ms-excel"});
+    let a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="output.xls";
+    a.click();
+}
+
+// === 投篮小游戏 ===
+let game=document.getElementById("gameCanvas");
+let gctx=game.getContext("2d");
+let ball={x:150,y:250,r:10,shooting:false,target:0},score=0;
+function drawGame(){
+    gctx.clearRect(0,0,300,300);
+    // 篮框
+    gctx.fillStyle="red"; gctx.fillRect(130,20,40,10);
+    // 小孩
+    gctx.fillStyle="blue"; gctx.fillRect(140,280,20,20);
+    // 篮球
+    gctx.beginPath(); gctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); gctx.fillStyle="orange"; gctx.fill();
+}
+function shoot(points){
+    ball.y=250; ball.shooting=true; ball.target=(points===2)?230:200;
+    let interval=setInterval(()=>{
+        ball.y-=5;
+        if(ball.y<=ball.target){
+            clearInterval(interval);
+            ball.shooting=false;
+            score+=points;
+            document.getElementById("score").innerText=score;
+        }
+        drawGame();
+    },50);
+}
+drawGame();
+</script>
+
+</body>
+</html>
+
+
+
+
+
+把这里面的定位功能单独拨出来，其他的不要，就要定位功能的全部代码
