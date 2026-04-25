@@ -1,168 +1,522 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>输入与保存</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>多益精灵大冒险 - 益生菌儿童故事</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖动干扰，但保留文字可选更好，不强制 */
+        }
 
-<style>
-body{
-    margin:0;
-    font-family:sans-serif;
-    background:#f2f2f2;
-    text-align:center;
-}
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #b8e1fc 0%, #f9e6b3 100%);
+            font-family: 'Comic Neue', 'Comic Neue', 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI Emoji', 'Apple SD Gothic Neo', cursive, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
 
-h1{
-    margin-top:20px;
-}
+        /* 故事卡片容器 */
+        .story-container {
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(255, 253, 235, 0.92);
+            border-radius: 80px 60px 80px 60px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2), inset 0 1px 4px rgba(255,255,200,0.8);
+            overflow: hidden;
+            backdrop-filter: blur(2px);
+            transition: all 0.3s ease;
+        }
 
-textarea{
-    width:90%;
-    height:180px;
-    margin-top:15px;
-    padding:10px;
-    font-size:16px;
-    border-radius:10px;
-    border:1px solid #ccc;
-}
+        /* 头部区域 */
+        .hero {
+            background: #ffcd94;
+            padding: 30px 30px 20px 30px;
+            text-align: center;
+            border-bottom: 8px solid #ffa559;
+            background-image: radial-gradient(circle at 10% 30%, rgba(255,245,190,0.5) 2%, transparent 2.5%);
+            background-size: 28px 28px;
+        }
 
-/* 按钮 */
-.btn{
-    padding:12px;
-    border:none;
-    border-radius:12px;
-    color:#fff;
-    font-size:15px;
-}
+        .hero h1 {
+            font-size: 2.8rem;
+            color: #a3411b;
+            text-shadow: 4px 4px 0 #ffd966;
+            letter-spacing: 2px;
+            display: inline-block;
+            background: #fff5e0;
+            padding: 0 25px;
+            border-radius: 60px;
+            line-height: 1.3;
+            box-shadow: 0 8px 0 #e1a451;
+            transform: rotate(-1deg);
+        }
 
-/* 颜色 */
-.blue{background:#2196F3;}
-.green{background:#4CAF50;}
-.orange{background:#ff9800;}
-.red{background:#f44336;}
-.gray{background:#666;}
-/* 替换原来的颜色部分 */
-.pink{background:#F72585;}
-.lightpink{background:#FF80AB;}
-.red{background:#E53935;}
-.orange{background:#FB8C00;}
-.yellow{background:#FDD835;}
-.green{background:#43A047;}
-.teal{background:#00ACC1;}
-.blue{background:#1E88E5;}
-.purple{background:#8E24AA;}
-.gray{background:#757575;}
+        .hero p {
+            font-size: 1.3rem;
+            margin-top: 18px;
+            color: #5d2e0e;
+            font-weight: bold;
+            background: #ffefc0;
+            display: inline-block;
+            padding: 8px 24px;
+            border-radius: 40px;
+        }
 
-/* 布局 */
-.row{
-    display:flex;
-    justify-content:center;
-    gap:10px;
-    margin-top:12px;
-}
+        /* 主体内容区，左右布局 */
+        .main-story {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 30px 30px 20px 30px;
+        }
 
-.grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:10px;
-    width:90%;
-    margin:12px auto;
-}
-</style>
+        /* 插画区 + 动态益生菌 */
+        .illustration-area {
+            flex: 1.2;
+            min-width: 240px;
+            background: #FFFAE6;
+            border-radius: 64px;
+            padding: 20px;
+            box-shadow: inset 0 0 0 3px white, 0 12px 24px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .bacteria-scene {
+            background: #d9f0ec;
+            border-radius: 48px;
+            padding: 20px 12px;
+            position: relative;
+            background-image: radial-gradient(circle at 15% 40%, #c0e0d8 2px, transparent 2px);
+            background-size: 22px 22px;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .germ-characters {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .probiotic {
+            background: #fee2b5;
+            border-radius: 100px;
+            padding: 12px 18px;
+            text-align: center;
+            width: 110px;
+            box-shadow: 0 8px 0 #b97f48;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .probiotic:hover {
+            transform: translateY(-5px);
+        }
+        .probiotic-emoji {
+            font-size: 4rem;
+        }
+        .probiotic-name {
+            font-weight: bold;
+            background: #ffb882;
+            border-radius: 50px;
+            padding: 4px;
+            margin-top: 8px;
+            color: #3b250a;
+        }
+
+        .bad-bug {
+            background: #d9b48b;
+            border-radius: 70px;
+            padding: 12px 15px;
+            width: 110px;
+            background: #d9634e;
+            box-shadow: 0 6px 0 #8b3c2a;
+            text-align: center;
+        }
+        .bad-emoji {
+            font-size: 3.8rem;
+            filter: drop-shadow(2px 2px 0 #4f1e0e);
+        }
+
+        .fight-status {
+            background: #fff0bb;
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            margin-top: 15px;
+            font-size: 1rem;
+        }
+
+        /* 故事文字区 */
+        .story-text {
+            flex: 1.8;
+            min-width: 260px;
+            background: #FFF5E6;
+            border-radius: 56px;
+            padding: 18px 28px;
+            box-shadow: inset 0 0 0 3px #fff8e7, 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .story-content {
+            font-size: 1.35rem;
+            line-height: 1.55;
+            color: #462309;
+            margin-bottom: 28px;
+            background: #fffaf0;
+            padding: 20px;
+            border-radius: 44px;
+            min-height: 220px;
+        }
+
+        .story-content p {
+            margin-bottom: 16px;
+        }
+
+        .story-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        button {
+            background: #ffb156;
+            border: none;
+            font-family: inherit;
+            font-weight: bold;
+            padding: 12px 28px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            color: #3e280f;
+            cursor: pointer;
+            transition: 0.1s linear;
+            box-shadow: 0 5px 0 #8b4e1e;
+        }
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #8b4e1e;
+        }
+        button.reset-btn {
+            background: #b3cf9e;
+            box-shadow: 0 5px 0 #6f8f56;
+            color: #2b411c;
+        }
+        .progress {
+            background: #ffe3b5;
+            border-radius: 40px;
+            padding: 6px 16px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        /* 小彩蛋 + 响应式 */
+        .footer {
+            background: #ffdc9a;
+            text-align: center;
+            padding: 15px;
+            font-size: 1rem;
+            color: #945d2e;
+            border-top: 4px solid #ffbf6e;
+        }
+
+        @media (max-width: 750px) {
+            .hero h1 { font-size: 2rem; }
+            .story-content { font-size: 1.1rem; }
+            .probiotic { width: 85px; padding: 8px 8px; }
+            .probiotic-emoji { font-size: 2.8rem; }
+        }
+        .highlight {
+            animation: bounceLight 0.5s ease;
+        }
+        @keyframes bounceLight {
+            0% { transform: scale(1); background: #ffd966; }
+            80% { transform: scale(1.05); background: #ffe69e; }
+            100% { transform: scale(1); background: #fee2b5; }
+        }
+    </style>
 </head>
-
 <body>
+<div class="story-container">
+    <div class="hero">
+        <h1>🧸 多益精灵大冒险 🌈</h1>
+        <p>✨ 益生菌小队 · 保卫肠道王国 ✨</p>
+    </div>
 
-<h1>输入与保存</h1>
+    <div class="main-story">
+        <!-- 左侧互动区 益生菌战士和小坏菌战斗场景 -->
+        <div class="illustration-area">
+            <div class="bacteria-scene">
+                <div style="font-size:1.2rem; font-weight:bold; background:#fff7cf; display:inline-block; padding:4px 16px; border-radius:60px;">⚔️ 战场时刻 ⚔️</div>
+                <div class="germ-characters" id="germTeam">
+                    <!-- 动态由js填充益生菌阵容 -->
+                </div>
+                <div id="badBugArea" style="margin-top: 6px;">
+                    <!-- 坏细菌显示 -->
+                </div>
+                <div class="fight-status" id="fightStatusMsg">
+                    点击【帮助消化】或【打败坏菌】～
+                </div>
+            </div>
+        </div>
 
-<!-- 上方按钮 -->
-<div class="row">
-    <button class="btn red" onclick="clearText()">清空</button>
-    <button class="btn teal" onclick="pasteText()">粘贴</button>
+        <!-- 右侧故事区和控制台 -->
+        <div class="story-text">
+            <div class="story-content" id="storyMessage">
+                <p>🌱 在一个名叫“多益生菌儿童乐园”的肠道王国里，住着三个活泼的益生菌小勇士：<strong>乐乐乳酸桿菌</strong>、<strong>壮壮双歧杆菌</strong>和<strong>甜甜酵母菌</strong>。</p>
+                <p>🍬 突然有一天，<strong>腐败大王</strong>带着坏细菌军团来捣乱，让小朋友肚子胀气、不消化！🧸 小英雄们需要你的帮助，一起打败坏细菌，恢复肠道健康！</p>
+                <p>✨ 点击下方按钮，为益生菌加油，每战胜一个敌人，故事就会推进～</p>
+            </div>
+            <div class="story-controls">
+                <button id="helpDigestBtn">🥗 帮助消化 · 召唤营养</button>
+                <button id="fightBtn">⚡ 消灭坏细菌军团 ⚡</button>
+                <button id="resetBtn" class="reset-btn">🔄 重启大冒险</button>
+                <div class="progress" id="progressText">🌟 胜利进度: 0 / 3</div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        🧫 多益生菌儿童专属 — 每天活力满满，肠道乐悠悠～
+    </div>
 </div>
-
-<textarea id="text" placeholder="在此输入内容..."></textarea>
-
-<!-- 第一排 -->
-<div class="row">
-    <button class="btn blue" onclick="downloadFile('txt')">TXT</button>
-    <button class="btn green" onclick="downloadWord()">Word</button>
-    <button class="btn blue" onclick="downloadExcel()">Excel</button>
-    <button class="btn green" onclick="downloadPPT()">PPT</button>
-</div>
-
-<!-- 第二排（4个一行） -->
-<div class="grid">
-    <button class="btn red" onclick="downloadCode('py')">Python</button>
-    <button class="btn purple" onclick="downloadCode('java')">Java</button>
-    <button class="btn red" onclick="downloadCode('cs')">C#</button>
-    <button class="btn purple" onclick="downloadCode('html')">HTML</button>
-</div>
-
-
 
 <script>
-const textArea=document.getElementById("text");
-
-/* 清空 */
-function clearText(){
-    textArea.value="";
-}
-
-/* 粘贴 */
-async function pasteText(){
-    try{
-        let text=await navigator.clipboard.readText();
-        textArea.value+=text;
-    }catch{
-        alert("无法读取剪贴板");
+    // ---------- 故事状态 ----------
+    // 定义三阶段的敌人(坏细菌)和剧情描述
+    const enemies = [
+        { name: "腹胀怪", emoji: "🦠💨", desc: "腹胀怪让肠道充满气体，小肚子圆滚滚！" },
+        { name: "懒惰球菌", emoji: "😴🦠", desc: "懒惰球菌让消化速度变得超级慢，食物堆成小山。" },
+        { name: "腐败大王", emoji: "👑🦹‍♂️🤢", desc: "腐败大王来了！它释放毒素，威胁整个肠道王国！" }
+    ];
+    
+    // 益生菌小队数据 (永久)
+    const probiotics = [
+        { name: "乐乐乳酸菌", emoji: "🍋🧴", desc: "擅长分解乳糖，产生能量!" },
+        { name: "壮壮双歧杆菌", emoji: "💪🦠", desc: "超级强壮，抑制坏细菌!" },
+        { name: "甜甜酵母菌", emoji: "🍰✨", desc: "带来香甜好味道，促进吸收!" }
+    ];
+    
+    let currentStep = 0;      // 0=未击败任何敌人, 1=击败第一个, 2=击败第二个, 3=最终胜利结局
+    let storyLog = [];         // 保存额外叙事 (但直接用动态更新区域)
+    // 附加协助次数计数（华丽的小彩蛋，不影响主线，但增加互动趣味）
+    let helpCount = 0;
+    
+    // DOM 元素
+    const storyDiv = document.getElementById("storyMessage");
+    const progressSpan = document.getElementById("progressText");
+    const fightStatusMsg = document.getElementById("fightStatusMsg");
+    const germTeamDiv = document.getElementById("germTeam");
+    const badBugArea = document.getElementById("badBugArea");
+    
+    // 刷新界面：展示益生菌头像，展示当前敌人(根据step)，刷新故事进度文字
+    function refreshUI() {
+        // 渲染益生菌小队 (左侧一直显示)
+        germTeamDiv.innerHTML = probiotics.map(p => `
+            <div class="probiotic" title="${p.desc}">
+                <div class="probiotic-emoji">${p.emoji}</div>
+                <div class="probiotic-name">${p.name}</div>
+            </div>
+        `).join('');
+        
+        // 根据当前 step 渲染坏细菌区域
+        if (currentStep < enemies.length) {
+            const enemy = enemies[currentStep];
+            badBugArea.innerHTML = `
+                <div class="bad-bug" style="margin:0 auto; display:inline-block;">
+                    <div class="bad-emoji">${enemy.emoji}</div>
+                    <div style="color:white; font-weight:bold; background:#a33d27; border-radius:40px; padding:2px 6px; margin-top:6px;">${enemy.name}</div>
+                </div>
+                <div style="margin-top:12px; font-size:0.9rem; background:#FFE3B0; border-radius:40px; padding:6px;">⚠️ ${enemy.desc}</div>
+            `;
+        } else if (currentStep === enemies.length) {
+            // 胜利状态，显示庆贺
+            badBugArea.innerHTML = `
+                <div style="background:goldenrod; border-radius:60px; padding:15px; margin-top:6px;">
+                    <div style="font-size:2.5rem;">🏆✨🥳✨🏆</div>
+                    <div style="font-weight:bold; font-size:1.2rem;">所有坏细菌已被净化！肠道王国恢复和平！</div>
+                </div>
+            `;
+        } else {
+            // 重置时也可能存在，保证安全
+            badBugArea.innerHTML = `<div>✨ 和平乐园 ✨</div>`;
+        }
+        
+        // 更新进度文本
+        progressSpan.innerText = `🌟 胜利进度: ${currentStep} / ${enemies.length}`;
+        if(currentStep === enemies.length) {
+            progressSpan.innerText = `🎉 完美通关! 肠道无敌 🎉`;
+        }
     }
-}
-
-/* 通用下载 */
-function saveFile(content,filename,type){
-    const blob=new Blob([content],{type});
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download=filename;
-    a.click();
-}
-
-/* TXT */
-function downloadFile(ext){
-    saveFile(textArea.value,"内容."+ext,"text/plain");
-}
-
-/* Word */
-function downloadWord(){
-    let html="<html><body>"+textArea.value.replace(/\n/g,"<br>")+"</body></html>";
-    saveFile(html,"内容.doc","application/msword");
-}
-
-/* Excel */
-function downloadExcel(){
-    let html="<table><tr><td>"+textArea.value.replace(/\n/g,"</td></tr><tr><td>")+"</td></tr></table>";
-    saveFile(html,"内容.xls","application/vnd.ms-excel");
-}
-
-/* 代码文件 */
-function downloadCode(ext){
-    let name="代码."+ext;
-    let type="text/plain";
-
-    if(ext==="html") type="text/html";
-
-    saveFile(textArea.value,name,type);
-}
-
-/* PDF（简单版） */
-function downloadPDF(){
-    let win=window.open("");
-    win.document.write("<pre>"+textArea.value+"</pre>");
-    win.print();
-}
+    
+    // 更新右侧故事板的主内容 (根据当前step和额外的action消息)
+    // 可以传入一个特定的动作消息，如果没有就根据step重新生成主线故事
+    function updateStoryContent(actionMessage = null) {
+        if (actionMessage) {
+            // 附加一个动作提示，然后保留完整故事主线
+            let baseStory = getBaseStoryByStep();
+            storyDiv.innerHTML = `<p>${actionMessage}</p><hr style="margin:12px 0; border-color:#ffcf8a;"><div>${baseStory}</div>`;
+        } else {
+            let baseStory = getBaseStoryByStep();
+            storyDiv.innerHTML = baseStory;
+        }
+    }
+    
+    // 根据当前步骤获取主线剧情html
+    function getBaseStoryByStep() {
+        if (currentStep === 0) {
+            return `<p>🌱 一开始，“腐败大王”派出了第一个坏蛋<strong>腹胀怪</strong>！小朋友肚子开始咕噜噜叫，很不舒服。</p>
+                    <p>🧪 <strong>多益精灵小队</strong> 乐乐、壮壮和甜甜一起站出来！乐乐说：“我们需要正能量和帮助消化！” ✨ 点击【帮助消化】为益生菌提供营养，再点击【消灭坏细菌军团】战斗吧！</p>`;
+        } else if (currentStep === 1) {
+            return `<p>🎉 哇！在大家的加油下，乐乐乳酸菌释放乳酸，消灭了<strong>腹胀怪</strong>！肚子变得轻松了！</p>
+                    <p>🐢 但第二个敌人<strong>懒惰球菌</strong>出现了，它让肠道蠕动变得懒洋洋，营养吸收不了。现在需要壮壮双歧杆菌和甜甜酵母菌的协作～ 继续攻击坏菌，也可以先【帮助消化】增加活力！</p>`;
+        } else if (currentStep === 2) {
+            return `<p>🏅 太棒啦！懒惰球菌被打败啦！壮壮用超强粘附力赶跑了它！肠道开始活跃消化～ 但是最终BOSS<strong>腐败大王</strong>登场了！！它非常强大，准备用大招毒素攻击！</p>
+                    <p>🍭 小朋友们，快点点【帮助消化】累积益生元力量，再按<strong>消灭坏细菌军团</strong>完成最终正义之战！！💪</p>`;
+        } else if (currentStep === 3) {
+            return `<p>🎉✨🎊 <strong>奇迹发生了！</strong> 在所有小朋友和益生菌小英雄的齐心努力下，腐败大王被打败，肠道王国充满了芬芳和活力！小朋友再也不会胀气、便秘啦～</p>
+                    <p>🍬🍎 多益精灵们开起了健康派对，唱着歌：“多益生菌，快乐儿童，肚子舒服笑容多！” 🌈 每天喝一杯益生菌，保持肠道好环境！</p>
+                    <p>💖 <strong>恭喜你完成了“多益生菌儿童大冒险”</strong>  按【重启大冒险】可以再玩一次哟！</p>`;
+        }
+        return `<p>冒险继续... 一起帮助益生菌吧！</p>`;
+    }
+    
+    // 核心战斗逻辑 (点击消灭坏细菌)
+    function fightAction() {
+        if (currentStep >= enemies.length) {
+            // 已经通关, 显示胜利提示，不让无限战斗
+            updateStoryContent("🏆 肠道王国已经恢复和平啦！点击【重启大冒险】再玩一次吧！", false);
+            fightStatusMsg.innerText = "🎉 已经是健康乐园啦！重启继续冒险~";
+            return;
+        }
+        
+        // 增加一点小彩蛋: 根据帮助消化次数影响战斗趣味提示, 但不影响主线跳过
+        let bonusMsg = "";
+        if (helpCount > 0) {
+            bonusMsg = ` 因为有 ${helpCount} 次营养助力，益生菌们能量爆棚✨！`;
+        } else {
+            bonusMsg = " 帮助消化可以给益生菌补充能量噢~";
+        }
+        
+        // 战斗胜利: 击败当前敌人
+        const defeatedEnemy = enemies[currentStep];
+        // 战斗叙事
+        const fightText = `⚔️💥 益生菌小队齐心协力！${probiotics.map(p=>p.name).join("、")} 发出耀眼的光芒，击败了 ${defeatedEnemy.name} ${defeatedEnemy.emoji}！${bonusMsg}`;
+        
+        // 进入下一阶段
+        currentStep++;
+        
+        // 刷新界面ui及敌人展示
+        refreshUI();
+        
+        // 特殊结局后额外修改战斗信息
+        if (currentStep === enemies.length) {
+            // 最终胜利，额外彩蛋
+            updateStoryContent(`🎉✨ 终极胜利 ✨🎉 ${fightText}<br><br> 🧸 腐败大王化为泡泡消失，所有肠道小朋友都欢呼：“多益生菌，我们爱你！” 🧸`);
+            fightStatusMsg.innerText = "🎊 完美拯救肠道王国！你是个英雄！ 🎊";
+            // 额外再刷新一下，避免显示错误
+        } else {
+            // 正常击败当前敌人，显示故事推进内容并保留主线上下文
+            updateStoryContent(`✅ ${fightText}<br> ➕ 继续向前，新的挑战来了！`);
+            fightStatusMsg.innerText = `🎈 成功击败${defeatedEnemy.name}！继续加油！剩余${enemies.length - currentStep}个敌人~`;
+        }
+        
+        // 重置帮助计数的加成仅用于互动，不清零也行，保留好玩
+        // 但如果最终胜利显示庆祝，不需要重置helpCount
+    }
+    
+    // 帮助消化动作: 不会推进主线，但会累积帮助计数，产生故事互动，并且可以略微让战斗更轻松的感觉 (纯粹氛围)
+    function helpDigestAction() {
+        if (currentStep >= enemies.length) {
+            updateStoryContent("🌈 肠道王国已经恢复健康啦！谢谢你的帮助，小朋友们每天都喝益生菌，变得超级强壮！✨ 可以重启再玩～");
+            fightStatusMsg.innerText = "🥛 已经是完美状态了！ 试试重启冒险吧～";
+            return;
+        }
+        
+        helpCount++;
+        // 根据当前敌人和益生菌表现，生成一段助消化文本
+        let currentEnemy = enemies[currentStep];
+        let helpMessage = "";
+        let randomFlavor = ["美味的膳食纤维", "可口的益生元", "一大杯暖暖的牛奶", "甜甜的香蕉泥", "香香的燕麦糊"];
+        let food = randomFlavor[helpCount % randomFlavor.length];
+        
+        if (currentStep === 0) {
+            helpMessage = `🍌 乐乐乳酸菌吸收了${food}，活力满满！它产生了更多乳酸，腹胀怪吓得退缩了一点！ 🛡️ 再用【消灭坏细菌军团】给它致命一击吧。`;
+        } else if (currentStep === 1) {
+            helpMessage = `🍎 壮壮双歧杆菌得到${food}的滋养，变得力大无穷！懒惰球菌的迟缓效果被削弱了～ 继续攻击！`;
+        } else if (currentStep === 2) {
+            helpMessage = `🍭 甜甜酵母菌得到了${food}，释放了香甜的治愈酶，腐败大王的毒气减弱了！就差一次总攻击啦～ ⚡`;
+        } else {
+            helpMessage = `🎉 益生菌们享用${food}，开心跳舞，肠道环境更加健康！ (`;
+        }
+        
+        // 更新区域左侧战斗状态显示可爱信息
+        fightStatusMsg.innerHTML = `🥄 帮助消化 +1！ ${probiotics[helpCount%3].name} 得到了能量～ 继续点击战斗吧！`;
+        // 将帮助消化信息展示在主故事框而不覆盖已经的进度，采用追加方式
+        let currentHtml = storyDiv.innerHTML;
+        let newHelperHtml = `<div style="background:#ffe3aa; border-radius:30px; padding:10px; margin-bottom:8px;">🍼 助消化时刻: ${helpMessage}</div>`;
+        // 保留基本内容，但不要丢失原主线 (如果太长了，简单的进行替换前面插入)
+        if (currentStep < enemies.length) {
+            let baseMain = getBaseStoryByStep();
+            storyDiv.innerHTML = `${newHelperHtml}<hr>${baseMain}`;
+        } else {
+            storyDiv.innerHTML = `${newHelperHtml}<hr>${getBaseStoryByStep()}`;
+        }
+        
+        // 闪烁效果加强趣味
+        const probioticsDivs = document.querySelectorAll('.probiotic');
+        if (probioticsDivs.length) {
+            let index = (helpCount-1) % probioticsDivs.length;
+            probioticsDivs[index].classList.add('highlight');
+            setTimeout(() => { probioticsDivs[index].classList.remove('highlight'); }, 500);
+        }
+    }
+    
+    // 重置整个故事
+    function resetAdventure() {
+        currentStep = 0;
+        helpCount = 0;
+        refreshUI();
+        updateStoryContent(null);   // 用基础剧情刷新
+        fightStatusMsg.innerText = "⚡ 冒险重启！帮助益生菌们打倒坏细菌吧 ✨";
+        // 额外增加可爱的初始引导
+        let introMsg = `<p>🌟 冒险重新开始啦！三个益生菌小英雄正等着你的指挥！<br>点击【帮助消化】提升队伍状态，再按【消灭坏细菌军团】来击败敌人～ 每打败一个，故事继续！</p>`;
+        storyDiv.innerHTML = getBaseStoryByStep() + introMsg;
+    }
+    
+    // 初始化事件绑定
+    function bindEvents() {
+        const fightBtn = document.getElementById("fightBtn");
+        const helpBtn = document.getElementById("helpDigestBtn");
+        const resetBtn = document.getElementById("resetBtn");
+        
+        fightBtn.addEventListener("click", fightAction);
+        helpBtn.addEventListener("click", helpDigestAction);
+        resetBtn.addEventListener("click", resetAdventure);
+    }
+    
+    // 渲染初始状态
+    function init() {
+        bindEvents();
+        currentStep = 0;
+        helpCount = 0;
+        refreshUI();
+        updateStoryContent(null);   // 显示初始故事
+        fightStatusMsg.innerText = "🐣 益生菌小队等你指挥！";
+    }
+    
+    init();
 </script>
-
 </body>
 </html>
