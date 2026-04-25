@@ -67,19 +67,6 @@ button:hover{
     font-size:17px;
     font-weight:500;
 }
-.qr-btn{
-    background:#333;
-    margin-top:10px;
-}
-.qr-btn:hover{
-    background:#444;
-}
-#qrImg{
-    width:200px;
-    margin-top:20px;
-    border-radius:8px;
-    display:none;
-}
 </style>
 </head>
 <body>
@@ -89,18 +76,14 @@ button:hover{
 <div class="input-wrap">
     <input id="pwdInput" placeholder="🔐 请输入激活码">
     <button onclick="check()">验证解锁✨</button>
-    <button class="qr-btn" onclick="toggleQr()">显示二维码📷</button>
 </div>
 
 <div class="tip" id="tip"></div>
-
-<img id="qrImg" src="h/h8/j9/nbnb.jpg" alt="二维码">
 
 <script>
 const KEY = CryptoJS.enc.Utf8.parse("9s7d2k8g5h1j3p6q");
 const IV  = CryptoJS.enc.Utf8.parse("a1s2d3f4g5h6j7k8");
 
-// 在这里加多个 单列密文csv
 const csvList = [
   "./h1.csv",
   "./h2.csv"
@@ -108,7 +91,6 @@ const csvList = [
 
 let miList = [];
 
-// 明文转密文
 function toMi(plain){
   let d = CryptoJS.enc.Utf8.parse(plain.trim());
   return CryptoJS.AES.encrypt(d, KEY, {
@@ -118,7 +100,6 @@ function toMi(plain){
   }).toString();
 }
 
-// 读取单列密文CSV
 async function loadCsv(){
   for(let file of csvList){
     let res = await fetch(file);
@@ -135,26 +116,12 @@ async function check(){
   if(miList.includes(userMi)){
     tip.innerText = "✅ 验证通过，正在进入主页...";
     tip.style.color = "#39d353";
-    // 写入永久授权凭证
     localStorage.setItem("auth_ok","yes");
-    // 【正确真实主页地址】
+    // 精准跳转你指定的真实主页
     location.href = "h/h8/j9/jw/sd.html";
   }else{
     tip.innerText = "❌ 激活码错误，请重新输入";
     tip.style.color = "#f56c6c";
-  }
-}
-
-// 切换二维码显示/隐藏
-function toggleQr(){
-  let img = document.getElementById("qrImg");
-  let btn = document.querySelector(".qr-btn");
-  if(img.style.display === "none"){
-    img.style.display = "block";
-    btn.innerText = "隐藏二维码🙈";
-  }else{
-    img.style.display = "none";
-    btn.innerText = "显示二维码📷";
   }
 }
 </script>
