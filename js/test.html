@@ -67,6 +67,19 @@ button:hover{
     font-size:17px;
     font-weight:500;
 }
+.qr-btn{
+    background:#333;
+    margin-top:10px;
+}
+.qr-btn:hover{
+    background:#444;
+}
+#qrImg{
+    width:200px;
+    margin-top:20px;
+    border-radius:8px;
+    display:none;
+}
 </style>
 </head>
 <body>
@@ -76,9 +89,12 @@ button:hover{
 <div class="input-wrap">
     <input id="pwdInput" placeholder="🔐 请输入激活码">
     <button onclick="check()">验证解锁✨</button>
+    <button class="qr-btn" onclick="toggleQr()">显示二维码📷</button>
 </div>
 
 <div class="tip" id="tip"></div>
+
+<img id="qrImg" src="h/h8/j9/nbnb.jpg" alt="二维码">
 
 <script>
 const KEY = CryptoJS.enc.Utf8.parse("9s7d2k8g5h1j3p6q");
@@ -117,13 +133,32 @@ async function check(){
   let userText = pwdInput.value.trim();
   let userMi = toMi(userText);
   if(miList.includes(userMi)){
-    tip.innerText = "✅ 验证通过";
+    tip.innerText = "✅ 验证通过，正在进入主页...";
     tip.style.color = "#39d353";
+    // 写入永久登录凭证
+    localStorage.setItem("auth_ok","yes");
+    // 跳转真实主页 index2.html
+    setTimeout(()=>{
+        location.href = "index2.html";
+    },800);
   }else{
-    tip.innerText = "❌ 密码错误";
+    tip.innerText = "❌ 激活码错误，请重新输入";
     tip.style.color = "#f56c6c";
+  }
+}
+
+// 切换二维码显示/隐藏
+function toggleQr(){
+  let img = document.getElementById("qrImg");
+  let btn = document.querySelector(".qr-btn");
+  if(img.style.display === "none"){
+    img.style.display = "block";
+    btn.innerText = "隐藏二维码🙈";
+  }else{
+    img.style.display = "none";
+    btn.innerText = "显示二维码📷";
   }
 }
 </script>
 </body>
-  </html>
+</html>
