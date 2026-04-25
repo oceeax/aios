@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多格式视频播放器</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    margin: 0;
+    padding: 10px;
+    text-align: center;
+  }
+
+  /* 上方工具栏 */
+  .top-bar {
+    display: flex;
+    justify-content: space-between; /* 左右分布 */
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 5px;
+  }
+  .left-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .left-controls input[type="text"] {
+    width: 160px;
+    padding: 4px;
+    font-size: 14px;
+  }
+  #confirmBtn {
+    background: #4CAF50;
+    color: white;
+    font-size: 10px;       /* 缩小字体 */
+    padding: 2px 6px;      /* 缩小内边距 */
+    border: none;
+    border-radius: 3px;    /* 小圆角，横向按钮 */
+    cursor: pointer;
+  }
+  #confirmBtn:hover {
+    background: #45a049;
+  }
+
+  video {
+    width: 100%;
+    max-height: 60vh;
+    background: black;
+    margin-bottom: 8px;
+    transition: transform 0.3s ease; /* 平滑缩放 */
+  }
+
+  /* 播放控制行 */
+  .controls {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+  }
+  .controls button {
+    font-size: 10px;
+    padding: 4px 8px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  }
+  .play { background: green; }
+  .stop { background: red; }
+  .download { background: orange; }
+  .volup { background: #0066cc; }
+  .voldown { background: #003366; }
+  .gain { background: purple; }
+  .zoom { background: teal; }
+
+  /* 快进快退容器（整体缩小 0.8） */
+  .speed-controls {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px auto;
+    width: 80%;
+  }
+  .speed-forward, .speed-backward {
+    flex: 1;
+    margin: 0 2px;
+    font-size: 10px;
+    padding: 3px 6px;
+    border-radius: 50px;
+    border: none;
+    color: white;
+    cursor: pointer;
+  }
+  .speed-forward { background: #00008B; } /* 深蓝 */
+  .speed-backward { background: #000; color: white; }
+</style>
+</head>
+<body>
+
+<!-- 上方工具栏 -->
+<div class="top-bar">
+  <!-- 左边：输入地址 + 确定 -->
+  <div class="left-controls">
+    <input type="text" id="urlInput" placeholder="输入视频地址">
+    <button id="confirmBtn" onclick="loadVideo()">确定</button>
+  </div>
+  <!-- 右边：选择本地文件 -->
+  <input type="file" id="fileInput" accept="video/*">
+</div>
+
+<!-- 视频播放器 -->
+<video id="videoPlayer" controls></video>
+
+<!-- 播放控制行 -->
+<div class="controls">
+  <button class="play" onclick="playVideo()">播放</button>
+  <button class="stop" onclick="pauseVideo()">停止</button>
+  <button class="download" onclick="downloadVideo()">下载</button>
+  <button class="voldown" onclick="changeVolume(-0.1)">音量-</button>
+  <button class="volup" onclick="changeVolume(0.1)">音量+</button>
+  <button class="gain" onclick="increaseGain()">增益</button>
+  <button class="zoom" onclick="zoomVideo()">放大</button>
+</div>
+
+<!-- 快进按钮行 -->
+<div class="speed-controls">
+  <button class="speed-forward" onclick="setSpeed(0.25)">0.25x</button>
+  <button class="speed-forward" onclick="setSpeed(0.5)">0.5x</button>
+  <button class="speed-forward" onclick="setSpeed(1)">1x</button>
+  <button class="speed-forward" onclick="setSpeed(1.5)">1.5x</button>
+  <button class="speed-forward" onclick="setSpeed(2)">2x</button>
+  <button class="speed-forward" onclick="setSpeed(4)">4x</button>
+  <button class="speed-forward" onclick="setSpeed(6)">6x</button>
+  <button class="speed-forward" onclick="setSpeed(8)">8x</button>
+</div>
+
+<!-- 快退按钮行 -->
+<div class="speed-controls">
+  <button class="speed-backward" onclick="rewind(0.25)">-0.25x</button>
+  <button class="speed-backward" onclick="rewind(0.5)">-0.5x</button>
+  <button class="speed-backward" onclick="rewind(1)">-1x</button>
+  <button class="speed-backward" onclick="rewind(1.5)">-1.5x</button>
+  <button class="speed-backward" onclick="rewind(2)">-2x</button>
+  <button class="speed-backward" onclick="rewind(4)">-4x</button>
+  <button class="speed-backward" onclick="rewind(6)">-6x</button>
+  <button class="speed-backward" onclick="rewind(8)">-8x</button>
+</div>
+
+<script>
+  const video = document.getElementById("videoPlayer");
+  const fileInput = document.getElementById("fileInput");
+  const urlInput = document.getElementById("urlInput");
+
+  let zoomLevel = 1;
+  let zoomTimer = null;
+
+  // 选择本地文件
+  fileInput.addEventListener("change", function() {
+    const file = this.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      video.src = url;
+      video.play();
+    }
+  });
+
+  // 播放输入网址视频
+  function loadVideo() {
+    const url = urlInput.value.trim();
+    if (url) {
+      video.src = url;
+      video.play();
+    }
+  }
+
+  function playVideo() { video.play(); }
+  function pauseVideo() { video.pause(); }
+
+  function setSpeed(rate) {
+    video.playbackRate = rate;
+  }
+
+  function rewind(rate) {
+    video.currentTime = Math.max(0, video.currentTime - rate * 5);
+  }
+
+  function changeVolume(val) {
+    video.volume = Math.min(1, Math.max(0, video.volume + val));
+  }
+
+  // 增益
+  let gainNode;
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const source = audioCtx.createMediaElementSource(video);
+  gainNode = audioCtx.createGain();
+  source.connect(gainNode).connect(audioCtx.destination);
+
+  function increaseGain() {
+    gainNode.gain.value += 0.2;
+  }
+
+  // 放大功能（5秒后恢复原大小）
+  function zoomVideo() {
+    zoomLevel += 0.5;
+    if (zoomLevel > 3) zoomLevel = 1;
+    video.style.transform = `scale(${zoomLevel})`;
+    video.style.transformOrigin = "center";
+
+    if (zoomTimer) clearTimeout(zoomTimer);
+    if (zoomLevel > 1) {
+      zoomTimer = setTimeout(() => {
+        zoomLevel = 1;
+        video.style.transform = "scale(1)";
+      }, 5000);
+    }
+  }
+
+  function downloadVideo() {
+    const a = document.createElement("a");
+    a.href = video.src;
+    a.download = "video.mp4";
+    a.click();
+  }
+</script>
+
+</body>
+</html>
