@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>定位功能</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+        background-color: #1a1a1a;
+        color: #ffffff;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .timer {
+        font-size: 48px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #ffffff;
+    }
+
+    .location {
+        font-size: 18px;
+        color: #cccccc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .location::before {
+        content: "📍";
+    }
+
+    /* 下面原版样式 */
+    h2 { margin: 10px 0; text-align: center; }
+    .card { background: #2b2b2b; padding: 15px; margin: 12px; border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+    button { margin: 6px; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; }
+    .blue { background: #2196F3; color: #fff; }
+    .green { background: #4CAF50; color: #fff; }
+    .red { background: #f44336; color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- 你要新加的：顶部倒计时+简约定位 -->
+<div class="header">
+    <div class="timer">00:02:50</div>
+    <div class="location" id="locText">纬度-- 经度--</div>
+</div>
+
+<!-- 你原来全部定位面板 + 按钮 -->
+<div class="card">
+    <h2>定位功能</h2>
+    <button class="red" onclick="toggleLocation()"><span id="locBtn">关闭定位</span></button>
+    <p id="status">定位状态：等待中...</p>
+    <p id="time"></p>
+    <p>经度：<span id="lng">--</span></p>
+    <p>纬度：<span id="lat">--</span></p>
+    <p>县/市/镇：<span id="region">--</span></p>
+    <p>详细地址：<span id="address">--</span></p>
+</div>
+
+<div class="card">
+    <button class="blue" onclick="openNativeBrowser()">🌐 打开本机浏览器</button>
+    <button class="green" onclick="showTip()">功能提示</button>
+</div>
+
+<script>
+// ========== 顶部倒计时+简约定位 ==========
+let seconds = 170;
+setInterval(() => {
+    seconds--;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    document.querySelector('.timer').textContent = 
+        `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    if(seconds <= 0) seconds = 170;
+}, 1000);
+
+function getPos(){
+    if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(res=>{
+            let lat = res.coords.latitude.toFixed(2);
+            let lng = res.coords.longitude.toFixed(2);
+            document.getElementById("locText").innerText = `纬度${lat} 经度${lng}`;
+        },err=>{
+            document.getElementById("locText").innerText = "定位获取失败";
+        })
+    }else{
+        document.getElementById("locText").innerText = "浏览器不支持定位";
+    }
+}
+getPos();
+
+// ========== 下方原版全套定位代码 ==========
+let watchId = null;
+function updateTime() {
+    const now = new Date();
+    document.getElementById("time").innerText = "时间：" + now.toLocaleString();
+}
+setInterval(updateTime, 1000);
+
+function getLocation() {
+    if (navigator.geolocation) {
+        watchId = navigator.geolocation.watchPosition(showPosition, showError, { enableHighAccuracy: true });
+    } else {
+        document.getElementById("status").innerText = "浏览器不支持定位";
+    }
+}
+function showPosition(position) {
+    document.getElementById("status").innerText = "定位成功";
+    document.getElementById("lng").innerText = position.coords.longitude;
+    document.getElementById("lat").innerText = position.coords.latitude;
+}
+function showError(error) {
+    document.getElementById("status").innerText = "定位失败：" + error.message;
+}
+function toggleLocation() {
+    if (watchId) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+        document.getElementById("status").innerText = "定位已关闭";
+        document.getElementById("locBtn").innerText = "开启定位";
+    } else {
+        getLocation();
+        document.getElementById("locBtn").innerText = "关闭定位";
+    }
+}
+getLocation();
+
+// 打开默认浏览器
+function openNativeBrowser() {
+    window.open('https://dfdd.site', '_blank');
+}
+
+// 提示弹窗
+function showTip() {
+    alert('提示：如无法查询经纬度请点击（打开本机浏览器）获取定位');
+}
+</script>
+
+</body>
+</html>
