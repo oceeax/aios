@@ -2,18 +2,82 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>单列密文CSV验证</title>
 <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
 <style>
-body{background:#111;color:#fff;text-align:center;padding-top:100px;}
-input{padding:12px;width:300px;border:0;border-radius:4px;}
-button{padding:12px 25px;background:#2563eb;border:0;color:#fff;border-radius:4px;margin-left:8px;}
-.tip{margin:30px 0;font-size:18px;}
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body{
+    background:#111;
+    color:#fff;
+    text-align:center;
+    min-height: 100vh;
+    padding: 80px 15px 0;
+    font-family:微软雅黑,sans-serif;
+}
+.wel{
+    font-size: 16px;
+    color:#ccc;
+    margin-bottom: 35px;
+    letter-spacing:1px;
+    line-height: 1.6;
+}
+.input-wrap{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+}
+input{
+    width: 100%;
+    max-width: 280px;
+    padding:12px 15px;
+    border:0;
+    border-radius:8px;
+    background:#222;
+    color:#fff;
+    outline:none;
+    border:1px solid #333;
+    font-size: 15px;
+}
+input:focus{
+    border-color:#2563eb;
+}
+button{
+    width: 100%;
+    max-width: 280px;
+    padding:12px;
+    background:#2563eb;
+    border:0;
+    color:#fff;
+    border-radius:8px;
+    cursor:pointer;
+    transition:0.2s;
+    font-size: 15px;
+}
+button:hover{
+    background:#1d4ed8;
+}
+.tip{
+    margin:30px 0;
+    font-size:17px;
+    font-weight:500;
+}
 </style>
 </head>
 <body>
-<input id="pwdInput" placeholder="输入明文密码">
-<button onclick="check()">验证解锁</button>
+
+<div class="wel">🎁 欢迎体验硬核工具，平安喜乐相伴，一路顺遂无忧🌙</div>
+
+<div class="input-wrap">
+    <input id="pwdInput" placeholder="🔐 请输入激活码">
+    <button onclick="check()">验证解锁✨</button>
+</div>
+
 <div class="tip" id="tip"></div>
 
 <script>
@@ -62,4 +126,4 @@ async function check(){
 }
 </script>
 </body>
-</html>
+  </html>
