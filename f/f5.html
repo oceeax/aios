@@ -37,16 +37,11 @@ textarea{
 }
 
 /* 颜色 */
-.blue{background:#1E88E5;}
-.green{background:#43A047;}
-.orange{background:#FB8C00;}
-.red{background:#E53935;}
-.gray{background:#757575;}
-.pink{background:#F72585;}
-.lightpink{background:#FF80AB;}
-.yellow{background:#FDD835;}
-.teal{background:#00ACC1;}
-.purple{background:#8E24AA;}
+.blue{background:#2196F3;}
+.green{background:#4CAF50;}
+.red{background:#f44336;}
+.purple{background:#9C27B0;}
+.teal{background:#00BCD4;}
 
 /* 布局 */
 .row{
@@ -112,45 +107,49 @@ async function pasteText(){
     }
 }
 
-/* 通用下载核心 */
-function saveFile(content,filename,type){
-    const blob=new Blob([content],{type});
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download=filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
+// === 核心修复：兼容所有浏览器的下载函数 ===
+function saveFile(content, filename, type) {
+    // 用 Blob 直接创建，不依赖 URL.revokeObjectURL 可能导致的跨域问题
+    const blob = new Blob([content], { type });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    // 必须把元素加到 body 里再点击，避免部分浏览器的安全限制
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    // 延迟释放 URL，避免部分浏览器报错
+    setTimeout(() => URL.revokeObjectURL(link.href), 100);
 }
 
 /* TXT纯文本 */
 function downloadFile(ext){
-    saveFile(textArea.value,"内容.txt","text/plain");
+    saveFile(textArea.value, "内容.txt", "text/plain;charset=utf-8");
 }
 
-/* 修复Word：纯文本doc，不会变成网页 */
+/* Word 纯文本doc，不会变成网页 */
 function downloadWord(){
-    saveFile(textArea.value,"内容.doc","application/msword");
+    // 加上BOM头，避免中文乱码
+    saveFile("\uFEFF" + textArea.value, "内容.doc", "application/msword;charset=utf-8");
 }
 
-/* 修复Excel */
+/* Excel 纯文本csv格式，可直接用Excel打开 */
 function downloadExcel(){
     let csv = textArea.value.replace(/\n/g,"\r\n");
-    saveFile(csv,"内容.xls","application/vnd.ms-excel");
+    saveFile("\uFEFF" + csv, "内容.csv", "text/csv;charset=utf-8");
 }
 
-/* PPT 修复 可直接下载 */
+/* PPT 纯文本格式，可被WPS/Office识别 */
 function downloadPPT(){
-    saveFile(textArea.value,"内容.ppt","application/vnd.ms-powerpoint");
+    saveFile(textArea.value, "内容.ppt", "application/vnd.ms-powerpoint;charset=utf-8");
 }
 
 /* 各类代码文件 */
 function downloadCode(ext){
-    let name="代码."+ext;
-    let type="text/plain";
-    if(ext==="html") type="text/html";
-    saveFile(textArea.value,name,type);
+    let name = "代码." + ext;
+    let type = "text/plain;charset=utf-8";
+    if(ext === "html") type = "text/html;charset=utf-8";
+    saveFile(textArea.value, name, type);
 }
 </script>
 
