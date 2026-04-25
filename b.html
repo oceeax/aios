@@ -12,6 +12,14 @@
         .box{background:#fff;border-radius:16px;padding:35px 15px;text-align:center;text-decoration:none;color:#222;font-size:18px;box-shadow:0 2px 8px #00000012;}
     </style>
 </head>
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.1"></script>
+<script>
+  const client = new Appwrite.Client();
+  client
+    .setEndpoint('https://fra.cloud.appwrite.io/v1')
+    .setProject('69ece0da00003cf5d79f');
+  window.appwriteClient = client;
+</script>
 <body>
     <h1>图片中心</h1>
     <div class="grid">
