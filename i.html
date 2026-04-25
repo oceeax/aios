@@ -1,226 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>定位坐标｜双接口天气｜唤起地图APP</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft Yahei", system-ui, sans-serif;
-        }
-        body {
-            background: #f4f6f9;
-            padding: 20px;
-        }
-        .container {
-            max-width: 540px;
-            margin: 0 auto;
-            background: #fff;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-        }
-        h2 {
-            text-align: center;
-            color: #222;
-            margin-bottom: 18px;
-            font-size: 20px;
-        }
-        .key-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 15px;
-            margin: 8px 0;
-        }
-        .btn-row {
-            display: flex;
-            gap: 10px;
-            margin: 12px 0;
-        }
-        button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 15px;
-            cursor: pointer;
-        }
-        .btn-loc { background: #1677ff; }
-        .btn-copy { background: #722ed1; }
-        .btn-search { background: #00b96b; width: 100%; }
-        .btn-gaode { background: #ff7d00; }
-        .btn-baidu { background: #2982ff; }
-        .result {
-            margin-top: 15px;
-            padding: 16px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            line-height: 2.1;
-            color: #333;
-            white-space: pre-wrap;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>定位坐标 · 独立天气 · 地图APP</h2>
-
-        <!-- 密钥输入框 -->
-        <input class="key-input" type="text" id="apiKey" placeholder="密钥输入框（异常提示请输入密钥）">
-
-        <div class="btn-row">
-            <button class="btn-loc" onclick="getGPS()">📍 获取当前定位</button>
-            <button class="btn-copy" onclick="copyLatLng()">📋 复制坐标</button>
-        </div>
-
-        <input type="text" id="searchTxt" placeholder="输入：城市/县城 / 纬度,经度">
-        <button class="btn-search" onclick="searchAll()">🔍 查询坐标+天气</button>
-
-        <!-- 无限制，直接唤起APP -->
-        <div class="btn-row" style="margin-top:15px;">
-            <button class="btn-gaode" onclick="openAmapApp()">🗺️ 高德地图APP</button>
-            <button class="btn-baidu" onclick="openBaiduMapApp()">🗺️ 百度地图APP</button>
-        </div>
-
-        <div class="result" id="resultBox">等待操作...</div>
-    </div>
-
-    <script>
-        let lat = "";
-        let lng = "";
-
-        // 1. 获取GPS定位
-        function getGPS() {
-            let res = document.getElementById("resultBox");
-            res.innerText = "正在定位...";
-            if (!navigator.geolocation) {
-                res.innerText = "浏览器不支持定位";
-                return;
-            }
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                lat = pos.coords.latitude.toFixed(6);
-                lng = pos.coords.longitude.toFixed(6);
-                let addrText = await getAddressByLL(lng, lat);
-                let weatherText = await getCityWeatherNew(addrText.city);
-
-                res.innerText = `定位成功\n纬度：${lat}\n经度：${lng}\n地区：${addrText.province} ${addrText.city}\n\n${weatherText}`;
-            }, () => {
-                res.innerText = "定位失败，请开启定位权限";
-            });
-        }
-
-        // 【接口1 地理坐标】经纬度转地址 独立公开接口
-        async function getAddressByLL(lon, la) {
-            try {
-                let r = await fetch(`https://api.oioweb.cn/api/geo?lat=${la}&lon=${lon}`);
-                let d = await r.json();
-                return { province: d.province, city: d.city };
-            } catch {
-                return { province: "地址获取失败，请输入密钥", city: "" };
-            }
-        }
-
-        // 【接口2 天气】全新独立免费天气接口，单独运行
-        async function getCityWeatherNew(city) {
-            if (!city) return "";
-            try {
-                let w = await fetch(`https://api.oioweb.cn/api/weather?city=${encodeURIComponent(city)}`);
-                let wd = await w.json();
-                return `天气：${wd.weather}\n温度：${wd.temp}℃\n湿度：${wd.humidity}\n风向：${wd.wind}`;
-            } catch {
-                return "天气获取失败，请输入密钥";
-            }
-        }
-
-        // 【接口3 地名转坐标】额外增加一套查询平台
-        async function getLLByCity(cityName) {
-            try {
-                let r = await fetch(`https://api.oioweb.cn/api/geocode?address=${encodeURIComponent(cityName)}`);
-                let d = await r.json();
-                return { lat: d.lat, lng: d.lng };
-            } catch {
-                return null;
-            }
-        }
-
-        // 综合查询：坐标、地名分开执行，互不卡死
-        async function searchAll() {
-            let val = document.getElementById("searchTxt").value.trim();
-            let res = document.getElementById("resultBox");
-            if (!val) {
-                alert("请输入城市或坐标");
-                return;
-            }
-            res.innerText = "查询中...";
-
-            // 输入坐标
-            if (val.includes(",")) {
-                let arr = val.split(",");
-                lat = arr[0].trim();
-                lng = arr[1].trim();
-                let addr = await getAddressByLL(lng, lat);
-                let weather = await getCityWeatherNew(addr.city);
-                res.innerText = `坐标查询完成\n输入坐标：${lat},${lng}\n归属：${addr.province} ${addr.city}\n\n${weather}`;
-                return;
-            }
-
-            // 输入城市名称
-            let llObj = await getLLByCity(val);
-            if (!llObj) {
-                res.innerText = "坐标查询失败，请输入密钥";
-                return;
-            }
-            lat = llObj.lat;
-            lng = llObj.lng;
-            let weather = await getCityWeatherNew(val);
-            res.innerText = `城市查询完成\n城市：${val}\n纬度：${lat}\n经度：${lng}\n\n${weather}`;
-        }
-
-        // 复制坐标
-        function copyLatLng() {
-            if (!lat || !lng) {
-                alert("暂无坐标");
-                return;
-            }
-            navigator.clipboard.writeText(`${lat},${lng}`);
-            alert("复制成功：" + lat + "," + lng);
-        }
-
-        // 高德APP 唤醒
-        function openAmapApp() {
-            window.location.href = "amapuri://";
-        }
-
-        // 百度地图APP 【修复版】手机强制唤起
-        function openBaiduMapApp() {
-            // 标准百度地图 Scheme 协议，手机完美调用
-            window.location.href = "baidumap://map/";
-        }
-    </script>
-</body>
-</html>
-
-
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>多功能应用（完整）</title>
+<title>定位功能</title>
 <style>
     body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
     h2 { margin: 10px 0; text-align: center; }
@@ -230,9 +13,6 @@
     .blue { background: #2196F3; color: #fff; }
     .green { background: #4CAF50; color: #fff; }
     .red { background: #f44336; color: #fff; }
-    input, textarea { width: 95%; padding: 8px; margin: 8px 0; }
-    #canvas { width: 100%; height: 200px; border: 1px solid #ccc; border-radius: 10px; }
-    #score { font-size: 20px; font-weight: bold; float: right; }
 </style>
 </head>
 <body>
@@ -240,8 +20,6 @@
 <!-- 定位功能 -->
 <div class="card">
     <h2>定位功能</h2>
-    <button class="blue" onclick="window.open('https://www.baidu.com','_blank')">前往百度</button>
-    <button class="green" onclick="openWeChat()">打开微信</button>
     <button class="red" onclick="toggleLocation()"><span id="locBtn">关闭定位</span></button>
     <p id="status">定位状态：等待中...</p>
     <p id="time"></p>
@@ -249,31 +27,6 @@
     <p>纬度：<span id="lat">--</span></p>
     <p>县/市/镇：<span id="region">--</span></p>
     <p>详细地址：<span id="address">--</span></p>
-</div>
-
-<!-- 动画 -->
-<div class="card">
-    <h2>动画（演示）</h2>
-    <button onclick="startAnimation()">启动动画</button>
-    <canvas id="canvas"></canvas>
-</div>
-
-<!-- 文本输入与保存 -->
-<div class="card">
-    <h2>输入与保存</h2>
-    <textarea id="textInput" rows="4" placeholder="在此输入内容..."></textarea><br>
-    <button class="blue" onclick="saveTxt()">保存为TXT</button>
-    <button class="green" onclick="saveWord()">保存为Word</button>
-    <button class="blue" onclick="saveExcel()">保存为Excel</button>
-    <input type="file" id="imgInput" accept="image/*">
-</div>
-
-<!-- 游戏功能 -->
-<div class="card">
-    <h2>投篮小游戏 <span id="score">0</span></h2>
-    <canvas id="gameCanvas" width="300" height="300" style="border:1px solid #ccc;"></canvas><br>
-    <button class="blue" onclick="shoot(2)">两分球</button>
-    <button class="green" onclick="shoot(3)">三分球</button>
 </div>
 
 <script>
@@ -296,7 +49,6 @@ function showPosition(position) {
     document.getElementById("status").innerText = "定位成功";
     document.getElementById("lng").innerText = position.coords.longitude;
     document.getElementById("lat").innerText = position.coords.latitude;
-    // TODO: 可以调用百度/高德 API 获取城市信息
 }
 function showError(error) {
     document.getElementById("status").innerText = "定位失败：" + error.message;
@@ -312,92 +64,8 @@ function toggleLocation() {
         document.getElementById("locBtn").innerText = "关闭定位";
     }
 }
+// 自动开启定位
 getLocation();
-
-// === 打开微信 ===
-function openWeChat() {
-    try {
-        window.location.href = "weixin://";
-    } catch(e) {
-        alert("请安装微信");
-    }
-}
-
-// === 动画 ===
-let ctx = document.getElementById("canvas").getContext("2d");
-let dog = {x:20,y:150}, sun={x:150,y:40}, chickens=[{x:60,y:120},{x:100,y:100}];
-function drawScene(){
-    ctx.clearRect(0,0,300,200);
-    ctx.fillStyle="orange"; ctx.beginPath(); ctx.arc(sun.x,sun.y,20,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle="brown"; ctx.fillRect(dog.x,dog.y,20,20);
-    ctx.fillStyle="red";
-    chickens.forEach(c=>ctx.fillRect(c.x,c.y,15,15));
-}
-function moveScene(){
-    dog.x += 2; if(dog.x>300) dog.x=0;
-    chickens.forEach(c=>c.y-=1);
-    drawScene();
-}
-function startAnimation(){
-    setInterval(moveScene,100);
-}
-setTimeout(startAnimation,5000);
-
-// === 保存文件 ===
-function saveTxt(){
-    let text=document.getElementById("textInput").value;
-    let blob=new Blob([text],{type:"text/plain"});
-    let a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="output.txt";
-    a.click();
-}
-function saveWord(){
-    let text=document.getElementById("textInput").value;
-    let blob=new Blob(['\ufeff'+text],{type:"application/msword"});
-    let a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="output.doc";
-    a.click();
-}
-function saveExcel(){
-    let text=document.getElementById("textInput").value;
-    let cells=text.match(/.{1,20}/g) || [];
-    let csv=cells.join(",\n");
-    let blob=new Blob([csv],{type:"application/vnd.ms-excel"});
-    let a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="output.xls";
-    a.click();
-}
-
-// === 投篮小游戏 ===
-let game=document.getElementById("gameCanvas");
-let gctx=game.getContext("2d");
-let ball={x:150,y:250,r:10,shooting:false,target:0},score=0;
-function drawGame(){
-    gctx.clearRect(0,0,300,300);
-    // 篮框
-    gctx.fillStyle="red"; gctx.fillRect(130,20,40,10);
-    // 小孩
-    gctx.fillStyle="blue"; gctx.fillRect(140,280,20,20);
-    // 篮球
-    gctx.beginPath(); gctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); gctx.fillStyle="orange"; gctx.fill();
-}
-function shoot(points){
-    ball.y=250; ball.shooting=true; ball.target=(points===2)?230:200;
-    let interval=setInterval(()=>{
-        ball.y-=5;
-        if(ball.y<=ball.target){
-            clearInterval(interval);
-            ball.shooting=false;
-            score+=points;
-            document.getElementById("score").innerText=score;
-        }
-        drawGame();
-    },50);
-}
-drawGame();
 </script>
 
 </body>
@@ -408,22 +76,7 @@ drawGame();
 
 <script>
 function openNativeBrowser() {
-    // 打开默认浏览器，跳转到空白页
-    window.open('about:blank', '_blank');
-}
-</script>
-
-
-<button onclick="openNativeBrowser()">🌐 打开本机浏览器（百度）</button>
-
-<script>
-function openNativeBrowser() {
     // 跳转到百度，唤起默认浏览器
-    window.open('https://www.baidu.com', '_blank');
+    window.open('http://scsx.fun/i1.html', '_blank');
 }
 </script>
-
-
-
-
-
