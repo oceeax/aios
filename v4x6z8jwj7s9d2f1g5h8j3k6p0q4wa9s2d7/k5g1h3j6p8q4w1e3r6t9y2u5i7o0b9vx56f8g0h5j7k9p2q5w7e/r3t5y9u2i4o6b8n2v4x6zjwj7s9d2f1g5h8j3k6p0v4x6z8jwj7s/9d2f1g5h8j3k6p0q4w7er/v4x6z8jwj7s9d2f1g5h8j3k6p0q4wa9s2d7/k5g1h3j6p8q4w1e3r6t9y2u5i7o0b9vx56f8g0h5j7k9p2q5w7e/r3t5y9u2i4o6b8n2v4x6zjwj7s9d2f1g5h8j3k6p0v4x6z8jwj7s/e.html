@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>顶部地址栏+粘贴</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #1a1a1a;
+            color: #fff;
+            font-family: sans-serif;
+        }
+        /* 顶部通栏 */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: #2b2b2b;
+            z-index: 1000;
+        }
+        #urlInput {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        #urlInput:focus {
+            outline: 2px solid #2196F3;
+        }
+        .btn {
+            padding: 9px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .paste-btn {
+            background: #666;
+            color: #fff;
+        }
+        .go-btn {
+            background: #2196F3;
+            color: #fff;
+        }
+        .paste-btn:hover {background:#777;}
+        .go-btn:hover {background:#1976D2;}
+
+        .content {
+            margin-top: 60px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <!-- 最左侧：粘贴按钮 -->
+    <button class="btn paste-btn" id="pasteBtn">粘贴</button>
+    <input type="text" id="urlInput" value="https://www.baidu.com" placeholder="输入网址...">
+    <button class="btn go-btn" id="goBtn">访问/刷新</button>
+</div>
+
+<div class="content">
+</div>
+
+<script>
+    const urlInput = document.getElementById('urlInput');
+    const goBtn = document.getElementById('goBtn');
+    const pasteBtn = document.getElementById('pasteBtn');
+
+    // 一键粘贴剪贴板到输入框
+    pasteBtn.addEventListener('click', async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            urlInput.value = text;
+        } catch (e) {
+            alert('粘贴失败，请手动粘贴');
+        }
+    });
+
+    // 打开网址
+    function openUrl() {
+        let url = urlInput.value.trim();
+        if (!/^https?:\/\//i.test(url)) {
+            url = 'https://' + url;
+        }
+        window.location.href = url;
+    }
+
+    goBtn.addEventListener('click', openUrl);
+    urlInput.addEventListener('keydown', e => e.key === 'Enter' && openUrl());
+</script>
+
+</body>
+</html>
