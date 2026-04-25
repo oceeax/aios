@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>单列密文CSV验证</title>
+<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
+<style>
+body{background:#111;color:#fff;text-align:center;padding-top:100px;}
+input{padding:12px;width:300px;border:0;border-radius:4px;}
+button{padding:12px 25px;background:#2563eb;border:0;color:#fff;border-radius:4px;margin-left:8px;}
+.tip{margin:30px 0;font-size:18px;}
+</style>
+</head>
+<body>
+<input id="pwdInput" placeholder="输入明文密码">
+<button onclick="check()">验证解锁</button>
+<div class="tip" id="tip"></div>
+
+<script>
+const KEY = CryptoJS.enc.Utf8.parse("9s7d2k8g5h1j3p6q");
+const IV  = CryptoJS.enc.Utf8.parse("a1s2d3f4g5h6j7k8");
+
+// 在这里加多个 单列密文csv
+const csvList = [
+  "./pass1.csv",
+  "./pass2.csv"
+];
+
+let miList = [];
+
+// 明文转密文
+function toMi(plain){
+  let d = CryptoJS.enc.Utf8.parse(plain.trim());
+  return CryptoJS.AES.encrypt(d, KEY, {
+    iv: IV,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+  }).toString();
+}
+
+// 读取单列密文CSV
+async function loadCsv(){
+  for(let file of csvList){
+    let res = await fetch(file);
+    let txt = await res.text();
+    let rows = txt.split("\n").map(v=>v.trim()).filter(v=>v);
+    miList = miList.concat(rows);
+  }
+}
+
+async function check(){
+  if(miList.length <= 0) await loadCsv();
+  let userText = pwdInput.value.trim();
+  let userMi = toMi(userText);
+  if(miList.includes(userMi)){
+    tip.innerText = "✅ 验证通过";
+    tip.style.color = "#39d353";
+  }else{
+    tip.innerText = "❌ 密码错误";
+    tip.style.color = "#f56c6c";
+  }
+}
+</script>
+</body>
+</html>
