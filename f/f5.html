@@ -108,6 +108,43 @@
 <body>
     <div class="container">
         <h1>文件保存器</h1>
+        <!-- 文本输入与保存 -->
+<div class="card">
+    <h2>输入与保存</h2>
+    <textarea id="textInput" rows="4" placeholder="在此输入内容..."></textarea><br>
+    <button class="blue" onclick="saveTxt()">保存为TXT</button>
+    <button class="green" onclick="saveWord()">保存为Word</button>
+    <button class="blue" onclick="saveExcel()">保存为Excel</button>
+    <input type="file" id="imgInput" accept="image/*">
+</div>
+        // === 保存文件 ===
+function saveTxt(){
+    let text=document.getElementById("textInput").value;
+    let blob=new Blob([text],{type:"text/plain"});
+    let a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="output.txt";
+    a.click();
+}
+function saveWord(){
+    let text=document.getElementById("textInput").value;
+    let blob=new Blob(['\ufeff'+text],{type:"application/msword"});
+    let a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="output.doc";
+    a.click();
+}
+function saveExcel(){
+    let text=document.getElementById("textInput").value;
+    let cells=text.match(/.{1,20}/g) || [];
+    let csv=cells.join(",\n");
+    let blob=new Blob([csv],{type:"application/vnd.ms-excel"});
+    let a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="output.xls";
+    a.click();
+}
+        
 
         <div class="row">
             <div class="file-section">
