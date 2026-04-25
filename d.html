@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <!-- 这里就是加上的页面锁代码 -->
+    <script>
+    (function checkAuth(){
+        const auth = JSON.parse(localStorage.getItem("auth_ok") || "{}");
+        const now = Date.now();
+        if(!auth.ok || now > auth.expire){
+            window.location.href = "js/test(72).html";
+        }
+    })();
+    </script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>文件管理</title>
