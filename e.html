@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <!-- 页面加密锁 未登录自动跳转到 js/test.html -->
+    <script>
+    (function checkAuth(){
+        const auth = JSON.parse(localStorage.getItem("auth_ok") || "{}");
+        const now = Date.now();
+        if(!auth.ok || now > auth.expire){
+            window.location.href = "js/test.html";
+        }
+    })();
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>顶部地址栏+粘贴</title>
@@ -68,7 +79,6 @@
 <body>
 
 <div class="top-bar">
-    <!-- 最左侧：粘贴按钮 -->
     <button class="btn paste-btn" id="pasteBtn">粘贴</button>
     <input type="text" id="urlInput" value="https://www.baidu.com" placeholder="输入网址...">
     <button class="btn go-btn" id="goBtn">访问/刷新</button>
@@ -82,7 +92,6 @@
     const goBtn = document.getElementById('goBtn');
     const pasteBtn = document.getElementById('pasteBtn');
 
-    // 一键粘贴剪贴板到输入框
     pasteBtn.addEventListener('click', async () => {
         try {
             const text = await navigator.clipboard.readText();
@@ -92,7 +101,6 @@
         }
     });
 
-    // 打开网址
     function openUrl() {
         let url = urlInput.value.trim();
         if (!/^https?:\/\//i.test(url)) {
