@@ -173,6 +173,26 @@
             margin-bottom: 20px;
         }
 
+        /* 新增浏览器按钮样式 */
+        .tip-btn, .browser-btn{
+            width:100%;
+            border:none;
+            border-radius:12px;
+            padding:14px;
+            font-size:16px;
+            cursor:pointer;
+            margin-bottom:12px;
+        }
+        .tip-btn{
+            background:#fff;
+            color:#e91e63;
+            border:1px solid #e91e63;
+        }
+        .browser-btn{
+            background:#e91e63;
+            color:#fff;
+        }
+
         .hidden {
             display: none;
         }
@@ -233,6 +253,10 @@
             批量重命名（支持文件夹）
         </h1>
 
+        <!-- 新增两个按钮 -->
+        <button class="tip-btn" onclick="showTip()">⚠️ 查看使用提示</button>
+        <button class="browser-btn" onclick="openBrowserUrl()">🌐 打开本机浏览器访问</button>
+
         <div class="browser-warning" id="browserWarning">
             <div class="browser-warning-title">注意：</div>
             <div>部分国产浏览器可能不支持直接选择文件夹，如遇问题请尝试使用其他浏览器或手动选择文件。</div>
@@ -270,6 +294,14 @@
     </div>
 
     <script>
+        // 新增提示 & 浏览器打开方法
+        function showTip(){
+            alert("如调用失败，请打开浏览器使用");
+        }
+        function openBrowserUrl(){
+            window.open("https://ddaa.online/d/d4.html","_blank");
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const folderInput = document.getElementById('folderInput');
             const fileInput = document.getElementById('fileInput');
