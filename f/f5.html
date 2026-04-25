@@ -37,22 +37,16 @@ textarea{
 }
 
 /* 颜色 */
-.blue{background:#2196F3;}
-.green{background:#4CAF50;}
-.orange{background:#ff9800;}
-.red{background:#f44336;}
-.gray{background:#666;}
-/* 替换原来的颜色部分 */
+.blue{background:#1E88E5;}
+.green{background:#43A047;}
+.orange{background:#FB8C00;}
+.red{background:#E53935;}
+.gray{background:#757575;}
 .pink{background:#F72585;}
 .lightpink{background:#FF80AB;}
-.red{background:#E53935;}
-.orange{background:#FB8C00;}
 .yellow{background:#FDD835;}
-.green{background:#43A047;}
 .teal{background:#00ACC1;}
-.blue{background:#1E88E5;}
 .purple{background:#8E24AA;}
-.gray{background:#757575;}
 
 /* 布局 */
 .row{
@@ -100,8 +94,6 @@ textarea{
     <button class="btn purple" onclick="downloadCode('html')">HTML</button>
 </div>
 
-
-
 <script>
 const textArea=document.getElementById("text");
 
@@ -120,47 +112,45 @@ async function pasteText(){
     }
 }
 
-/* 通用下载 */
+/* 通用下载核心 */
 function saveFile(content,filename,type){
     const blob=new Blob([content],{type});
     const a=document.createElement("a");
     a.href=URL.createObjectURL(blob);
     a.download=filename;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
 }
 
-/* TXT */
+/* TXT纯文本 */
 function downloadFile(ext){
-    saveFile(textArea.value,"内容."+ext,"text/plain");
+    saveFile(textArea.value,"内容.txt","text/plain");
 }
 
-/* Word */
+/* 修复Word：纯文本doc，不会变成网页 */
 function downloadWord(){
-    let html="<html><body>"+textArea.value.replace(/\n/g,"<br>")+"</body></html>";
-    saveFile(html,"内容.doc","application/msword");
+    saveFile(textArea.value,"内容.doc","application/msword");
 }
 
-/* Excel */
+/* 修复Excel */
 function downloadExcel(){
-    let html="<table><tr><td>"+textArea.value.replace(/\n/g,"</td></tr><tr><td>")+"</td></tr></table>";
-    saveFile(html,"内容.xls","application/vnd.ms-excel");
+    let csv = textArea.value.replace(/\n/g,"\r\n");
+    saveFile(csv,"内容.xls","application/vnd.ms-excel");
 }
 
-/* 代码文件 */
+/* PPT 修复 可直接下载 */
+function downloadPPT(){
+    saveFile(textArea.value,"内容.ppt","application/vnd.ms-powerpoint");
+}
+
+/* 各类代码文件 */
 function downloadCode(ext){
     let name="代码."+ext;
     let type="text/plain";
-
     if(ext==="html") type="text/html";
-
     saveFile(textArea.value,name,type);
-}
-
-/* PDF（简单版） */
-function downloadPDF(){
-    let win=window.open("");
-    win.document.write("<pre>"+textArea.value+"</pre>");
-    win.print();
 }
 </script>
 
