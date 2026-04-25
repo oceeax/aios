@@ -1,261 +1,168 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文件保存器</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 850px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        .file-section {
-            flex: 1;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .file-section h2 {
-            margin-top: 0;
-            color: #555;
-            font-size: 15px;
-            display: inline;
-        }
-        .btn-group {
-            display: inline-flex;
-            gap: 6px;
-            margin-left: 10px;
-            vertical-align: middle;
-        }
-        .btn-paste {
-            padding: 3px 10px;
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .btn-paste:hover {
-            background-color: #1976D2;
-        }
-        .btn-clear {
-            padding: 3px 10px;
-            background-color: #FF9800;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .btn-clear:hover {
-            background-color: #F57C00;
-        }
-        textarea {
-            width: 100%;
-            height: 130px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 13px;
-            resize: vertical;
-        }
-        .button-group {
-            margin-top: 8px;
-        }
-        button {
-            padding: 7px 14px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .info {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #e7f3fe;
-            border-left: 5px solid #2196F3;
-            color: #555;
-            font-size: 13px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>输入与保存</title>
+
+<style>
+body{
+    margin:0;
+    font-family:sans-serif;
+    background:#f2f2f2;
+    text-align:center;
+}
+
+h1{
+    margin-top:20px;
+}
+
+textarea{
+    width:90%;
+    height:180px;
+    margin-top:15px;
+    padding:10px;
+    font-size:16px;
+    border-radius:10px;
+    border:1px solid #ccc;
+}
+
+/* 按钮 */
+.btn{
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    color:#fff;
+    font-size:15px;
+}
+
+/* 颜色 */
+.blue{background:#2196F3;}
+.green{background:#4CAF50;}
+.orange{background:#ff9800;}
+.red{background:#f44336;}
+.gray{background:#666;}
+/* 替换原来的颜色部分 */
+.pink{background:#F72585;}
+.lightpink{background:#FF80AB;}
+.red{background:#E53935;}
+.orange{background:#FB8C00;}
+.yellow{background:#FDD835;}
+.green{background:#43A047;}
+.teal{background:#00ACC1;}
+.blue{background:#1E88E5;}
+.purple{background:#8E24AA;}
+.gray{background:#757575;}
+
+/* 布局 */
+.row{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin-top:12px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    width:90%;
+    margin:12px auto;
+}
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>文件保存器</h1>
-        <!-- 文本输入与保存 -->
-<div class="card">
-    <h2>输入与保存</h2>
-    <textarea id="textInput" rows="4" placeholder="在此输入内容..."></textarea><br>
-    <button class="blue" onclick="saveTxt()">保存为TXT</button>
-    <button class="green" onclick="saveWord()">保存为Word</button>
-    <button class="blue" onclick="saveExcel()">保存为Excel</button>
-    <input type="file" id="imgInput" accept="image/*">
+
+<h1>输入与保存</h1>
+
+<!-- 上方按钮 -->
+<div class="row">
+    <button class="btn red" onclick="clearText()">清空</button>
+    <button class="btn teal" onclick="pasteText()">粘贴</button>
 </div>
-        // === 保存文件 ===
-function saveTxt(){
-    let text=document.getElementById("textInput").value;
-    let blob=new Blob([text],{type:"text/plain"});
-    let a=document.createElement("a");
+
+<textarea id="text" placeholder="在此输入内容..."></textarea>
+
+<!-- 第一排 -->
+<div class="row">
+    <button class="btn blue" onclick="downloadFile('txt')">TXT</button>
+    <button class="btn green" onclick="downloadWord()">Word</button>
+    <button class="btn blue" onclick="downloadExcel()">Excel</button>
+    <button class="btn green" onclick="downloadPPT()">PPT</button>
+</div>
+
+<!-- 第二排（4个一行） -->
+<div class="grid">
+    <button class="btn red" onclick="downloadCode('py')">Python</button>
+    <button class="btn purple" onclick="downloadCode('java')">Java</button>
+    <button class="btn red" onclick="downloadCode('cs')">C#</button>
+    <button class="btn purple" onclick="downloadCode('html')">HTML</button>
+</div>
+
+
+
+<script>
+const textArea=document.getElementById("text");
+
+/* 清空 */
+function clearText(){
+    textArea.value="";
+}
+
+/* 粘贴 */
+async function pasteText(){
+    try{
+        let text=await navigator.clipboard.readText();
+        textArea.value+=text;
+    }catch{
+        alert("无法读取剪贴板");
+    }
+}
+
+/* 通用下载 */
+function saveFile(content,filename,type){
+    const blob=new Blob([content],{type});
+    const a=document.createElement("a");
     a.href=URL.createObjectURL(blob);
-    a.download="output.txt";
+    a.download=filename;
     a.click();
 }
-function saveWord(){
-    let text=document.getElementById("textInput").value;
-    let blob=new Blob(['\ufeff'+text],{type:"application/msword"});
-    let a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="output.doc";
-    a.click();
+
+/* TXT */
+function downloadFile(ext){
+    saveFile(textArea.value,"内容."+ext,"text/plain");
 }
-function saveExcel(){
-    let text=document.getElementById("textInput").value;
-    let cells=text.match(/.{1,20}/g) || [];
-    let csv=cells.join(",\n");
-    let blob=new Blob([csv],{type:"application/vnd.ms-excel"});
-    let a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="output.xls";
-    a.click();
+
+/* Word */
+function downloadWord(){
+    let html="<html><body>"+textArea.value.replace(/\n/g,"<br>")+"</body></html>";
+    saveFile(html,"内容.doc","application/msword");
 }
-        
 
-        <div class="row">
-            <div class="file-section">
-                <h2>Python 文件</h2>
-                <div class="btn-group">
-                    <button class="btn-paste" onclick="pasteBox('pythonContent')">粘贴</button>
-                    <button class="btn-clear" onclick="clearBox('pythonContent')">清空</button>
-                </div>
-                <textarea id="pythonContent" placeholder="在此输入Python代码..."></textarea>
-                <div class="button-group">
-                    <button onclick="saveFile('pythonContent', 'python', '.py')">保存为 .py</button>
-                </div>
-            </div>
-            <div class="file-section">
-                <h2>Java 文件</h2>
-                <div class="btn-group">
-                    <button class="btn-paste" onclick="pasteBox('javaContent')">粘贴</button>
-                    <button class="btn-clear" onclick="clearBox('javaContent')">清空</button>
-                </div>
-                <textarea id="javaContent" placeholder="在此输入Java代码..."></textarea>
-                <div class="button-group">
-                    <button onclick="saveFile('javaContent', 'java', '.java')">保存为 .java</button>
-                </div>
-            </div>
-        </div>
+/* Excel */
+function downloadExcel(){
+    let html="<table><tr><td>"+textArea.value.replace(/\n/g,"</td></tr><tr><td>")+"</td></tr></table>";
+    saveFile(html,"内容.xls","application/vnd.ms-excel");
+}
 
-        <div class="row">
-            <div class="file-section">
-                <h2>HTML 文件</h2>
-                <div class="btn-group">
-                    <button class="btn-paste" onclick="pasteBox('htmlContent')">粘贴</button>
-                    <button class="btn-clear" onclick="clearBox('htmlContent')">清空</button>
-                </div>
-                <textarea id="htmlContent" placeholder="在此输入HTML代码..."></textarea>
-                <div class="button-group">
-                    <button onclick="saveFile('htmlContent', 'html', '.html')">保存为 .html</button>
-                </div>
-            </div>
-            <div class="file-section">
-                <h2>C# 文件</h2>
-                <div class="btn-group">
-                    <button class="btn-paste" onclick="pasteBox('csharpContent')">粘贴</button>
-                    <button class="btn-clear" onclick="clearBox('csharpContent')">清空</button>
-                </div>
-                <textarea id="csharpContent" placeholder="在此输入C#代码..."></textarea>
-                <div class="button-group">
-                    <button onclick="saveFile('csharpContent', 'csharp', '.cs')">保存为 .cs</button>
-                </div>
-            </div>
-        </div>
+/* 代码文件 */
+function downloadCode(ext){
+    let name="代码."+ext;
+    let type="text/plain";
 
-        <div class="row">
-            <div class="file-section">
-                <h2>文本文件</h2>
-                <div class="btn-group">
-                    <button class="btn-paste" onclick="pasteBox('txtContent')">粘贴</button>
-                    <button class="btn-clear" onclick="clearBox('txtContent')">清空</button>
-                </div>
-                <textarea id="txtContent" placeholder="在此输入文本内容..."></textarea>
-                <div class="button-group">
-                    <button onclick="saveFile('txtContent', 'text', '.txt')">保存为 .txt</button>
-                </div>
-            </div>
-        </div>
+    if(ext==="html") type="text/html";
 
-        <div class="info">
-            <p><strong>提示：</strong>点击粘贴按钮从剪贴板读取内容，点击保存按钮立即下载文件，文件名格式为"时-分_类型.扩展名"。</p>
-        </div>
-    </div>
+    saveFile(textArea.value,name,type);
+}
 
-    <script>
-        async function pasteBox(id) {
-            try {
-                const text = await navigator.clipboard.readText();
-                document.getElementById(id).value = text;
-            } catch (e) {
-                alert('无法读取剪贴板，请检查浏览器权限');
-            }
-        }
+/* PDF（简单版） */
+function downloadPDF(){
+    let win=window.open("");
+    win.document.write("<pre>"+textArea.value+"</pre>");
+    win.print();
+}
+</script>
 
-        function clearBox(id) {
-            document.getElementById(id).value = '';
-        }
-
-        function getCurrentTimeFilename() {
-            const now = new Date();
-            const hour = now.getHours().toString().padStart(2, '0');
-            const minute = now.getMinutes().toString().padStart(2, '0');
-            return `${hour}-${minute}`;
-        }
-
-        function saveFile(textareaId, fileType, extension) {
-            const content = document.getElementById(textareaId).value;
-            if (!content) {
-                alert(`请先在${fileType}文本框中输入内容`);
-                return;
-            }
-            const timestamp = getCurrentTimeFilename();
-            const filename = `${timestamp}_${fileType}${extension}`;
-            const blob = new Blob([content], {type: 'text/plain'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }, 0);
-        }
-    </script>
 </body>
 </html>
