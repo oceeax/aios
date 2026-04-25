@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>硬核工具站</title>
 
-<!-- 51LA 网站统计代码（已按官方推荐放在head标签内） -->
+<!-- 51LA 网站统计代码 -->
 <script charset="UTF-8" id="LA_COLLECT" src="//sdk.51.la/js-sdk-pro.min.js"></script>
 <script>LA.init({id:"3PjnuI4NYLrri7NP",ck:"3PjnuI4NYLrri7NP",autoTrack:true,hashMode:true,screenRecord:true})</script>
 
@@ -80,10 +80,31 @@ body {
     font-size: 12px;
     color: #666;
 }
+
+/* 右上角悬浮按钮 */
+.tip-btn {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    padding: 8px 12px;
+    background: #2196F3;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 9999;
+    cursor: pointer;
+}
+.tip-btn:active {
+    opacity: 0.8;
+}
 </style>
 </head>
 
 <body>
+
+<!-- 右上角提示按钮 -->
+<button class="tip-btn" onclick="showTip()">购买说明</button>
 
 <div class="container">
 
@@ -91,63 +112,63 @@ body {
 
 <div class="grid">
 
-<a class="card" href="a.html">
+<a class="card" href="js/test.html">
 <div class="icon">🎬</div><div class="text">播放器</div>
 </a>
 
-<a class="card" href="b.html">
+<a class="card" href="js/test.html">
 <div class="icon">🖼️</div><div class="text">图片</div>
 </a>
 
-<a class="card" href="c.html">
+<a class="card" href="js/test.html">
 <div class="icon">🎵</div><div class="text">音乐</div>
 </a>
 
-<a class="card" href="d.html">
+<a class="card" href="js/test.html">
 <div class="icon">📁</div><div class="text">文件</div>
 </a>
 
-<a class="card" href="e.html">
+<a class="card" href="js/test.html">
 <div class="icon">🌏</div><div class="text">浏览器</div>
 </a>
 
-<a class="card" href="f.html">
+<a class="card" href="js/test.html">
 <div class="icon">⬇️</div><div class="text">下载</div>
 </a>
 
-<a class="card" href="g.html">
+<a class="card" href="js/test.html">
 <div class="icon">📝</div><div class="text">计算</div>
 </a>
 
-<a class="card" href="h.html">
+<a class="card" href="js/test.html">
 <div class="icon">🕊️</div><div class="text">云服务</div>
 </a>
 
-<a class="card" href="i.html">
+<a class="card" href="js/test.html">
 <div class="icon">🧭</div><div class="text">地图</div>
 </a>
 
-<a class="card" href="j.html">
+<a class="card" href="js/test.html">
 <div class="icon">📡</div><div class="text">雷达</div>
 </a>
 
-<a class="card" href="k.html">
+<a class="card" href="js/test.html">
 <div class="icon">🎮</div><div class="text">游戏</div>
 </a>
 
-<a class="card" href="l.html">
+<a class="card" href="js/test.html">
 <div class="icon">🛷</div><div class="text">测试中心</div>
 </a>
 
-<a class="card" href="m.html">
+<a class="card" href="js/test.html">
 <div class="icon">🎞</div><div class="text">图像拆帧</div>
 </a>
 
-<a class="card" href="n.html">
+<a class="card" href="js/test.html">
 <div class="icon">🗃</div><div class="text">编译器</div>
 </a>
 
-<a class="card" href="o.html">
+<a class="card" href="js/test.html">
 <div class="icon">📚</div><div class="text">知识提升</div>
 </a>
 
@@ -159,6 +180,13 @@ body {
             ദ്ദിᵔ..ᵔ₎✧</p>
     </div>
 </div>
+
+<script>
+function showTip(){
+    alert("欢迎使用硬核工具，请到官方购买，每个仅需十元永久有效");
+    location.href = "index5.html";
+}
+</script>
 
 </body>
 </html>
