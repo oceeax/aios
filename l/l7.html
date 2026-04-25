@@ -1,193 +1,248 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>多功能应用（完整）</title>
-<style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
-    h2 { margin: 10px 0; text-align: center; }
-    .card { background: #fff; padding: 15px; margin: 12px; border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
-    button { margin: 6px; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; }
-    .blue { background: #2196F3; color: #fff; }
-    .green { background: #4CAF50; color: #fff; }
-    .red { background: #f44336; color: #fff; }
-    input, textarea { width: 95%; padding: 8px; margin: 8px 0; }
-    #canvas { width: 100%; height: 200px; border: 1px solid #ccc; border-radius: 10px; }
-    #score { font-size: 20px; font-weight: bold; float: right; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <title>APP唤起工具_双页_精准检测_自动下载日志</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:#f0f2f5;padding:12px;}
+        .container{max-width:750px;margin:0 auto;}
+        .page{display:none;}
+        .page.active{display:block;}
+        .btn-wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:15px;}
+        /* 第1、3列蓝色  第2、4列绿色 */
+        .app-btn:nth-child(4n+1),
+        .app-btn:nth-child(4n+3){
+            background:#409eff;
+            color:#fff;
+        }
+        .app-btn:nth-child(4n+2),
+        .app-btn:nth-child(4n+4){
+            background:#67c23a;
+            color:#fff;
+        }
+        .app-btn{
+            padding:14px 0;
+            border:none;
+            border-radius:8px;
+            font-size:14px;
+        }
+        .page-btn{
+            width:48%;
+            padding:10px;
+            border:none;
+            border-radius:6px;
+            background:#222;
+            color:#fff;
+            font-size:15px;
+            margin-bottom:15px;
+        }
+        .opt-box{display:flex;justify-content:space-between;}
+        .save-btn{
+            width:100%;
+            margin:12px 0;
+            padding:11px;
+            background:#e6a23c;
+            border:none;
+            border-radius:6px;
+            color:#fff;
+            font-size:15px;
+        }
+        .log-box{
+            background:#fff;
+            padding:15px;
+            border-radius:6px;
+            min-height:180px;
+            font-size:13px;
+            line-height:1.8;
+            white-space:pre-wrap;
+            overflow:auto;
+            max-height:300px;
+        }
+    </style>
 </head>
 <body>
+<div class="container">
+    <div class="opt-box">
+        <button class="page-btn" id="prevPage" disabled>上一页</button>
+        <button class="page-btn" id="nextPage">下一页</button>
+    </div>
 
-<!-- 定位功能 -->
-<div class="card">
-    <h2>定位功能</h2>
-    <button class="blue" onclick="window.open('https://www.baidu.com','_blank')">前往百度</button>
-    <button class="green" onclick="openWeChat()">打开微信</button>
-    <button class="red" onclick="toggleLocation()"><span id="locBtn">关闭定位</span></button>
-    <p id="status">定位状态：等待中...</p>
-    <p id="time"></p>
-    <p>经度：<span id="lng">--</span></p>
-    <p>纬度：<span id="lat">--</span></p>
-    <p>县/市/镇：<span id="region">--</span></p>
-    <p>详细地址：<span id="address">--</span></p>
+    <!-- 第一页 -->
+    <div class="page active" id="page1">
+        <div class="btn-wrap">
+            <button class="app-btn" data-scheme="weixin://" data-name="微信">微信</button>
+            <button class="app-btn" data-scheme="mqq://" data-name="QQ">QQ</button>
+            <button class="app-btn" data-scheme="baiduboxapp://" data-name="百度">百度</button>
+            <button class="app-btn" data-scheme="amap://" data-name="高德地图">高德</button>
+
+            <button class="app-btn" data-role="camera" data-name="相机">相机</button>
+            <button class="app-btn" data-role="browser" data-name="系统浏览器">浏览器</button>
+            <button class="app-btn" data-scheme="hgdz://" data-name="红果短剧">红果</button>
+            <button class="app-btn" data-scheme="taobao://" data-name="淘宝">淘宝</button>
+
+            <button class="app-btn" data-scheme="jd://" data-name="京东">京东</button>
+            <button class="app-btn" data-scheme="douyin://" data-name="抖音">抖音</button>
+            <button class="app-btn" data-scheme="mttbrowser://" data-name="QQ浏览器">QQ浏览器</button>
+            <button class="app-btn" data-scheme="kugou://" data-name="酷狗音乐">酷狗</button>
+
+            <button class="app-btn" data-scheme="quark://" data-name="夸克">夸克</button>
+            <button class="app-btn" data-scheme="qianwen://" data-name="千问">千问</button>
+            <button class="app-btn" data-scheme="kwai://" data-name="快手">快手</button>
+        </div>
+    </div>
+
+    <!-- 第二页 -->
+    <div class="page" id="page2">
+        <div class="btn-wrap">
+            <button class="app-btn" data-scheme="alipay://" data-name="支付宝">支付宝</button>
+            <button class="app-btn" data-scheme="meituan://" data-name="美团">美团</button>
+            <button class="app-btn" data-scheme="pinduoduo://" data-name="拼多多">拼多多</button>
+            <button class="app-btn" data-scheme="xhs://" data-name="小红书">小红书</button>
+
+            <button class="app-btn" data-scheme="bilibili://" data-name="B站">哔哩哔哩</button>
+            <button class="app-btn" data-scheme="weibo://" data-name="微博">微博</button>
+            <button class="app-btn" data-scheme="ucbrowser://" data-name="UC浏览器">UC</button>
+            <button class="app-btn" data-scheme="tencentvideo://" data-name="腾讯视频">腾讯视频</button>
+
+            <button class="app-btn" data-scheme="iqiyi://" data-name="爱奇艺">爱奇艺</button>
+            <button class="app-btn" data-scheme="fanqienovel://" data-name="番茄小说">番茄</button>
+            <button class="app-btn" data-scheme="ximalaya://" data-name="喜马拉雅">喜马拉雅</button>
+            <button class="app-btn" data-scheme="cmb://" data-name="招商银行">招行</button>
+        </div>
+    </div>
+
+    <button class="save-btn" id="saveLog">📥 一键下载日志TXT</button>
+    <div class="log-box" id="log">【运行日志开始】
 </div>
-
-<!-- 动画 -->
-<div class="card">
-    <h2>动画（演示）</h2>
-    <button onclick="startAnimation()">启动动画</button>
-    <canvas id="canvas"></canvas>
-</div>
-
-<!-- 文本输入与保存 -->
-<div class="card">
-    <h2>输入与保存</h2>
-    <textarea id="textInput" rows="4" placeholder="在此输入内容..."></textarea><br>
-    <button class="blue" onclick="saveTxt()">保存为TXT</button>
-    <button class="green" onclick="saveWord()">保存为Word</button>
-    <button class="blue" onclick="saveExcel()">保存为Excel</button>
-    <input type="file" id="imgInput" accept="image/*">
-</div>
-
-<!-- 游戏功能 -->
-<div class="card">
-    <h2>投篮小游戏 <span id="score">0</span></h2>
-    <canvas id="gameCanvas" width="300" height="300" style="border:1px solid #ccc;"></canvas><br>
-    <button class="blue" onclick="shoot(2)">两分球</button>
-    <button class="green" onclick="shoot(3)">三分球</button>
 </div>
 
 <script>
-// === 定位功能 ===
-let watchId = null;
-function updateTime() {
-    const now = new Date();
-    document.getElementById("time").innerText = "时间：" + now.toLocaleString();
-}
-setInterval(updateTime, 1000);
+    const logDom = document.getElementById('log');
+    let logList = [];
+    let nowPage = 1;
+    const page1 = document.getElementById('page1');
+    const page2 = document.getElementById('page2');
+    const prevBtn = document.getElementById('prevPage');
+    const nextBtn = document.getElementById('nextPage');
 
-function getLocation() {
-    if (navigator.geolocation) {
-        watchId = navigator.geolocation.watchPosition(showPosition, showError, { enableHighAccuracy: true });
-    } else {
-        document.getElementById("status").innerText = "浏览器不支持定位";
+    // 分页切换
+    nextBtn.onclick = () => {
+        nowPage = 2;
+        page1.classList.remove('active');
+        page2.classList.add('active');
+        prevBtn.disabled = false;
+        nextBtn.disabled = true;
     }
-}
-function showPosition(position) {
-    document.getElementById("status").innerText = "定位成功";
-    document.getElementById("lng").innerText = position.coords.longitude;
-    document.getElementById("lat").innerText = position.coords.latitude;
-    // TODO: 可以调用百度/高德 API 获取城市信息
-}
-function showError(error) {
-    document.getElementById("status").innerText = "定位失败：" + error.message;
-}
-function toggleLocation() {
-    if (watchId) {
-        navigator.geolocation.clearWatch(watchId);
-        watchId = null;
-        document.getElementById("status").innerText = "定位已关闭";
-        document.getElementById("locBtn").innerText = "开启定位";
-    } else {
-        getLocation();
-        document.getElementById("locBtn").innerText = "关闭定位";
+    prevBtn.onclick = () => {
+        nowPage = 1;
+        page2.classList.remove('active');
+        page1.classList.add('active');
+        nextBtn.disabled = false;
+        prevBtn.disabled = true;
     }
-}
-getLocation();
 
-// === 打开微信 ===
-function openWeChat() {
-    try {
-        window.location.href = "weixin://";
-    } catch(e) {
-        alert("请安装微信");
+    // 写入日志 + 弹窗提示
+    function writeLog(msg, alertTip = "") {
+        const time = new Date().toLocaleString();
+        const text = `[${time}] ${msg}`;
+        logList.push(text);
+        logDom.innerText += text + '\n';
+        logDom.scrollTop = logDom.scrollHeight;
+        if(alertTip) alert(alertTip);
     }
-}
 
-// === 动画 ===
-let ctx = document.getElementById("canvas").getContext("2d");
-let dog = {x:20,y:150}, sun={x:150,y:40}, chickens=[{x:60,y:120},{x:100,y:100}];
-function drawScene(){
-    ctx.clearRect(0,0,300,200);
-    ctx.fillStyle="orange"; ctx.beginPath(); ctx.arc(sun.x,sun.y,20,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle="brown"; ctx.fillRect(dog.x,dog.y,20,20);
-    ctx.fillStyle="red";
-    chickens.forEach(c=>ctx.fillRect(c.x,c.y,15,15));
-}
-function moveScene(){
-    dog.x += 2; if(dog.x>300) dog.x=0;
-    chickens.forEach(c=>c.y-=1);
-    drawScene();
-}
-function startAnimation(){
-    setInterval(moveScene,100);
-}
-setTimeout(startAnimation,5000);
-
-// === 保存文件 ===
-function saveTxt(){
-    let text=document.getElementById("textInput").value;
-    let blob=new Blob([text],{type:"text/plain"});
-    let a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="output.txt";
-    a.click();
-}
-function saveWord(){
-    let text=document.getElementById("textInput").value;
-    let blob=new Blob(['\ufeff'+text],{type:"application/msword"});
-    let a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="output.doc";
-    a.click();
-}
-function saveExcel(){
-    let text=document.getElementById("textInput").value;
-    let cells=text.match(/.{1,20}/g) || [];
-    let csv=cells.join(",\n");
-    let blob=new Blob([csv],{type:"application/vnd.ms-excel"});
-    let a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="output.xls";
-    a.click();
-}
-
-// === 投篮小游戏 ===
-let game=document.getElementById("gameCanvas");
-let gctx=game.getContext("2d");
-let ball={x:150,y:250,r:10,shooting:false,target:0},score=0;
-function drawGame(){
-    gctx.clearRect(0,0,300,300);
-    // 篮框
-    gctx.fillStyle="red"; gctx.fillRect(130,20,40,10);
-    // 小孩
-    gctx.fillStyle="blue"; gctx.fillRect(140,280,20,20);
-    // 篮球
-    gctx.beginPath(); gctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); gf();
-}
-function shoot(points){
-    ball.y=250; ball.shooting=true; ball.target=(points===2)?230:200;
-    let interval=setInterval(()=>{
-        ball.y-=5;
-        if(ball.y<=ball.target){
-            clearInterval(interval);
-            ball.shooting=false;
-            score+=points;
-            document.getElementById("score").innerText=score;
+    // 自动下载日志
+    function downLog() {
+        if(logList.length === 0){
+            alert("暂无日志内容");
+            return;
         }
-        drawGame();
-    },50);
-}
-drawGame();
-</script>
+        let content = logList.join("\r\n");
+        let blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        let a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `APP调用日志_${Date.now()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+    }
 
+    // 绑定下载按钮
+    document.getElementById("saveLog").addEventListener("click", downLog);
+
+    // 核心唤起+精准判断
+    function openApp(btn) {
+        const scheme = btn.dataset.scheme;
+        const name = btn.dataset.name;
+        const isCamera = btn.dataset.role === "camera";
+        const isBrowser = btn.dataset.role === "browser";
+
+        // 相机
+        if(isCamera){
+            try {
+                let intentUrl = "intent:#Intent;action=android.media.action.IMAGE_CAPTURE;end;";
+                location.href = intentUrl;
+                writeLog(`✅【${name}】唤起成功`, "相机已打开");
+            } catch (e) {
+                writeLog(`❌【${name}】唤起失败：浏览器禁止调用相机`, "调用相机失败");
+            }
+            return;
+        }
+
+        // 系统浏览器
+        if(isBrowser){
+            writeLog(`ℹ️【${name}】已唤起系统默认浏览器`, "已打开浏览器");
+            return;
+        }
+
+        // 无协议
+        if(!scheme){
+            writeLog(`❌【${name}】暂无可用唤醒协议`, "暂无唤醒协议");
+            return;
+        }
+
+        let openFlag = false;
+        // 切后台判定成功
+        const visibleFn = () => {
+            if(document.hidden){
+                openFlag = true;
+                writeLog(`✅【${name}】唤起成功`, `已打开${name}`);
+                document.removeEventListener("visibilitychange", visibleFn);
+            }
+        };
+        document.addEventListener("visibilitychange", visibleFn);
+
+        // 隐藏iframe跳转
+        let iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = scheme;
+        document.body.appendChild(iframe);
+
+        // 超时判断未安装
+        setTimeout(() => {
+            document.removeEventListener("visibilitychange", visibleFn);
+            document.body.removeChild(iframe);
+            if(!openFlag){
+                // 细分错误
+                let errText = "";
+                if(navigator.userAgent.toLowerCase().indexOf("android") > -1){
+                    errText = `❌【${name}】唤起失败：本机未安装该APP`;
+                    writeLog(errText, `本机未安装${name}`);
+                }else{
+                    errText = `❌【${name}】唤起失败：当前设备不支持或浏览器拦截`;
+                    writeLog(errText, "浏览器拦截/设备不支持");
+                }
+            }
+        }, 700);
+    }
+
+    // 绑定所有按钮
+    document.querySelectorAll(".app-btn").forEach(btn => {
+        btn.addEventListener("click", () => openApp(btn));
+    });
+</script>
 </body>
 </html>
-
-
-
-
-
-把这里面的定位功能单独拨出来，其他的不要，就要定位功能的全部代码
