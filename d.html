@@ -12,7 +12,20 @@ body{background:#fce4ec;padding:30px 15px}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .item{background:#fff;border-radius:12px;padding:25px 10px;text-align:center;box-shadow:0 2px 8px #00000013;cursor:pointer}
 </style>
+
+ <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.1"></script>
+<script>
+  const client = new Appwrite.Client();
+  client
+    .setEndpoint('https://fra.cloud.appwrite.io/v1')
+    .setProject('69ece0da00003cf5d79f');
+  window.appwriteClient = client;
+</script>
+
+<script src="/auth-check.js"></script>
 </head>
+
+
 <body>
 <button class="back" onclick="location.href='index.html'">← 返回主页</button>
 <div class="title">📁 文件管理</div>
