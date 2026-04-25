@@ -1,181 +1,108 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>浏览器入口</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>顶部地址栏+粘贴</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #1a1a1a;
+            color: #fff;
+            font-family: sans-serif;
+        }
+        /* 顶部通栏 */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: #2b2b2b;
+            z-index: 1000;
+        }
+        #urlInput {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        #urlInput:focus {
+            outline: 2px solid #2196F3;
+        }
+        .btn {
+            padding: 9px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .paste-btn {
+            background: #666;
+            color: #fff;
+        }
+        .go-btn {
+            background: #2196F3;
+            color: #fff;
+        }
+        .paste-btn:hover {background:#777;}
+        .go-btn:hover {background:#1976D2;}
 
-<style>
-body{
-    margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-    background:#000;
-    color:#fff;
-}
-
-/* 顶部栏 */
-.top{
-    padding:10px;
-    display:flex;
-    gap:8px;
-    background:rgba(255,255,255,0.15);
-    backdrop-filter:blur(10px);
-    flex-wrap:wrap;
-}
-
-input{
-    flex:1;
-    min-width:120px;
-    padding:10px;
-    border-radius:12px;
-    border:none;
-    outline:none;
-}
-
-/* 统一按钮 黑底协调高级灰蓝色 */
-button,.card{
-    padding:8px 12px;
-    border:none;
-    border-radius:10px;
-    background:#2b3445;
-    color:#e5e7eb;
-    font-size:13px;
-    text-align:center;
-    cursor:pointer;
-    transition:0.2s;
-}
-
-.card:active{
-    transform:scale(0.95);
-    background:#374151;
-}
-
-/* 6个按钮同行一排 */
-.grid{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-    padding:12px;
-}
-
-/* 浏览区域 */
-.viewer{
-    height:calc(100vh - 260px);
-    overflow:hidden;
-    border-radius:16px 16px 0 0;
-    background:#111;
-    margin:0 10px;
-}
-
-.wrap{
-    width:100%;
-    height:100%;
-    transform-origin:0 0;
-}
-
-iframe{
-    width:100%;
-    height:100%;
-    border:none;
-    background:#fff;
-}
-</style>
+        .content {
+            margin-top: 60px;
+            padding: 20px;
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="top">
-<input id="url" placeholder="输入网址">
-<button onclick="go()">打开</button>
-<button onclick="toggleZoom()">缩放</button>
+<div class="top-bar">
+    <!-- 最左侧：粘贴按钮 -->
+    <button class="btn paste-btn" id="pasteBtn">粘贴</button>
+    <input type="text" id="urlInput" value="https://www.baidu.com" placeholder="输入网址...">
+    <button class="btn go-btn" id="goBtn">访问/刷新</button>
 </div>
 
-<div class="grid">
-<div class="card" onclick="openSite('https://www.google.com')">Google</div>
-<div class="card" onclick="openSite('https://www.sina.com.cn')">新浪</div>
-<div class="card" onclick="openSite('https://www.163.com')">网易</div>
-<div class="card" onclick="openSite('https://www.baidu.com')">百度</div>
-<div class="card" onclick="openSite('https://github.com')">GitHub</div>
-</div>
-
-<div class="viewer" id="viewer">
-    <div class="wrap" id="wrap">
-        <iframe id="frame"></iframe>
-    </div>
+<div class="content">
 </div>
 
 <script>
-let scale = 1;
-let zoomOn = false;
+    const urlInput = document.getElementById('urlInput');
+    const goBtn = document.getElementById('goBtn');
+    const pasteBtn = document.getElementById('pasteBtn');
 
-// 打开网址
-function go(){
-    let input = document.getElementById("url").value.trim();
-    if(!input.startsWith("http")){
-        input = "https://" + input;
+    // 一键粘贴剪贴板到输入框
+    pasteBtn.addEventListener('click', async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            urlInput.value = text;
+        } catch (e) {
+            alert('粘贴失败，请手动粘贴');
+        }
+    });
+
+    // 打开网址
+    function openUrl() {
+        let url = urlInput.value.trim();
+        if (!/^https?:\/\//i.test(url)) {
+            url = 'https://' + url;
+        }
+        window.location.href = url;
     }
-    document.getElementById("frame").src = input;
-}
 
-// 快捷站点
-function openSite(url){
-    document.getElementById("frame").src = url;
-    document.getElementById("url").value = url;
-}
-
-function toggleZoom(){
-    zoomOn = !zoomOn;
-    if(!zoomOn){
-        scale = 1;
-        apply();
-    }else{
-        alert("已开启缩放（支持双指）");
-    }
-}
-
-function apply(){
-    document.getElementById("wrap").style.transform = "scale(" + scale + ")";
-}
-
-/* 手势缩放 */
-let startDist = 0;
-function getDistance(t){
-    let dx = t[0].clientX - t[1].clientX;
-    let dy = t[0].clientY - t[1].clientY;
-    return Math.sqrt(dx*dx + dy*dy);
-}
-
-const viewer = document.getElementById("viewer");
-viewer.addEventListener("touchstart", e=>{
-    if(!zoomOn) return;
-    if(e.touches.length === 2){
-        startDist = getDistance(e.touches);
-    }
-});
-
-viewer.addEventListener("touchmove", e=>{
-    if(!zoomOn) return;
-    if(e.touches.length === 2){
-        let newDist = getDistance(e.touches);
-        let diff = newDist - startDist;
-        scale += diff * 0.005;
-        if(scale < 0.3) scale = 0.3;
-        if(scale > 3) scale = 3;
-        startDist = newDist;
-        apply();
-    }
-});
-
-/* 双击恢复 */
-let lastTap = 0;
-viewer.addEventListener("touchend", ()=>{
-    let now = Date.now();
-    if(now - lastTap < 300){
-        scale = 1;
-        apply();
-    }
-    lastTap = now;
-});
+    goBtn.addEventListener('click', openUrl);
+    urlInput.addEventListener('keydown', e => e.key === 'Enter' && openUrl());
 </script>
 
 </body>
