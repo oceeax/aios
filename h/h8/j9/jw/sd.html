@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<!-- 全局访问拦截 -->
+<script>
+if(!localStorage.getItem("auth_ok")){
+    location.href = "/js/test.html";
+}
+</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>硬核工具站</title>
@@ -91,63 +98,63 @@ body {
 
 <div class="grid">
 
-<a class="card" href="a.html">
+<a class="card" href="/a.html">
 <div class="icon">🎬</div><div class="text">播放器</div>
 </a>
 
-<a class="card" href="b.html">
+<a class="card" href="/b.html">
 <div class="icon">🖼️</div><div class="text">图片</div>
 </a>
 
-<a class="card" href="c.html">
+<a class="card" href="/c.html">
 <div class="icon">🎵</div><div class="text">音乐</div>
 </a>
 
-<a class="card" href="d.html">
+<a class="card" href="/d.html">
 <div class="icon">📁</div><div class="text">文件</div>
 </a>
 
-<a class="card" href="e.html">
+<a class="card" href="/e.html">
 <div class="icon">🌏</div><div class="text">浏览器</div>
 </a>
 
-<a class="card" href="f.html">
+<a class="card" href="/f.html">
 <div class="icon">⬇️</div><div class="text">下载</div>
 </a>
 
-<a class="card" href="g.html">
+<a class="card" href="/g.html">
 <div class="icon">📝</div><div class="text">计算</div>
 </a>
 
-<a class="card" href="h.html">
+<a class="card" href="/h.html">
 <div class="icon">🕊️</div><div class="text">云服务</div>
 </a>
 
-<a class="card" href="i.html">
+<a class="card" href="/i.html">
 <div class="icon">🧭</div><div class="text">地图</div>
 </a>
 
-<a class="card" href="j.html">
+<a class="card" href="/j.html">
 <div class="icon">📡</div><div class="text">雷达</div>
 </a>
 
-<a class="card" href="k.html">
+<a class="card" href="/k.html">
 <div class="icon">🎮</div><div class="text">游戏</div>
 </a>
 
-<a class="card" href="l.html">
+<a class="card" href="/l.html">
 <div class="icon">🛷</div><div class="text">测试中心</div>
 </a>
 
-<a class="card" href="m.html">
+<a class="card" href="/m.html">
 <div class="icon">🎞</div><div class="text">图像拆帧</div>
 </a>
 
-<a class="card" href="n.html">
+<a class="card" href="/n.html">
 <div class="icon">🗃</div><div class="text">编译器</div>
 </a>
 
-<a class="card" href="o.html">
+<a class="card" href="/o.html">
 <div class="icon">📚</div><div class="text">知识提升</div>
 </a>
 
@@ -156,7 +163,7 @@ body {
         <p>© 2026ଘ(੭ˊᵕˋ)੭*
             专注实用功能打造，高效便捷，解锁多元实用服务
             
-            ദ്ദിᵔ..ᵔ₎✧</p>
+            દ્દીᵔ..ᵔ₎✧</p>
     </div>
 </div>
 
