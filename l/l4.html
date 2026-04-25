@@ -1,41 +1,340 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>刷新</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>设备互联 + 故事聊天对话</title>
 <style>
-body{text-align:center;font-family:system-ui;background:#f3f3f3;}
-button{padding:12px;margin:8px;border-radius:10px;background:#444;color:#fff;border:none;}
-</style>
-</head>
-
-<body>
-
-<button onclick="back()">←返回</button>
-<h3>刷新功能</h3>
-
-<button onclick="normal()">普通刷新</button>
-<button onclick="hard()">强制刷新</button>
-<button onclick="auto()">自动刷新</button>
-<button onclick="timer()">定时刷新（5秒）</button>
-
-<script>
-function back(){location.href="../index.html"}
-
-function normal(){location.reload();}
-function hard(){location.href=location.href;}
-
-let t;
-
-function auto(){
-    clearInterval(t);
-    t=setInterval(()=>location.reload(),2000);
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: system-ui,Microsoft Yahei;
+}
+body {
+    background: #f6f7fb;
+    padding: 15px;
+}
+.head {
+    background: #2563eb;
+    color: #fff;
+    padding: 14px;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+/* 5个导航按钮 */
+.btn-nav {
+    display: grid;
+    grid-template-columns: repeat(5,1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+}
+.nav-btn {
+    padding: 10px 0;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #fff;
+}
+.btn1 {background:#165DFF;}
+.btn2 {background:#00B42A;}
+.btn3 {background:#FF7D00;}
+.btn4 {background:#722ED1;}
+.btn5 {background:#E53E3E;}
+.page {
+    display: none;
+}
+.page.active {
+    display: block;
+}
+.card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 10px #00000012;
+}
+input {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin: 8px 0;
+    font-size: 14px;
+}
+.run-btn {
+    width: 100%;
+    padding: 11px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    margin-top: 6px;
+}
+.log {
+    background: #111827;
+    color: #36d399;
+    padding: 12px;
+    border-radius: 8px;
+    min-height: 130px;
+    margin-top: 12px;
+    font-size: 13px;
+    white-space: pre-wrap;
+    overflow: auto;
+}
+.text-content {
+    line-height: 1.8;
+    color: #333;
+    font-size: 14px;
 }
 
-function timer(){
-    setTimeout(()=>location.reload(),5000);
+/* ========== 聊天页面样式 ========== */
+.chat-box {
+    height: 380px;
+    overflow-y: auto;
+    padding:10px;
+    background:#f9f9f9;
+    border-radius:10px;
+    margin-bottom:12px;
+}
+.msg-me{
+    background:#165DFF;
+    color:#fff;
+    padding:8px 12px;
+    border-radius:12px 12px 2px 12px;
+    margin:6px 0;
+    max-width:85%;
+    margin-left:auto;
+}
+.msg-stu1{
+    background:#eeeeee;
+    color:#333;
+    padding:8px 12px;
+    border-radius:12px 12px 12px 2px;
+    margin:6px 0;
+    max-width:85%;
+}
+.msg-stu2{
+    background:#d1f7ff;
+    color:#222;
+    padding:8px 12px;
+    border-radius:12px 12px 12px 2px;
+    margin:6px 0;
+    max-width:85%;
+}
+.chat-input{
+    display:flex;
+    gap:8px;
+}
+.chat-input input{
+    flex:1;
+    margin:0;
+}
+.send-btn{
+    padding:0 16px;
+    background:#E53E3E;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+}
+</style>
+</head>
+<body>
+
+<div class="head">
+    <h2>多功能工具箱 · 故事聊天对话版</h2>
+</div>
+
+<!-- 5个导航按钮 -->
+<div class="btn-nav">
+    <button class="nav-btn btn1" onclick="changePage(1)">设备直连</button>
+    <button class="nav-btn btn2" onclick="changePage(2)">功能介绍</button>
+    <button class="nav-btn btn3" onclick="changePage(3)">常见问题</button>
+    <button class="nav-btn btn4" onclick="changePage(4)">交流留言</button>
+    <button class="nav-btn btn5" onclick="changePage(5)">故事聊天</button>
+</div>
+
+<!-- 页面1：直连其他机子 -->
+<div class="page active" id="p1">
+    <div class="card">
+        <h3>🔗 远程设备直连</h3>
+        <input id="hostIp" placeholder="输入对方设备IP / 域名">
+        <input id="hostPort" placeholder="输入端口 如:22、80、3389" value="80">
+        <button class="run-btn" onclick="linkDevice()">立即连接测试</button>
+        <div class="log" id="connectLog">连接日志：
+</div>
+    </div>
+</div>
+
+<!-- 页面2：功能介绍 -->
+<div class="page" id="p2">
+    <div class="card">
+        <h3>📘 功能介绍</h3>
+        <div class="text-content">
+1. 设备直连检测<br>
+可输入局域网/外网任意设备IP+端口，快速检测两台机器是否互通、端口是否放行。<br><br>
+2. 局域网互联<br>
+手机、电脑、云服务器、虚拟机之间互相连通测试，排查网络不通问题。<br><br>
+3. 网络检测工具<br>
+支持连通性、延迟、跨域、端口状态一键检测。<br><br>
+4. 故事聊天对话<br>
+内置长篇森林冒险故事，两名学生角色智能回复，关键词自动匹配回应。
+        </div>
+    </div>
+</div>
+
+<!-- 页面3：别人常说的问题/网络常识 -->
+<div class="page" id="p3">
+    <div class="card">
+        <h3>💡 大家常问的网络问题</h3>
+        <div class="text-content">
+❶ 为什么同WiFi连不上另一台电脑？<br>
+→ 防火墙拦截、共享未开启、网段不一样。<br><br>
+❷ 云服务器为什么访问失败？<br>
+→ 安全组没放行端口、黑名单拦截、仅内网访问。<br><br>
+❸ 百度云/网盘链接打不开？<br>
+→ 防盗链+登录鉴权，禁止网页直接跨域访问。<br><br>
+❹ 端口通但是连不上？<br>
+→ 程序没监听该端口、只监听内网IP。
+        </div>
+    </div>
+</div>
+
+<!-- 页面4：留言交流网页 -->
+<div class="page" id="p4">
+    <div class="card">
+        <h3>💬 交流留言区</h3>
+        <div class="text-content">
+可定制各类网页工具、接口测试、APP唤醒、文件管理、服务器辅助工具。<br>
+需要什么功能都可以直接说明，全部纯前端实现，本地打开即用，无后台不上传数据。
+        </div>
+    </div>
+</div>
+
+<!-- 页面5：故事聊天 + 双学生自动回复 -->
+<div class="page" id="p5">
+    <div class="card">
+        <h3>📖 森林奇遇故事 · 双人聊天</h3>
+        <!-- 内置长篇故事 -->
+        <div class="text-content" style="max-height:200px;overflow:auto;border:1px solid #eee;padding:10px;border-radius:8px;margin-bottom:15px;">
+<b>长篇原创故事：深山森林的神秘小屋</b><br><br>
+暑假来临，两名初中生小林和小安相约去郊外的深山森林探险。这片森林年代久远，树木高大茂密，阳光只能透过树叶缝隙洒下细碎光斑。两人背着书包，带着水和零食，一路说说笑笑走进森林深处。<br><br>
+走到半路，天空慢慢阴沉下来，林间刮起凉风，四周变得安静诡异。小路越来越偏僻，手机信号慢慢消失，两人发现自己不小心迷路了。正当慌张的时候，前方树林中间出现一座老旧的木头小屋，屋顶爬满青苔，木门半掩，看起来很久没人居住。<br><br>
+小林胆子大一点，提议进去躲避风雨，小安有些害怕，但没有别的办法只能跟着进去。小屋里面摆放着旧木桌、老旧椅子，墙角落满灰尘，墙上贴着泛黄的旧图画。桌上放着一本古老的日记本，字迹模糊，记录着很多年前森林里发生的奇怪小事。<br><br>
+外面渐渐下起小雨，两人只能暂时留在小屋。慢慢的，他们发现这座小屋并不简单，窗外偶尔传来奇怪的鸟叫声，风吹木门发出咯吱的响声，仿佛有人在附近走动。两人一边翻看日记，一边讨论要不要尽快离开森林，寻找回家的路。
+        </div>
+
+        <!-- 聊天区域 -->
+        <div class="chat-box" id="chatBox"></div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="输入内容：故事、小屋、森林、迷路、下雨、害怕...">
+            <button class="send-btn" onclick="sendMsg()">发送</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// 页面切换
+function changePage(num){
+    document.querySelectorAll('.page').forEach(item=>{
+        item.classList.remove('active');
+    });
+    document.getElementById('p'+num).classList.add('active');
+}
+
+// ========== 设备直连代码 ==========
+function writeLog(text){
+    let time = new Date().toLocaleTimeString();
+    document.getElementById('connectLog').innerText += `[${time}] ${text}\n`;
+    let logBox = document.getElementById('connectLog');
+    logBox.scrollTop = logBox.scrollHeight;
+}
+function linkDevice(){
+    let ip = document.getElementById('hostIp').value.trim();
+    let port = document.getElementById('hostPort').value.trim();
+    if(!ip){
+        writeLog('错误：请输入对方设备IP或域名');
+        return;
+    }
+    writeLog(`开始连接目标设备：${ip}:${port}`);
+    let start = Date.now();
+    fetch(`http://${ip}:${port}`,{mode:"no-cors",cache:"no-cache"})
+    .then(()=>{
+        let t = Date.now() - start;
+        writeLog(`✅ 设备连接成功，延迟：${t}ms`);
+    })
+    .catch(err=>{
+        writeLog(`❌ 连接失败：${err.message}`);
+        writeLog('原因：防火墙拦截/端口未开放/不在同一局域网');
+    })
+}
+
+// ========== 聊天故事+双学生回复+关键词检测 ==========
+// 本地存储聊天记录，刷新不丢失
+if(!localStorage.getItem("chatData")){
+    localStorage.setItem("chatData","");
+}
+// 学生1 小林 回复库
+const stu1Reply = [
+    {key:["故事","剧情","情节"],res:"这个森林故事氛围很好，老旧小屋看着特别有神秘感，越看越好奇后面会发生什么。"},
+    {key:["小屋","房子","木屋"],res:"这座木头小屋看起来荒废很久了，里面的旧日记应该藏着很多秘密。"},
+    {key:["迷路","找不到路","回家"],res:"深山里面太容易迷路了，没有信号太危险，我们一定要早点想办法出去。"},
+    {key:["下雨","雨天","刮风"],res:"突然下雨太突然了，还好遇到小屋可以临时躲雨，不然就要淋雨了。"},
+    {key:["害怕","恐怖","诡异"],res:"我其实也有点紧张，四周太安静了，风声和木门响声听着有点吓人。"},
+    {key:["森林","树林","深山"],res:"这片森林树木特别密，白天都很阴暗，晚上肯定更吓人。"},
+    {key:["日记","本子","文字"],res:"桌上那本旧日记本年代很久，应该能知道以前这里住过什么人。"},
+    {key:["你好","哈喽","在吗"],res:"我是小林，正在和你聊森林探险的故事，你有什么想法？"}
+];
+// 学生2 小安 回复库
+const stu2Reply = [
+    {key:["故事","剧情","情节"],res:"两个人迷路进到神秘小屋，剧情很有代入感，很适合继续往下续写。"},
+    {key:["小屋","房子","木屋"],res:"青苔、旧木门、落灰的家具，整体氛围特别冷清，感觉很久没人来过。"},
+    {key:["迷路","找不到路","回家"],res:"深山没有导航、没有信号，迷路真的很危险，不能在野外乱走。"},
+    {key:["下雨","雨天","刮风"],res:"天气突然变坏，也是推动故事发展的关键，只能被迫留在小屋。"},
+    {key:["害怕","恐怖","诡异"],res:"我胆子比较小，这种偏僻的地方总感觉怪怪的，想尽快离开。"},
+    {key:["森林","树林","深山"],res:"茂密的森林遮挡视线，很容易走错路，野外探险一定要提前规划路线。"},
+    {key:["日记","本子","文字"],res:"泛黄的日记充满年代感，说不定里面藏着这座小屋的来历。"},
+    {key:["你好","哈喽","在吗"],res:"我是小安，我们一起讨论这个森林冒险故事吧！"}
+];
+
+// 渲染聊天记录
+function renderChat(){
+    let data = localStorage.getItem("chatData");
+    document.getElementById("chatBox").innerHTML = data;
+    document.getElementById("chatBox").scrollTop = document.getElementById("chatBox").scrollHeight;
+}
+renderChat();
+
+// 匹配关键词自动获取回复
+function getReply(text,arr){
+    for(let item of arr){
+        for(let k of item.key){
+            if(text.includes(k)){
+                return item.res;
+            }
+        }
+    }
+    return "我认真看完了这段内容，结合森林小屋的故事，感觉整体氛围特别安静又神秘。";
+}
+
+// 发送消息
+function sendMsg(){
+    let val = document.getElementById("chatInput").value.trim();
+    if(!val)return;
+    // 自己消息
+    let html = localStorage.getItem("chatData");
+    html += `<div class="msg-me">${val}</div>`;
+    // 学生1回复
+    let r1 = getReply(val,stu1Reply);
+    html += `<div class="msg-stu1">【小林】${r1}</div>`;
+    // 学生2回复
+    let r2 = getReply(val,stu2Reply);
+    html += `<div class="msg-stu2">【小安】${r2}</div>`;
+    // 保存+刷新
+    localStorage.setItem("chatData",html);
+    document.getElementById("chatInput").value = "";
+    renderChat();
 }
 </script>
 
